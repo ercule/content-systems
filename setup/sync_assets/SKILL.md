@@ -1,0 +1,172 @@
+---
+name: utilities_sync_assets
+description: >-
+  Sync workspace reference assets into {workspace_root}/_assets from local paths and
+  external_assets.md (URLs, Google Docs). Writes asset-manifest.md with last-updated
+  timestamps. Run as context assembly before workflows that read workspace canon.
+"last updated": 2026-06-20
+"last run": never
+---
+
+# Sync assets (shared)
+
+Materialize a workspace's approved reference layer into `{workspace_root}/_assets/` so
+downstream skills read stable local copies, not live URLs.
+
+Step 0: Read [run_workflow/SKILL.md](../run_workflow/SKILL.md) (workflow standards: runtime HTTP, logging, ephemeral rules).
+
+## When to run
+
+- Automatically as **context assembly** (see run_workflow) before any workflow that reads workspace positioning, references, or canon.
+- On demand when `external_assets.md` changes or a source was updated.
+- After adding a new line to `external_assets.md` or dropping a file into `_assets/`.
+
+## Inputs
+
+- `workspace_root` — required. Directory that contains (or will contain) `_assets/` and
+  optionally `external_assets.md`. Usually this repo (repo root)
+  that owns the active `config.json`.
+
+## Layout
+
+```
+{workspace_root}/
+  external_assets.md    # optional registry of sources to copy in (see example below)
+  _assets/              # synced text copies + manifest (created if missing)
+    asset-manifest.md   # written by this skill — do not hand-edit
+    …                   # one file per asset
+```
+
+Copy [external_assets.example.md](external_assets.example.md) to
+`{workspace_root}/external_assets.md` when bootstrapping a workspace.
+
+## Asset sources
+
+An asset is anything that ends up as a file under `_assets/` (except `asset-manifest.md`).
+
+| Source | How it is discovered |
+|--------|----------------------|
+| `external_assets.md` line | Fetched or copied on each run |
+| File already in `_assets/` | Kept as-is; manifest records its timestamp |
+
+Do not list paths that already live inside `_assets/` in `external_assets.md`.
+
+## `external_assets.md` format
+
+One asset per non-empty line. `#` starts an end-of-line comment (strip before parse).
+
+```
+[<output-filename>] <source>
+```
+
+- **source** — repo-relative path from `workspace_root`, `https://` URL, or Google Doc URL.
+- **output-filename** — optional. When omitted, derive from the source basename (add `.md`
+  for web/Google Doc exports when the basename has no extension).
+
+Examples:
+
+```markdown
+# Approved positioning (repo copy)
+positioning.md | _context/positioning.md
+
+# Google Doc — requires Drive OAuth in credentials.json
+approved-positioning.md | https://docs.google.com/document/d/EXAMPLE_DOC_ID/edit
+
+# Web snapshot for drift analysis only — not canon
+homepage.txt | https://example.com/
+```
+
+## Workflow
+
+Log line prefix:
+
+`[run-debug] workflow=sync_assets | workspace={workspace_root} | <facts>`
+
+1. **Resolve paths.** `assets_dir = {workspace_root}/_assets`. Create `_assets/` if missing.
+2. **Parse registry.** If `{workspace_root}/external_assets.md` exists, read it. Ignore blank
+   lines and `#` full-line comments. Parse each spec line into `output_filename` + `source`.
+3. **Sync external specs.** For each registry row, in file order:
+   1. Resolve the output path: `assets_dir/{output_filename}`. Refuse path segments `..`
+      or absolute paths in `output_filename`.
+   2. **Local path** (does not start with `http://` or `https://`):
+      - Resolve from `workspace_root`. If missing, log
+        `[run-debug] … | WARN | asset={output} | reason=source not found: {source}` and
+        continue.
+      - Read text. Binary files (NUL byte in first 8 KiB): log WARN and skip.
+      - Write to the output path. Set `sync_status=ok`, `last_updated` = now (UTC ISO-8601).
+   3. **URL** (including Google Docs):
+      - Run [fetch_url_html/SKILL.md](../../_workflows/ops/fetch_url_html/SKILL.md) with `input={source}`.
+      - On empty `content_html`, log WARN with fetch status and continue.
+      - Convert HTML to plain text (strip tags; preserve paragraph breaks). Cap at 200,000
+        characters; log WARN if truncated.
+      - Write text to the output path. Prepend a short provenance header:
+
+        ```markdown
+        <!-- synced from: {source_url} -->
+        <!-- synced at: {ISO-8601} -->
+        <!-- title: {source_title} -->
+
+        ```
+
+      - Set `sync_status=ok`, `last_updated` = now.
+   4. On any other failure, log WARN with `asset`, `source`, and `reason`; do not stop
+      the run.
+4. **Inventory native files.** List every file in `_assets/` except `asset-manifest.md`.
+   For files not written in step 3, set `source=local`, `sync_status=ok`, and
+   `last_updated` = file mtime (UTC ISO-8601). If a file was both in the registry and
+   already present, the registry sync in step 3 wins.
+5. **Write manifest.** Overwrite `_assets/asset-manifest.md`:
+
+   ```markdown
+   # Asset manifest
+
+   Auto-generated by [sync_assets](SKILL.md). Do not edit by hand.
+
+   last_sync: {ISO-8601 UTC}
+   workspace_root: {workspace_root}
+
+   | asset | source | last_updated | sync_status | notes |
+   |-------|--------|--------------|-------------|-------|
+   ```
+
+   One row per inventoried file, sorted by `asset` name. `sync_status` is `ok` or `warn`.
+   Put failure detail in `notes` when status is `warn`.
+
+6. **Summarize.** Log asset count, warn count, and manifest path. If warn count > 0, list
+   each WARN again in the final summary.
+
+## Outputs
+
+- Synced files under `{workspace_root}/_assets/`
+- `{workspace_root}/_assets/asset-manifest.md`
+
+Downstream skills should read copy from `_assets/` and treat `asset-manifest.md` as
+provenance. Prefer entries with `sync_status=ok`.
+
+## Rules
+
+- **Warnings, not hard stops.** A single bad source must not block the rest of the sync or
+  the parent workflow unless the caller explicitly requires a named asset.
+- **Text only.** This skill materializes text for agent consumption. Do not store binaries
+  in `_assets/`.
+- **Do not use synced web text as canon** unless the workspace's own policy says otherwise.
+  Web rows in `external_assets.md` are for drift analysis and indexing; approved copy
+  should come from `internal` paths or Google Docs the workspace owns.
+- **Idempotent.** Re-running with unchanged sources overwrites outputs and refreshes
+  timestamps.
+- **No secrets in the manifest.** Log hosts and paths only.
+
+## Failure handling
+
+| Condition | Behavior |
+|-----------|----------|
+| Missing `external_assets.md` | OK — sync only native `_assets/` files into manifest |
+| Missing `_assets/` | Create it |
+| Missing credentials for Google Doc | WARN on that row; continue |
+| HTTP non-2xx | WARN on that row; continue |
+| Empty extracted text | WARN on that row; continue |
+
+## Related skills
+
+- [fetch_url_html/SKILL.md](../../_workflows/ops/fetch_url_html/SKILL.md) — URL and Google Doc fetch
+- [run_workflow/SKILL.md](../run_workflow/SKILL.md) — context assembly hook

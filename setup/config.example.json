@@ -1,0 +1,21 @@
+{
+  "_comment": "Copy this file to ./config.json at the repo root. Unlike credentials.json, config.json is tracked and must NOT contain secrets.",
+  "repo": {
+    "url": ""
+  },
+  "google": {
+    "credentials_path": "credentials.json",
+    "token_path": "token.pickle",
+    "oauth_json_bundle_path": "google.oauth_token_unified"
+  },
+  "gemini": {
+    "model_smart": "gemini-3.1-pro-preview",
+    "model_fast": "gemini-3-flash-preview",
+    "max_tokens": 30000
+  },
+  "anthropic": {
+    "model_smart": "claude-sonnet-4-6",
+    "model_fast": "claude-haiku-4-5"
+  },
+  "workflows_path": "."
+}

@@ -1,0 +1,38 @@
+{
+  "wordpress": {
+    "site_url": "https://example.com",
+    "username": "your-username",
+    "app_password": "xxxx xxxx xxxx xxxx xxxx xxxx",
+    "post_type": "posts",
+    "default_status": "draft",
+    "content_format": "html",
+    "taxonomy_defaults": {
+      "category": [1],
+      "post_tag": null
+    }
+  },
+  "doc_schema": {
+    "meta_location": "top",
+    "meta_fields": {
+      "title": "Title",
+      "slug": "Page url",
+      "excerpt": "Description",
+      "category": null,
+      "tags": null
+    },
+    "body_start_style": "HEADING_1",
+    "exclude_title_from_body": true,
+    "stop_heading_prefixes": ["FAQs", "Social post ideas", "Sources"],
+    "heading_map": {
+      "HEADING_1": "h2",
+      "HEADING_2": "h2",
+      "HEADING_3": "h3",
+      "HEADING_4": "h4",
+      "NORMAL_TEXT": "p"
+    },
+    "faq_heading_prefix": "FAQs",
+    "faq_question_style": "HEADING_3",
+    "faq_answer_style": "NORMAL_TEXT",
+    "faq_handling": "append_html"
+  }
+}

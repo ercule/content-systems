@@ -1,0 +1,13 @@
+{
+  "name": "{{COMPANY}}-workflows",
+  "owner": {
+    "name": "{{COMPANY}}"
+  },
+  "plugins": [
+    {
+      "name": "{{PLUGIN_NAME}}",
+      "source": "./",
+      "description": "{{COMPANY}} content workflows + the shared content-systems skill library."
+    }
+  ]
+}

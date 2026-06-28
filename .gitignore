@@ -1,0 +1,28 @@
+# Secrets — never commit populated credential files
+credentials.json
+**/credentials.json
+secrets/
+
+# Ephemeral run data (repo convention)
+**/tmp/
+
+# OAuth / local auth artifacts
+token.pickle
+*.pickle
+
+# Python
+.venv/
+**/.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Local transcription scratch (scripts/video_transcription)
+scripts/**/youtube_transcripts/
+scripts/video_transcription/.venv/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
