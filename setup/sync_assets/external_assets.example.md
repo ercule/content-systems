@@ -1,9 +1,20 @@
-# External assets registry (example)
+Copy to `external_assets.md` at the workspace root and edit.
 
-Copy to `{workspace_root}/external_assets.md` and edit.
+One asset per non-empty line. `#` starts an end-of-line comment.
 
-| Source | Output path under `_assets/` | Notes |
-|--------|------------------------------|-------|
-| `_context/voice.md` | `voice.md` | Native file copy |
-| `https://docs.google.com/document/d/EXAMPLE/edit` | `positioning/canonical.md` | Google Doc export |
+```
+[<output-filename>] <source>
+```
 
+Examples:
+
+```markdown
+# Approved positioning (repo copy)
+positioning.md | _context/positioning.md
+
+# Google Doc — requires Drive OAuth in credentials.json
+approved-positioning.md | https://docs.google.com/document/d/EXAMPLE_DOC_ID/edit
+
+# Web snapshot for drift analysis only — not canon
+homepage.txt | https://example.com/
+```

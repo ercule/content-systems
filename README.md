@@ -1,427 +1,136 @@
 # content-systems
 
-Open-source **agent skills** for content operations — a foundation for **agentic marketing**: workflows that research, draft, edit, evaluate, and publish content with an AI agent doing the work, not just suggesting it.
+Open-source agent skills for content operations, a foundation for agentic marketing: workflows that research, draft, edit, evaluate, and publish content with an AI agent doing the work, not just suggesting it.
 
-Most marketing teams have tools (CMS, docs, sheets, analytics) and knowledge (messaging decks, brand guides, competitive intel) scattered across systems. Agents can connect those pieces — but only if you give them two things:
+Most marketing teams have tools (CMS, docs, sheets, analytics) and knowledge (messaging decks, brand guides, competitive intel) scattered across systems. Agents can connect those pieces, but only if you give them two things: something to know and something to follow. This repo provides the "follow" part (shared, reusable skills) and a shape for the "know" part (your messaging canon).
 
-| Layer | What it is | Where it lives in this repo |
-|-------|------------|-----------------------------|
-| **Marketing brain** | What the agent *knows* — approved messaging, voice, proof, competitive context, content inventory | [`_context/`](_context/README.md), optional [`_assets/`](setup/sync_assets/SKILL.md), [`config.json`](setup/config.example.json) |
-| **Marketing hands** | What the agent *does* — fetch pages, mine FAQs, draft copy, mark up edits, publish to CMS | [`_workflows/`](_workflows/README.md), [`setup/run_workflow/`](setup/run_workflow/SKILL.md) |
+This repository includes a demo brain called [Gallivant](_context/reference/gallivant-origin.md), a fictional enterprise travel-and-expense company used to try the system before you plug in a real brand, built on an extension of Janessa Lantz's [context builder](https://github.com/janessa-lantz/context-builder/). It also includes production-ready hands: Google Doc markup, FAQ pipelines, page refresh, WordPress publish, and more.
 
-This repository ships: a demo brain ([Gallivant](_context/reference/gallivant-origin.md)) in an attempt to extend Janessa Lantz' [context builder](https://github.com/janessa-lantz/context-builder/) and production-ready hands (Google Doc markup, FAQ pipelines, page refresh, WordPress publish, and more).
+## Getting started
 
-Each skill is a `SKILL.md` file an agent reads and follows step by step.
+The simplest way to start working with this repo is to point an agent, such as Claude Code, Claude, or Cursor, at this file and let it take things from there. Open the repo in your agent of choice and reference this README directly; the agent will read it, along with the skill files it links to, and can guide you through cloning the repo, setting up a workspace, and running your first skill.
 
-Clone this repository and work from its **root** — the directory that contains `config.json`, `credentials.json`, `_context/`, `_workflows/`, and `setup/`.
+## A few terms, in plain language
 
-**Agents (Claude Code, Claude, Cursor):** read this file end to end before the first skill run. Execute the [Agent checklist](#agent-checklist) in order. Ask the user for missing values. **Do not print, log, or commit secrets.**
+A repository, or "repo," is just a folder of files that's stored online and tracked over time, so changes can be reviewed and undone. This document you're reading lives in a repo called `content-systems`.
 
----
+To clone a repo means to download a working copy of it onto your own computer, so you have the actual files rather than just viewing them in a browser. Cloning content-systems gets you a folder full of the skill instructions described below.
 
-## Why agentic marketing
+A skill, in this repo, is a single instruction file (called a `SKILL.md`) that tells an AI agent exactly how to do one job, like refreshing a page or drafting FAQ answers. You don't need to write or edit these yourself to use them, though you're welcome to.
 
-Traditional marketing automation moves data between systems. **Agentic marketing** adds an agent that can reason over your canon, call APIs, run scripts, and complete multi-step pipelines — with human gates where judgment matters (editorial review in Google Docs, publish approval, etc.).
+You won't need to touch any of this directly for day-to-day content work. Someone on the technical side sets up the repo and connects it to an agent; from there, you work through normal tools like Google Docs. The sections below explain how the pieces fit together, and the later sections (Quick start, Credentials, Folder layout) are the technical setup details for whoever does that connecting.
 
-This repo is a starter kit for that model:
+## Design principles
 
-1. **Install a brain** — replace the Gallivant demo in `_context/` with your messaging canon ([context-builder](https://github.com/janessa-lantz/context-builder) shape), or use Gallivant to learn the system first.
-2. **Wire up hands** — run shipped skills as-is, or compose custom pipelines in `_workflows/` that link to them.
-3. **Connect credentials once** — `credentials.json` at repo root; skills resolve keys through a shared contract ([run_workflow](setup/run_workflow/SKILL.md)).
-4. **Extend** — add your own orchestrators under `_workflows/`, swap in your canon, and fork or contribute back as your needs grow.
+These ideas shape every skill and pipeline in this repo. They exist because agents behave better with clear structure than with open-ended instructions.
 
-The brain feeds the hands: `_context/` and `_assets/` inform what skills produce; `_workflows/` executes against Google Docs, your CMS, search APIs, and LLMs.
+Separate writing from publishing. Production workflows create or revise content and stop at something a human can review, usually a Google Doc. Staging and publish workflows take an already-approved piece of content and push it to a CMS (the content management system a website runs on, like WordPress). 
 
----
+Combined pipelines make it too easy to skip human review. But agents require a human in the loop, meaning a person needs to check the work before it goes live. If "write the article" and "push to production" are one pipeline, the agent, or a rushed human, can skip review and go live with unapproved copy. The system assumes editorial judgment happens in a Doc first; publishing to the CMS is a deliberate, separate second step.
 
-## Quick start
+Review is a process boundary between two runs (produce, then later stage/publish), not a numbered step inside either pipeline unless your workspace explicitly requires one.
 
-```bash
-git clone <repository-url> content-systems
-cd content-systems
-cp setup/config.example.json config.json
-cp setup/credentials.example.json credentials.example.json
-cp setup/credentials.example.json credentials.json   # then fill secrets
-```
+Always preflight before starting. Every pipeline begins with step `01_preflight`, which proves the run can succeed before expensive work. Spec: [maintain_workflows](setup/maintain_workflows/SKILL.md) (checklist) and [run_workflow](setup/run_workflow/SKILL.md) (runtime).
 
-A [`.gitignore`](.gitignore) ignores `credentials.json`, `**/tmp/`, local `.venv/` trees, and transcription scratch output.
+One path, no fallbacks. Each skill describes exactly one way to do the job, not "try A, and if that fails try B." Multiple paths invite an agent to pick randomly or skip steps silently. If the one path can't succeed, the skill should fail with a clear message. Failure is fine; ambiguity isn't.
 
-**Verify:** `./setup/run_workflow/SKILL.md` and `./_workflows/ops/show_edits_in_google_doc/` exist.
+Never repeat instructions. This is sometimes called the DRY principle, short for "don't repeat yourself." If the same instruction would need to appear in two skills, it belongs in one canonical place, and every other skill links to it instead of restating it. Copying instructions creates drift: the copy stops getting fixes made to the original. See [Documentation map](#documentation-map).
 
----
+Leave a visible trail. Every run should log what it did: which file or URL it touched, what it wrote, and where. Not secret values, but enough that a person can see what happened instead of guessing. Logging format: [run_workflow](setup/run_workflow/SKILL.md).
 
-## I want to…
+## Architecture
 
-| I want to… | Start here | Needs |
-|------------|------------|--------|
-| Mark up edits in a Google Doc | [_workflows/show_edits_in_google_doc](_workflows/ops/show_edits_in_google_doc/SKILL.md) | Google OAuth, `inline-markup-plan.json` |
-| Finalize markup after review | [_workflows/accept_edits_google_doc](_workflows/ops/accept_edits_google_doc/SKILL.md) | Google OAuth |
-| Convert Doc → Markdown | [_workflows/google_doc_to_markdown](_workflows/ops/google_doc_to_markdown/SKILL.md) | Google OAuth |
-| Create a Doc from Markdown | [_workflows/markdown_to_google_doc](_workflows/ops/markdown_to_google_doc/SKILL.md) | Google OAuth |
-| Mine FAQ questions (sheet) | [_workflows/find_faq_questions](_workflows/research/find_faq_questions/SKILL.md) | Google OAuth, SerpAPI, GSC |
-| Draft FAQ responses | [_workflows/generate_faq_responses](_workflows/generate/generate_faq_responses/SKILL.md) | Google OAuth, SerpAPI, Anthropic |
-| Audit external brand mentions | [_workflows/evaluate_external_brand](_workflows/research/evaluate_external_brand/SKILL.md) | SerpAPI, Google OAuth, Playwright |
-| Refresh an existing page | [_workflows/update_agent](_workflows/edit/update_agent/SKILL.md) | `workflow_specific.update_agent` in config |
-| Publish Doc → WordPress | [_workflows/publish_wordpress_from_google_doc](_workflows/ops/publish_wordpress_from_google_doc/SKILL.md) | WP + Google OAuth |
-| Browser fallback (CMS login) | [_workflows/browser_automation](_workflows/ops/browser_automation/SKILL.md) | Optional Browserbase |
+### Brain and hands
 
----
+The brain is what an agent should know before writing: positioning, voice, proof, competitive context, what pages already exist. It lives in a folder called `_context/`, which is markdown your team maintains, and optionally in a second folder called `_assets/`, which holds synced snapshots so the agent reads a local copy instead of fetching live URLs every time.
 
-## What's inside
+The hands are what an agent does: research a question, draft copy, mark up a Google Doc, refresh a page, publish to WordPress. Each procedure is a skill, meaning a `SKILL.md` file that describes the job step by step. Shared skills live in this repo under a folder called `_workflows/`; your own workspace (explained just below) adds pipelines that link to them rather than forking, or copying and diverging from, them.
 
-### The marketing brain
+Two files carry the settings a skill needs to run. `config.json` holds non-secret settings, like URLs, sheet IDs, and model names, and is safe to commit (saved into the repo's history for anyone to see). `credentials.json` holds API keys and tokens and stays in your workspace, never in this repo.
 
-| Path | Role |
-|------|------|
-| [_context/](_context/README.md) | **Messaging canon** — approved positioning, voice, proof, entities, content index. Ships with fictional [Gallivant](_context/reference/gallivant-origin.md) demo data; replace for production. |
-| [_assets/](setup/sync_assets/SKILL.md) | **Materialized copy** — synced snapshots of live pages and external docs the agent can read without hitting URLs every run. Populated by [sync_assets](setup/sync_assets/SKILL.md) from `external_assets.md`. |
-| `config.json` | **Operational config** — site URLs, sheet IDs, model names, workflow-specific blocks. Committed; no secrets. |
-| `external_assets.md` | Optional registry of URLs/paths for asset sync. |
+### Your workspace and the shared library
 
-Skills that write or evaluate content should read the brain *before* generating — see [Context assembly](setup/run_workflow/SKILL.md) in the run contract.
+You run production work from a workspace, which is one folder per company or content operation. It holds your canon (your team's approved messaging and voice), your secrets, your CMS connection details, and any custom pipelines you've built. It also points at a checkout of this shared skills repo; the folder path is `config.json` → `content_systems_public.path` (relative to the workspace root), not a fixed directory name.
 
-### The marketing hands
+Shared skills improve once and benefit everyone, so they live in the shared repo. Brand voice and credentials differ per company, so they live in the workspace instead. A workspace pipeline resolves the shared library through that one config setting, rather than a chain of folder references that would break if anything moved.
 
-| Path | Role |
-|------|------|
-| [_workflows/](_workflows/README.md) | **Skills by job type** — `research/`, `generate/`, `edit/`, `ops/`. Each folder has a `SKILL.md` the agent executes step by step. |
-| [setup/run_workflow/](setup/run_workflow/SKILL.md) | **Step 0 contract** — credential resolution, context assembly, HTTP logging, Browserbase handoff. Every skill starts here. |
+Runtime path rules and shared-library resolution: [run_workflow](setup/run_workflow/SKILL.md). Workflow layout and conventions: [maintain_workflows](setup/maintain_workflows/SKILL.md).
 
-### Supporting infrastructure
+### Workflows and skills
 
-| Layer | Path | Holds |
-|-------|------|--------|
-| **Asset sync** | [setup/sync_assets/](setup/sync_assets/SKILL.md) | Materialize `_assets/` from `external_assets.md` |
-| **Hygiene** | [setup/maintain_skills/](setup/maintain_skills/SKILL.md), [setup/maintain_workflows/](setup/maintain_workflows/SKILL.md) | Author audits for skill quality and layout |
-| **Setup templates** | [setup/](setup/) | Example `config.json` and `credentials.json` shapes |
+Workflows live under `_workflows/` as numbered pipelines or single-file utilities. Layout, naming, metadata, produce/stage boundaries, and staging conventions: [maintain_workflows](setup/maintain_workflows/SKILL.md). Individual skill text, frontmatter, and formatting: [maintain_skills](setup/maintain_skills/SKILL.md).
 
-Every skill run resolves **workspace root**: the directory that contains `config.json`. Walk up from the active `SKILL.md` until you find it (repo root in a normal setup).
+## Documentation map
 
-### Skill categories at a glance
+Each architectural or layout rule lives in one canonical file. This README orients readers, states design principles, and links to the owning doc. When you add or change a rule, edit the owner only — everywhere else, link instead of restating.
 
-| Category | Typical use | Examples |
-|----------|-------------|----------|
-| **research/** | Discover opportunities, audit the market, build link maps | FAQ mining, external brand audit, crosslinks |
-| **generate/** | Produce net-new drafts from research inputs | FAQ response drafting |
-| **edit/** | Multi-step pipelines that refresh or reshape existing content | Page refresh (`update_agent`) |
-| **ops/** | Atomic utilities — fetch, convert, markup, evaluate, publish | Doc ↔ Markdown, inline edits, WordPress publish, browser fallback |
+| File | Job |
+|------|-----|
+| **This README** | Onboarding, design principles, brain/hands model, workspace vs shared-library concept, folder layout, credential *policy* (where secrets live, never in this repo), quick start, troubleshooting, and agent entry checklist. |
+| [`setup/run_workflow/SKILL.md`](setup/run_workflow/SKILL.md) | Runtime execution rules: workspace root resolution, `{content_systems_public_root}`, cross-repo link style, context-assembly trigger (`sync_assets`), HTTP/logging/`[run-debug]` rules, `tmp/` hygiene, credential resolution procedure (`more_credentials`, `@…#…` refs), model credential checks, end-of-run `"last run"` updates. |
+| [`setup/maintain_workflows/SKILL.md`](setup/maintain_workflows/SKILL.md) | Workflow audits: Rules for layout and organization of skills within workflows, workflow metadata and naming, and workflow conventions. |
+| [`setup/maintain_skills/SKILL.md`](setup/maintain_skills/SKILL.md) | Skill audits: Rules for the text of individual skills, skill metadata and naming, and skill conventions. |
+| [`setup/config.example.json`](setup/config.example.json) | Non-secret configuration options and pointers to files. |
+| [`setup/credentials.example.json`](setup/credentials.example.json) | Credential key shapes — catalog of service blocks and JSON paths skills may require (placeholders only); copy needed shapes into workspace `credentials.json`. Which skill needs which key is noted in `_comment` fields where applicable. |
 
----
+## Example context: Gallivant
 
-## Agent checklist
+The `_context/` folder includes fictional Gallivant messaging so you can see the system work before touching a real brand. Gallivant is an invented enterprise travel-and-expense company. Use it to see how canon files, such as `canon-*.md` and `brand-writing-identity.md`, constrain what an agent generates; to run the `evaluate_content` skill against known-good and known-bad samples; and to practice the editorial markup pipeline without touching a real CMS.
 
-Follow this in order on first setup. Ask the user for anything you cannot infer.
-
-### 1. Clone and enter the repo
-
-See [Quick start](#quick-start).
-
-### 2. Ensure git ignores secrets
-
-```bash
-git check-ignore -v credentials.json
-```
-
-Must be ignored before writing secrets.
-
-### 3. Create config.json
-
-```bash
-cp setup/config.example.json config.json
-```
-
-Edit `config.json`:
-
-- `repo.url` — URL for this repository (blank until published is OK)
-- Model names under `anthropic` / `gemini` if the user has preferences
-- Service-specific IDs (sheet IDs, site URLs) as needed — **not secrets**
-- `workflow_specific.*` blocks when running multi-step pipelines like [update_agent](_workflows/edit/update_agent/SKILL.md)
-
-**Verify:** `jq . config.json` succeeds.
-
-### 4. Create credentials.json
-
-```bash
-cp setup/credentials.example.json credentials.json
-```
-
-Fill inline values for each key the planned skills require. See [Credentials](#credentials).
-
-Optional: split secrets using `@` references — see [Reference syntax](#reference-syntax).
-
-**Verify:** `git check-ignore -v credentials.json` still passes after creating the file.
-
-### 5. Set up the marketing brain
-
-Skills read from **`{workspace_root}/_context/`**.
-
-- **Learning / demo:** use shipped [Gallivant](_context/README.md) canon as-is. Run a generate or evaluate skill to see how canon shapes output.
-- **Production:** replace `_context/` with real messaging canon ([context-builder](https://github.com/janessa-lantz/context-builder) shape). Keep the same file roles: `messaging-canon.md`, `canon-*.md`, `brand-writing-identity.md`, `content-index.md`, etc.
-
-Optional asset layer:
-
-1. Create `external_assets.md` (see [setup/sync_assets/external_assets.example.md](setup/sync_assets/external_assets.example.md)).
-2. Run [setup/sync_assets/SKILL.md](setup/sync_assets/SKILL.md) to populate `{workspace_root}/_assets/`.
-
-### 6. Register the repo with your agent environment
-
-Point your agent at this README and the run contract so every session knows the rules.
-
-**Cursor**
-
-1. Open this repo as your project root.
-2. Add a project rule or `@`-mention this README at the start of content workflow tasks.
-3. Reference [setup/run_workflow/SKILL.md](setup/run_workflow/SKILL.md) as Step 0 for every skill.
-4. Skills live under `_workflows/{category}/{name}/SKILL.md` — open or `@`-mention the target skill before running.
-5. Browserbase sessions: follow [browser_automation](_workflows/ops/browser_automation/SKILL.md) — repeat the live session URL while the session is open.
-
-**Claude Code**
-
-1. Clone the repo and work from its root.
-2. Create `CLAUDE.md` at repo root pointing here:
-
-   ```markdown
-   # Content systems
-
-   Read ./README.md before any workflow.
-   Step 0: setup/run_workflow/SKILL.md
-   Skills: _workflows/{category}/{name}/SKILL.md
-   Never commit credentials.json.
-   ```
-
-3. Register individual skills from `_workflows/` if your setup supports skill discovery.
-
-**Claude (chat) / other agents**
-
-Paste this README plus the target skill's `SKILL.md`. The user maintains `credentials.json` locally; the agent should ask for missing keys by name, never echo values.
-
-### 7. Pull latest (ongoing)
-
-```bash
-git pull --ff-only
-```
-
-### 8. Smoke-test
-
-1. Read [run_workflow/SKILL.md](setup/run_workflow/SKILL.md).
-2. Read the target skill's `SKILL.md` (see [Skill catalog](#skill-catalog)).
-3. Run context assembly only if the skill reads `_context/` or `_assets/`.
-4. Execute the skill steps; confirm `[run-debug]` lines appear when the skill asks for them.
-5. Confirm `[run-debug]` lines appear — they are the agent's execution trace.
-
-**Good first runs (low risk):**
-
-- [fetch_url](_workflows/ops/fetch_url/SKILL.md) — no LLM, validates network + workspace root
-- [google_doc_to_markdown](_workflows/ops/google_doc_to_markdown/SKILL.md) — validates Google OAuth
-- [evaluate_content](_workflows/ops/evaluate_content/SKILL.md) — validates brain + LLM wiring
-
----
-
-## Building on this repo
-
-This is a standalone starter you own end to end. Typical paths:
-
-| Goal | What to do |
-|------|------------|
-| **Run shipped skills** | Clone, configure, pick a skill from [I want to…](#i-want-to) |
-| **Add your brand** | Replace `_context/` with your messaging canon; keep the same file roles |
-| **Add a custom pipeline** | Create `_workflows/{edit\|generate\|ops}/{your_pipeline}/SKILL.md`; link to shipped skills — do not copy their steps |
-| **Add a new atomic skill** | Add under `_workflows/ops/` (or the right category) |
-| **Sync live site copy** | Maintain `external_assets.md` and run [sync_assets](setup/sync_assets/SKILL.md) |
-
-Shipped skills in `_workflows/` are the canonical implementations. Your custom orchestrators should link down to them. If you improve a shared skill, contribute it back upstream so others benefit.
-
----
+When you're ready for production, swap `_context/` for your company's messaging brain and keep the same hands.
 
 ## Credentials
 
 ### Rules
 
-- **Runtime lookups start at `{workspace_root}/credentials.json` only.**
-- Do not commit populated credential files.
-- Put non-secrets in `config.json`.
+A few rules govern how credentials are handled. The shared skills checkout (this repo) never stores credentials; it holds skills only. Runtime lookups (meaning, when a skill runs and needs a key) start at `credentials.json` in the workspace root. Never commit a populated credentials file to version control. Anything that isn't a secret belongs in `config.json` instead.
 
-### Reference syntax
+### Referencing credentials stored elsewhere
 
-```text
-@relative/path/to/credentials.json#dotted.key.path
-```
-
-Example: `@secrets/vendor-keys.json#google.oauth_token_unified`
-
-Paths are relative to `workspace_root`. Inline values override references. Procedure: [run_workflow/SKILL.md](setup/run_workflow/SKILL.md).
+Workspaces may split secrets across files using `more_credentials` and `@alias#dotted.path` references. Resolution procedure: [run_workflow](setup/run_workflow/SKILL.md).
 
 ### Google OAuth
 
-Most Google skills need `google.oauth_token_unified` with scopes in [setup/credentials.example.json](setup/credentials.example.json).
+Setup shapes and required scopes: [`setup/credentials.example.json`](setup/credentials.example.json) → `google` block.
 
-1. Create OAuth **Desktop** client in Google Cloud Console → `google.oauth_installed_client`.
-2. Run installed-app flow → `google.oauth_token_unified`.
+### Which credentials which skills need
 
-### Keys by skill (common)
+Key shapes and skill mappings: [`setup/credentials.example.json`](setup/credentials.example.json).
 
-| Skill area | Credential paths |
-|------------|------------------|
-| Google Docs / Sheets / Drive | `google.oauth_token_unified` |
-| FAQ finder (GSC) | `google.oauth_token_unified` (+ optional `_2`) |
-| FAQ finder (Reddit/LinkedIn) | `serpapi.api_key` |
-| LLM steps | `anthropic.api_key`, `gemini.api_key` |
-| Browser automation | `browserbase.api_key` when enabled in config |
-| Webflow publish | `webflow.api_token` |
+### Config versus credentials, at a glance
 
----
+`config.json` lives at the workspace root, is safe to commit, and holds non-secret settings. Key list: [`setup/config.example.json`](setup/config.example.json). `credentials.json` also lives at the workspace root but is never committed; copy needed shapes from [`setup/credentials.example.json`](setup/credentials.example.json).
 
-## Config vs credentials
+## Folder layout
 
-| File | Committed? | Contents |
-|------|------------|----------|
-| `config.json` | Yes | IDs, URLs, models, `repo.url`, `browserbase.enabled` |
-| `credentials.json` | No | API keys, tokens, OAuth bundles |
-| `credentials.example.json` | Yes | Key shapes — no secrets |
+### Your workspace
 
-Templates: [setup/config.example.json](setup/config.example.json), [setup/credentials.example.json](setup/credentials.example.json).
+At the root of your workspace sits `config.json`, which is committed and includes `content_systems_public.path` (where the shared skills checkout lives), alongside a `README.md` for your own team. Next to it sit `credentials.json`, which is not committed and holds your actual secrets, and `credentials.example.json`, a safe-to-commit template of the same shape. The shared library checkout itself holds skills only and no credentials — its location is whatever path you set in config, often a submodule beside the workspace root (for example `@content_systems_public` in [`setup/config.example.json`](setup/config.example.json)). Your messaging canon lives in `_context/`, and, optionally, a synced snapshot of reference material lives in `_assets/`, populated according to an optional registry file called `external_assets.md`. Finally, `_workflows/` holds your own custom pipelines, organized into the same four categories used in the shared repo: `edit/`, `generate/`, `research/`, and `ops/`.
 
----
+### This repo
 
-## How to run a skill
-
-1. **Step 0** — [run_workflow/SKILL.md](setup/run_workflow/SKILL.md)
-2. **Read the skill** — `_workflows/{category}/{name}/SKILL.md`
-3. **Resolve workspace root** — directory containing `config.json`
-4. **Context assembly** — when the skill reads canon, ensure `_context/` / `_assets/` are ready
-5. **Execute** — small steps, `[run-debug]` logging
-6. **End of run** — update `"last run"` in skill frontmatter (ISO date)
-
-**Editorial markup pipeline:**
-
-```
-[your _workflows/ pipeline or plan JSON]
-        ↓  inline-markup-plan.json
-show_edits_in_google_doc  →  human review in Google Doc
-        ↓
-accept_edits_google_doc   →  finalized Doc
-```
-
-**Typical agentic content loop:**
-
-```
-research/find_faq_questions  →  sheet of questions
-generate/generate_faq_responses  →  drafted answers
-ops/evaluate_content  →  canon conformance check
-ops/show_edits_in_google_doc  →  human review
-ops/publish_wordpress_from_google_doc  →  live draft
-```
-
-Compose loops like this in `_workflows/` entry skills; link to shipped skills for each phase.
-
----
-
-## Skill catalog
-
-Grouped catalog: [_workflows/README.md](_workflows/README.md).
-
-| Category | Skills |
-|----------|--------|
-| **edit** | [update_agent](_workflows/edit/update_agent/SKILL.md) — shared page-refresh pipeline |
-| **research** | [find_faq_questions](_workflows/research/find_faq_questions/SKILL.md), [evaluate_external_brand](_workflows/research/evaluate_external_brand/SKILL.md), [build_crosslinks](_workflows/research/build_crosslinks/SKILL.md) |
-| **generate** | [generate_faq_responses](_workflows/generate/generate_faq_responses/SKILL.md) |
-| **ops** | [fetch_url](_workflows/ops/fetch_url/SKILL.md), [write_google_sheet](_workflows/ops/write_google_sheet/SKILL.md), [markdown_to_google_doc](_workflows/ops/markdown_to_google_doc/SKILL.md), [google_doc_to_markdown](_workflows/ops/google_doc_to_markdown/SKILL.md), [show_edits_in_google_doc](_workflows/ops/show_edits_in_google_doc/SKILL.md), [accept_edits_google_doc](_workflows/ops/accept_edits_google_doc/SKILL.md), [evaluate_content](_workflows/ops/evaluate_content/SKILL.md), [publish_wordpress_from_google_doc](_workflows/ops/publish_wordpress_from_google_doc/SKILL.md), [youtube_transcription](_workflows/ops/youtube_transcription/SKILL.md), [wikitext_editing](_workflows/ops/wikitext_editing/SKILL.md), [browser_automation](_workflows/ops/browser_automation/SKILL.md) |
-
-### Roadmap (not shipped yet)
-
-Documented in maintain docs but **no `SKILL.md` in this repo yet**:
-
-- `_workflows/stage_content` — CMS publish router (add under `_workflows/` when you need it)
-- Suggest/propose edit orchestrators, standalone `converters/` utility folder
-
-Do not link agents to these until the skill files exist.
-
----
-
-## Organization principles
-
-### Folder layout
-
-```
-<repo-root>/
-├── README.md
-├── config.json
-├── credentials.json              (gitignored)
-├── _context/                     messaging canon (Gallivant demo → replace)
-├── _assets/                      materialized copy (optional; see sync_assets)
-├── external_assets.md            optional registry for sync_assets
-├── _workflows/                   skills by category (see _workflows/README.md)
-│   ├── edit/ research/ generate/ ops/
-├── setup/                        config templates, run_workflow, maintain_*, sync_assets
-│   ├── run_workflow/             Step 0 contract
-│   ├── sync_assets/
-│   ├── maintain_skills/
-│   ├── maintain_workflows/
-│   ├── config.example.json
-│   └── credentials.example.json
-```
-
-### Ephemeral data
-
-Scratch files **only** in directories named `tmp/`. Gitignore `**/tmp/` (see [`.gitignore`](.gitignore)).
-
-### Skills and references
-
-- **Shipped skills:** `_workflows/{category}/{name}/SKILL.md` — link from custom orchestrators; do not fork.
-- **Custom pipelines:** add `_workflows/{edit|generate|ops}/{your_pipeline}/SKILL.md` and link to shipped skills below; do not copy their steps.
-- Every step starts with Step 0: [run_workflow/SKILL.md](setup/run_workflow/SKILL.md).
-- Say each instruction once — link to canonical skills ([setup/maintain_skills/SKILL.md](setup/maintain_skills/SKILL.md)).
-
-### sync_assets
-
-Before skills read materialized copy, run [setup/sync_assets/SKILL.md](setup/sync_assets/SKILL.md) to populate `{workspace_root}/_assets/` from `external_assets.md` and local paths. See [run_workflow/SKILL.md § Context assembly](setup/run_workflow/SKILL.md).
+This repo's own root looks similar but smaller: a `README.md`, a demo `config.json` (omit `content_systems_public` when skills are local), the Gallivant demo canon in `_context/`, the shipped shared skills in `_workflows/`, and a `setup/` folder. See [Documentation map](#documentation-map) for what each file under `setup/` owns.
 
 ### Repo hygiene
 
-Do not commit:
-
-- Populated `credentials.json`
-- Anything under `**/tmp/`
-- Local Python envs (`**/.venv/`)
-
----
-
-## For Claude Code and Cursor
-
-- Register skills under `_workflows/`.
-- Point `CLAUDE.md` or a Cursor rule at this **README** and [run_workflow/SKILL.md](setup/run_workflow/SKILL.md).
-- Browserbase: [_workflows/browser_automation](_workflows/ops/browser_automation/SKILL.md) — repeat the live session URL while the session is open.
-- When starting a content task, tell the agent: workspace root path, target skill path, and which canon layer is active (demo Gallivant vs production `_context/`).
-
----
-
-## Maintenance
-
-See [setup/maintain_skills/SKILL.md](setup/maintain_skills/SKILL.md) and [setup/maintain_workflows/SKILL.md](setup/maintain_workflows/SKILL.md).
-
----
+Never commit: a populated `credentials.json`, anything under `tmp/` (see [run_workflow](setup/run_workflow/SKILL.md)), or local Python virtual environments.
 
 ## Troubleshooting
 
-| Symptom | Check |
-|---------|--------|
-| `credentials.json` not found | File at repo root next to `config.json` |
-| Google 403 / invalid_grant | OAuth scopes; re-run token flow |
-| Script cannot find workspace | Run from repo root |
-| Skill not found | Look under `_workflows/{category}/{name}/` — see [_workflows/README.md](_workflows/README.md) |
-| Canon ignored | Replace `_context/` at repo root for production |
-| Agent output off-brand | Confirm context assembly ran; check `_context/` trust levels in [_context/README.md](_context/README.md) |
+If `credentials.json` can't be found, check that it's at the workspace root rather than inside the shared skills checkout (`content_systems_public.path`). A Google 403 error or an `invalid_grant` message usually means an OAuth scope problem; re-run the token flow. If a shared skill can't be found, check the `content_systems_public.path` setting in `config.json`. Older workspaces may use a `content_systems` key instead — rename to `content_systems_public` to match skills. If any skill can't be found at all, look under `_workflows/` in either your workspace or the shared repo. If the agent seems to be ignoring your canon, confirm `_context/` is at the workspace root and populated with real content. If output feels off-brand despite that, check the trust levels described in `_context/README.md`, since not all canon files are treated as equally authoritative.
 
----
+## Maintenance
 
-## Example context
+Run [maintain_skills](setup/maintain_skills/SKILL.md) and [maintain_workflows](setup/maintain_workflows/SKILL.md) under `setup/` when you want to audit the skill library. Each file's scope is defined in [Documentation map](#documentation-map).
 
-[_context/](_context/README.md) ships **fictional Gallivant** messaging. Replace with real canon for production work.
+## Instructions for agents
 
-Gallivant is an enterprise travel-and-expense company invented for demos. Use it to:
+Read this file, then follow [run_workflow](setup/run_workflow/SKILL.md) for every workflow run.
 
-- See how canon files (`canon-*.md`, `brand-writing-identity.md`) constrain generation
-- Run [evaluate_content](_workflows/ops/evaluate_content/SKILL.md) against known-good and known-bad samples
-- Practice the editorial markup pipeline without touching a real CMS
+1. Find the workspace root (folder containing `config.json`). Confirm `credentials.json` is there, not inside the shared skills checkout (`content_systems_public.path`).
+2. When the workflow reads canon or reference material, run context assembly per [run_workflow](setup/run_workflow/SKILL.md) → [sync_assets](setup/sync_assets/SKILL.md).
+3. Open the target skill at `_workflows/{category}/{name}/SKILL.md` (workspace or shared repo). Run step `01_preflight`, then remaining steps in order.
+4. Stop for human review after a produce skill outputs a Doc, sheet, or file. Run publish/stage skills only after review.
+5. End of run: [run_workflow](setup/run_workflow/SKILL.md) § End of run. If skills look stale, offer [maintain_skills](setup/maintain_skills/SKILL.md) and [maintain_workflows](setup/maintain_workflows/SKILL.md).
 
-When you are ready for production, swap `_context/` for your company's messaging brain and keep the same hands.
+Workflow layout, skill formatting, config keys, and credential shapes: [Documentation map](#documentation-map).

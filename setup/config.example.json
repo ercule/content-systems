@@ -1,19 +1,30 @@
 {
-  "_comment": "Copy this file to ./config.json at the repo root. Unlike credentials.json, config.json is tracked and must NOT contain secrets.",
+  "_comment": "Non-secret configuration options and pointers to files. Copy to workspace root as config.json. In-repo demo: see repo root config.json — omit content_systems_public when skills are local.",
   "repo": {
+    "_comment": "Optional repo metadata URL.",
     "url": ""
   },
+  "content_systems_public": {
+    "_comment": "Your workspace only — omit when this repo IS content-systems. path is relative to workspace root.",
+    "repo_url": "https://github.com/ercule/content-systems",
+    "path": "@content_systems_public",
+    "last_pull": null,
+    "stale_after_days": 14
+  },
   "google": {
+    "_comment": "Pointers for Google client tooling — secrets live in credentials.json.",
     "credentials_path": "credentials.json",
     "token_path": "token.pickle",
     "oauth_json_bundle_path": "google.oauth_token_unified"
   },
   "gemini": {
+    "_comment": "Model IDs and limits (non-secret).",
     "model_smart": "gemini-3.1-pro-preview",
     "model_fast": "gemini-3-flash-preview",
     "max_tokens": 30000
   },
   "anthropic": {
+    "_comment": "Model IDs (non-secret).",
     "model_smart": "claude-sonnet-4-6",
     "model_fast": "claude-haiku-4-5"
   },
