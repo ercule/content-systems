@@ -1,17 +1,17 @@
 ---
-name: gdoc_to_wp_02_build_post
+name: publish_wp_03_build_post
 description: >-
   Step 2: convert parsed paragraphs to HTML (or Gutenberg blocks), append FAQ
   if configured, and assemble the full WordPress post payload.
-"last updated": 2026-05-08
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": never
 ---
 
-# Google Doc to WordPress — 02 Build Post
+# Publish WordPress from Google Doc — 02 Build Post
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) (workflow standards: runtime HTTP, logging, ephemeral rules).
+Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
-Log line prefix: `[run-debug] workflow=google-doc-to-wordpress | <PHASE> | <facts>`
+Log line prefix: `[run-debug] workflow=publish-wordpress-from-google-doc | <PHASE> | <facts>`
 
 ## Inputs
 
@@ -89,4 +89,4 @@ Hold `POST_PAYLOAD` in memory for step 3.
 
 Log: `BUILD_OK | html_chars={n} faq_items={n} status={default_status}`
 
-Next: [../03-publish/SKILL.md](../03_publish/SKILL.md)
+Next: [../04_publish/SKILL.md](../04_publish/SKILL.md)

@@ -5,13 +5,13 @@ description: >-
   native Google Doc via Drive multipart upload. All workflows that create Docs from
   Markdown must delegate here — do not duplicate conversion rules, HTML shell, or
   upload recipe in workspace skills.
-"last updated": 2026-06-21T00:00:00+00:00
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": never
 ---
 
 # Markdown → Google Doc (shared)
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) (workflow standards: runtime HTTP, logging, ephemeral rules).
+Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.
 
 Log line prefix: `[run-debug] workflow=<caller> | markdown_to_google_doc | <facts>`
 
@@ -21,10 +21,10 @@ Any workflow step whose primary output is a **new Google Doc** created from Mark
 
 Do not copy the block rules, inline escaping procedure, DOCTYPE shell, or multipart recipe into workspace `SKILL.md` files. Link here and pass the inputs below.
 
-Related wrappers:
+Callers:
 
-- [update_doc_handoff](../../generate/update_doc_handoff/SKILL.md) — builds update_agent Markdown body, then calls this skill.
-- [google-doc-to-markdown](../../ops/google_doc_to_markdown/SKILL.md) — inverse (read Doc → Markdown).
+- update_agent step 06 — assembles handoff Markdown (body + change summary), then calls this skill with `preset: update_agent_default`.
+- [google_doc_to_markdown](../google_doc_to_markdown/SKILL.md) — inverse (read Doc → Markdown).
 
 ## Inputs
 
@@ -40,7 +40,7 @@ Related wrappers:
 | `shell` | No | `standard` (default) or `minimal`. |
 | `verify_export` | No | Default true — run post-upload export check. |
 
-OAuth: refresh token from [`./credentials.json`]](./credentials.json) → `oauth_token_unified` or `google.oauth_token_unified`. Drive file-create scope required.
+OAuth: refresh token from `{workspace_root}/credentials.json` → `oauth_token_unified` or `google.oauth_token_unified`. Drive file-create scope required.
 
 ## Outputs
 
@@ -54,7 +54,7 @@ OAuth: refresh token from [`./credentials.json`]](./credentials.json) → `oauth
 |--------|-----------------|----------------------|-------|-----------------|
 | `standalone_article` | None | No | standard | llm_article_writer produce steps (body only before template extras) |
 | `no_metadata` | None | No | standard | buyers_guide, solutions_page, and similar long-form outputs |
-| `update_agent_default` | Original URL, Generated, Changes made | Yes | standard | Generic update_agent via [update_doc_handoff](../../generate/update_doc_handoff/SKILL.md) |
+| `update_agent_default` | Original URL, Generated, Changes made | Yes | standard | update_agent step 06 |
 | `video_article` | Caller-supplied items (source video, video ID, generated, pipeline) | Yes | standard | video_article_pipeline output steps |
 | `custom_metadata` | Caller `metadata_items` | Usually yes | standard | update_agent (post id, slug, etc.), competitive_pages (HTML comment headers) |
 
@@ -84,7 +84,7 @@ Forbidden: `script`, `iframe`, `img`, `svg`, `style`, `video`, `object`, `embed`
 
 ## Inline rules
 
-**Escape first, then insert tags — never the reverse.** Building `<a href="…">` then running `html.escape` on the whole segment produces literal `&lt;a href=…` in the Doc.
+Escape first, then insert tags — never the reverse. Building `<a href="…">` then running `html.escape` on the whole segment produces literal `&lt;a href=…` in the Doc.
 
 Procedure:
 
@@ -122,7 +122,7 @@ When preset is `update_agent_default` or caller uses equivalent items:
 <hr />
 ```
 
-[update_doc_handoff](../../generate/update_doc_handoff/SKILL.md) builds richer Markdown (change summary sections); convert that Markdown with preset `standalone_article` or pass through as a single `markdown` input — the handoff skill documents the exact body shape.
+update_agent step 06 builds handoff Markdown (regenerated body plus a `## Changes made` section), then calls this skill with `preset: update_agent_default` or passes assembled `markdown` with `preset: standalone_article`.
 
 ## HTML shell
 

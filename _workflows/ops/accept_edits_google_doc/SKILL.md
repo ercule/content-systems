@@ -4,13 +4,13 @@ description: >-
   Accept or reject inline red-strikethrough / blue-addition editorial markup in a
   Google Doc after show_edits_in_google_doc. Trigger on "accept changes",
   "reject changes", "keep blue text", "remove red markup", or finalize editorial markup.
-"last updated": 2026-06-28T23:45:00+00:00
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": never
 ---
 
 # Accept edits in a Google Doc (inline markup)
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) (runtime HTTP, logging, ephemeral rules).
+Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.
 
 Log prefix: `[run-debug] workflow=accept_edits_google_doc | RESOLVE | <facts>`
 
@@ -34,7 +34,7 @@ Typical pipeline: editorial workflow → plan JSON → [show_edits_in_google_doc
 
 Tolerance ±0.08 per channel.
 
-**Before accept:** confirm inserted sections use correct `namedStyleType`. See [show_edits_in_google_doc paragraph styles](../show_edits_in_google_doc/SKILL.md#paragraph-styles-required-second-pass).
+Before accept: confirm inserted sections use correct `namedStyleType`. See [show_edits_in_google_doc paragraph styles](../show_edits_in_google_doc/SKILL.md#paragraph-styles-required-second-pass).
 
 ## Inputs
 

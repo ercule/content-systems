@@ -1,10 +1,10 @@
 ---
-name: utilities_youtube_transcription_yt
+name: utilities_youtube_transcription
 description: >-
   Run the shared YouTube → Whisper script yt.py for local transcripts when
   captions APIs or timedtext are unavailable. Use when the user asks for
   yt-dlp/Whisper transcription or points at scripts/video_transcription/yt.py.
-"last updated": 2026-05-24T00:00:00+00:00
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": 2026-06-14
 ---
 

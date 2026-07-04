@@ -3,13 +3,13 @@ name: evaluate_content
 description: >-
   Scores editorial content for publication risk and outputs a structured review card.
   Uses criteria.md, brand.md, and optional examples.md over HTTP when calibrating.
-"last updated": 2026-06-01T00:58:13+00:00
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": 2026-06-01T00:58:13+00:00
 ---
 
 # Evaluate content for publication (shared)
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) (workflow standards: runtime HTTP, logging, ephemeral rules).
+Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.
 
 Resolve `workspace_root` (directory with `config.json`) before running. Read workspace rubric files from `{workspace_root}/_context/evaluate_content/` (criteria.md, brand.md, examples.md, output-card-template.md). If that folder is missing, ask the user for the rubric location.
 

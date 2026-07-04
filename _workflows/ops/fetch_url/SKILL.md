@@ -1,15 +1,15 @@
 ---
-name: fetch_url_html
+name: fetch_url
 description: >-
   Shared HTML fetch for update_agent and similar workflows. Given a URL or Google Doc,
   return canonical main-body HTML, plain-text title, and the resolved source URL.
-"last updated": 2026-06-01T00:57:13+00:00
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": 2026-06-01T00:57:13+00:00
 ---
 
 # Fetch URL HTML (shared)
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) (workflow standards: runtime HTTP, logging, ephemeral rules).
+Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.
 
 ## Inputs
 
@@ -52,7 +52,7 @@ Extract the doc id with regex `/document/d/([a-zA-Z0-9-_]+)`.
 2. `GET https://www.googleapis.com/drive/v3/files/{doc_id}/export?mimeType=text%2Fhtml` → `content_html`.
 3. If HTML export fails, retry with `mimeType=text/plain` and wrap the body in a single `<pre>` block before returning.
 
-OAuth bearer comes from [./credentials.json](./credentials.json) at `oauth_token_unified` (or the same token used elsewhere in this repo). Drive scope is required.
+OAuth bearer comes from `{workspace_root}/credentials.json` at `oauth_token_unified` (or the same token used elsewhere in this repo). Drive scope is required.
 
 ## Logging
 

@@ -4,13 +4,13 @@ description: >-
   Read a Google Doc via the Drive API export, then produce GitHub-flavored
   Markdown (no model API required for the HTML-to-Markdown step). OAuth Bearer
   from merged repo credentials.
-"last updated": 2026-06-01T00:57:13+00:00
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": 2026-06-01T00:57:13+00:00
 ---
 
 # Google Doc to Markdown (shared)
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) (workflow standards: runtime HTTP, logging, ephemeral rules).
+Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.
 
 ## Task
 
@@ -31,8 +31,8 @@ Use before workflows that need Markdown source text (for example editorial passe
 
 Merge later over earlier (caller may document a workspace credentials file):
 
-1. [./credentials.json](./credentials.json)
-2. Optional ``{workspace_root}/credentials.json`` when the active workflow names it.
+1. `{workspace_root}/credentials.json`
+2. Optional `{workspace_root}/credentials.json` when the active workflow names it.
 
 You need an OAuth access token whose scopes include one of:
 
@@ -124,7 +124,7 @@ If you wrote `{workspace_root}/tmp/google-doc-{DOC_ID}.html` (or `.md`) during t
 
 ## Related
 
-- Reverse direction (Markdown to new Doc): [../../edit/markdown_to_google_doc/SKILL.md](../../edit/markdown_to_google_doc/SKILL.md)
+- Reverse direction (Markdown to new Doc): [../../ops/markdown_to_google_doc/SKILL.md](../../ops/markdown_to_google_doc/SKILL.md)
 - Structured field parsing (not export Markdown): use `GET https://docs.googleapis.com/v1/documents/{DOC_ID}` and walk `body.content` and `paragraph` elements when the caller needs labeled blocks (metadata, FAQ sections, etc.) instead of a single export body.
 
 ## Next

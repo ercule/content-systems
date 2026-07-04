@@ -1,23 +1,23 @@
 ---
-name: gdoc_to_wp_01_fetch_and_parse
+name: publish_wp_02_fetch_and_parse
 description: >-
   Step 1: fetch the Google Doc and parse it into structured fields using the
   doc_schema defined in config.json. Produces title, slug, excerpt, body
   paragraphs, and FAQ pairs for step 2.
-"last updated": 2026-06-01T00:57:13+00:00
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": 2026-06-01T00:57:13+00:00
 ---
 
-# Google Doc to WordPress — 01 Fetch and Parse
+# Publish WordPress from Google Doc — 01 Fetch and Parse
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) (workflow standards: runtime HTTP, logging, ephemeral rules).
+Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
-Log line prefix: `[run-debug] workflow=google-doc-to-wordpress | <PHASE> | <facts>`
+Log line prefix: `[run-debug] workflow=publish-wordpress-from-google-doc | <PHASE> | <facts>`
 
 ## Inputs
 
 - Google Doc URL (provided by user for this run).
-- `config.json` from step 00 — read `doc_schema.*`.
+- `config.json` from step 01 — read `doc_schema.*`.
 
 ## Google credentials
 
@@ -92,4 +92,4 @@ This step holds parsed data in memory only. If you persisted any scratch JSON or
 
 ## Next
 
-[../02-build-post/SKILL.md](../02_build_post/SKILL.md)
+[../03_build_post/SKILL.md](../03_build_post/SKILL.md)

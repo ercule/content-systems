@@ -7,7 +7,7 @@ description: >-
   (including, when the caller configures one, at least one to a preferred-source domain),
   and fixes other Wiki markup errors it encounters along the way. Returns the updated
   Wikitext — it does not write back to the wiki.
-"last updated": 2026-05-30
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": 2026-05-30
 ---
 

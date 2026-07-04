@@ -7,13 +7,13 @@ description: >-
   any skill that marks Browser (wp-admin) or Browser Fallback in its routing table.
   REQUIRED: post Browserbase live view URL to the user immediately after session
   create (see Live session link section); never only in run-debug logs.
-"last updated": 2026-06-28T05:45:00+00:00
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": 2026-06-28
 ---
 
 # Browser automation (shared)
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md).
+Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.
 
 Log prefix: `[run-debug] browser=… | …`
 
@@ -60,7 +60,7 @@ playwright install chromium
 
 Every time you create a Browserbase session, fetch the Live View URL and **keep repeating it in user-facing replies until the session closes**.
 
-**User-facing format (paste at the top of every message while BB is running; repeat again immediately before any ask):**
+User-facing format (paste at the top of every message while BB is running; repeat again immediately before any ask):
 
 ```markdown
 ## Browserbase live session
@@ -112,9 +112,9 @@ session = bb.sessions.create(
 - **`persist: false`** — read-only; use when auth is already saved and you must not overwrite cookies.
 - **`persist: true`** — write changes back to the context when the session is released (`sessions.update(id, status="REQUEST_RELEASE")`). Use after a fresh login handoff to save new auth.
 
-**First-time login handoff:** create session without a context (or with `persist: true` on a new context), give the user the live link, wait for login, then release the session and store the context id in `config.json`.
+First-time login handoff: create session without a context (or with `persist: true` on a new context), give the user the live link, wait for login, then release the session and store the context id in `config.json`.
 
-**Re-auth:** if a saved context stops working (Asana forced logout), repeat the handoff and update `contexts.asana.id` or create a new context.
+Re-auth: if a saved context stops working (Asana forced logout), repeat the handoff and update `contexts.asana.id` or create a new context.
 
 ### Connect pattern
 

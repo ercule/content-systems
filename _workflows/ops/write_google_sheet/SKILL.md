@@ -1,16 +1,16 @@
 ---
-name: google_sheet_write
+name: write_google_sheet
 description: >-
   Shared Google Sheets write utility. Match a row and update cell(s), or append a
   row. Used for notify/catalog steps (content calendar, Output tab, Delivery tab).
   Skips cleanly when spreadsheet config is blank.
-"last updated": 2026-06-21T00:00:00+00:00
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": never
 ---
 
 # Google Sheet write (shared)
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) (workflow standards: runtime HTTP, logging, ephemeral rules).
+Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.
 
 ## Operations
 
@@ -20,7 +20,7 @@ Step 0: Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md)
 | `append` | Add a new row (notify/catalog). |
 | `match_update_or_append` | Try `match_update`; if no row matches and `append_if_missing` is true, `append`. |
 
-OAuth bearer: Google token from [./credentials.json](./credentials.json) at `oauth_token_unified` (or `google.oauth_token_unified` — same token, either path in repo). Spreadsheets scope required.
+OAuth bearer: Google token from `{workspace_root}/credentials.json` at `oauth_token_unified` (or `google.oauth_token_unified` — same token, either path in repo). Spreadsheets scope required.
 
 ## Common inputs
 

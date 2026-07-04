@@ -5,17 +5,17 @@ description: >-
   inline markup so changes are visible in place. Requires inline-markup-plan.json
   from the caller or another workflow. Trigger on "show edits in the doc",
   "red blue markup", or apply editorial plan to Google Doc.
-"last updated": 2026-06-28T23:45:00+00:00
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": never
 ---
 
 # Show edits in a Google Doc (inline markup)
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) (runtime HTTP, logging, ephemeral rules).
+Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.
 
 Log prefix: `[run-debug] workflow=show_edits_in_google_doc | APPLY_INLINE | <facts>`
 
-**Does not read the Doc or invent edits.** Another workflow or the caller supplies an approved markup plan; this skill paints it into the source Doc. After apply, the human reviews; run [accept_edits_google_doc](../accept_edits_google_doc/SKILL.md) to finalize.
+Does not read the Doc or invent edits. Another workflow or the caller supplies an approved markup plan; this skill paints it into the source Doc. After apply, the human reviews; run [accept_edits_google_doc](../accept_edits_google_doc/SKILL.md) to finalize.
 
 Google Docs Suggest mode cannot be created via the Docs API. Red/blue inline markup is the substitute.
 

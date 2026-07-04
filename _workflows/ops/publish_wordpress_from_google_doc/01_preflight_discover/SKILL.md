@@ -1,20 +1,20 @@
 ---
-name: gdoc_to_wp_00_discover_and_configure
+name: publish_wp_01_preflight_discover_and_configure
 description: >-
   One-time setup step. Discovers the WordPress site's available post types,
   taxonomies, and statuses via the REST API, then inspects a sample Google Doc
-  to derive the doc template schema. Outputs config.json for use by steps 01–03.
-"last updated": 2026-06-01T00:57:13+00:00
+  to derive the doc template schema. Outputs config.json for use by steps 02–04.
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": 2026-06-01T00:57:13+00:00
 ---
 
-# Google Doc to WordPress — 00 Discover and Configure
+# Publish WordPress from Google Doc — 01 Preflight discover and Configure
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) (workflow standards: runtime HTTP, logging, ephemeral rules).
+Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
 Run this step once per workspace. It produces a `config.json` that all publish runs will use.
 
-Log line prefix: `[run-debug] workflow=google-doc-to-wordpress | <PHASE> | <facts>`
+Log line prefix: `[run-debug] workflow=publish-wordpress-from-google-doc | <PHASE> | <facts>`
 
 ## Part A: WordPress discovery
 
@@ -70,7 +70,7 @@ Log: `WP_DISCOVERY_OK | post_type={post_type} status={default_status} format={co
 
 ### Google credentials
 
-Use the merged OAuth bearer convention from [google_doc_to_markdown](../../google_doc_to_markdown/SKILL.md): read `oauth_token_unified` from [./credentials.json](./credentials.json), refresh via `POST https://oauth2.googleapis.com/token` (`grant_type=refresh_token`) when needed.
+Use the merged OAuth bearer convention from [google_doc_to_markdown](../../google_doc_to_markdown/SKILL.md): read `oauth_token_unified` from `{workspace_root}/credentials.json`, refresh via `POST https://oauth2.googleapis.com/token` (`grant_type=refresh_token`) when needed.
 
 ### Sample doc
 
@@ -146,7 +146,7 @@ Log: `DOC_SCHEMA_OK | meta_fields={n} stop_prefixes={list} faq={faq_handling}`.
 
 ## Output
 
-Write `config.json` to the workspace workflow directory (e.g. `<workspace>/google-doc-to-wordpress/config.json`). Non-secret values only.
+Write `config.json` to the workspace workflow directory (e.g. `<workspace>/publish-wordpress-from-google-doc/config.json`). Non-secret values only.
 
 ```json
 {
@@ -184,7 +184,7 @@ Write `config.json` to the workspace workflow directory (e.g. `<workspace>/googl
 }
 ```
 
-Tell the user: setup complete. Run steps 01–03 with any doc that follows this template.
+Tell the user: setup complete. Run steps 02–04 with any doc that follows this template.
 
 ## Cleanup
 
@@ -192,4 +192,4 @@ If you wrote any scratch dumps of the sample doc (for example `{workspace_root}/
 
 ## Next
 
-[../01-fetch-and-parse/SKILL.md](../01_fetch_and_parse/SKILL.md)
+[../02_fetch_and_parse/SKILL.md](../02_fetch_and_parse/SKILL.md)

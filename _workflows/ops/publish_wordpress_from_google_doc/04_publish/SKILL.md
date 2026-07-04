@@ -1,17 +1,17 @@
 ---
-name: gdoc_to_wp_03_publish
+name: publish_wp_04_publish
 description: >-
   Step 3: POST the assembled payload to the WordPress REST API and report
   the post ID, edit URL, and public URL.
-"last updated": 2026-05-08
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": never
 ---
 
-# Google Doc to WordPress — 03 Publish
+# Publish WordPress from Google Doc — 03 Publish
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) (workflow standards: runtime HTTP, logging, ephemeral rules).
+Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
-Log line prefix: `[run-debug] workflow=google-doc-to-wordpress | <PHASE> | <facts>`
+Log line prefix: `[run-debug] workflow=publish-wordpress-from-google-doc | <PHASE> | <facts>`
 
 ## Inputs
 
