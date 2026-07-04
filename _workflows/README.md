@@ -1,19 +1,65 @@
 # Workflows
 
-Shipped skills live here, grouped by job. Each workflow is a folder with a root `SKILL.md`. Multi-step pipelines add numbered subfolders (`01_preflight/`, `02_fetch/`, …).
+Shipped skills under `{workspace_root}/_workflows/`. Workspaces may add custom pipelines alongside these folders.
 
-Every step starts with Step 0: [run_workflow/SKILL.md](../setup/run_workflow/SKILL.md). Full setup and catalog: [README.md](../README.md).
+Read [setup/run_workflow/SKILL.md](../setup/run_workflow/SKILL.md) before running any workflow.
 
-**Custom pipelines:** add `_workflows/{edit|generate|ops}/{your_pipeline}/SKILL.md` and link to shipped skills below instead of copying their steps.
+## Layout
 
-## By category
+| Folder | Role |
+|--------|------|
+| **edit/** | Multi-step produce pipelines (e.g. page refresh) — produce only |
+| **research/** | Discovery and enrichment (FAQ mining, external audit, crosslinks) — produce only |
+| **generate/** | Content generation that writes net-new drafts — produce only |
+| **ops/** | Staging, publish, evaluate, and atomic utilities (fetch, Doc conversion, browser fallback) |
 
-| Category | Skills |
-|----------|--------|
-| **edit/** | [show_edits_in_google_doc](edit/show_edits_in_google_doc/SKILL.md), [accept_edits_google_doc](edit/accept_edits_google_doc/SKILL.md), [markdown_to_google_doc](edit/markdown_to_google_doc/SKILL.md), [evaluate_content](edit/evaluate_content/SKILL.md) |
-| **generate/** | [faq_question_finder](generate/faq_question_finder/SKILL.md), [faq_question_responder](generate/faq_question_responder/SKILL.md), [external_linter](generate/external_linter/SKILL.md), [update_agent](generate/update_agent/SKILL.md), [build_crosslinks](generate/build_crosslinks/SKILL.md), [init_crosslinks_json](generate/init_crosslinks_json/SKILL.md), [update_doc_handoff](generate/update_doc_handoff/SKILL.md) |
-| **ops/** | [fetch_url_html](ops/fetch_url_html/SKILL.md), [google_doc_to_markdown](ops/google_doc_to_markdown/SKILL.md), [google_doc_to_wordpress](ops/google_doc_to_wordpress/SKILL.md), [wikitext_editing](ops/wikitext_editing/SKILL.md), [browser_automation](ops/browser_automation/SKILL.md), [google_sheet_write](ops/google_sheet_write/SKILL.md), [youtube_transcription_yt](ops/youtube_transcription_yt/SKILL.md) |
+Produce workflows never live in `ops/`. Staging and publish workflows always live in `ops/`.
 
-Python runners: [scripts/](../scripts/README.md) (linked from individual skills).
+Verb-first workflow folder names (`update_agent`, `build_crosslinks`, `stage_content`, `generate_article`, …). Numbered steps use `{NN}_{slug}` starting at `01_preflight`. Net-new article pipelines use `generate_article`, not `generate_article`.
 
-Store run artifacts only in `tmp/` (this folder or repo root).
+## Shipped skills
+
+### edit/
+
+| Skill | Purpose |
+|-------|---------|
+| [update_agent](edit/update_agent/SKILL.md) | Refresh an existing page → Google Doc (uses research/build_crosslinks, ops/markdown_to_google_doc) |
+
+### research/
+
+| Skill | Purpose |
+|-------|---------|
+| [find_faq_questions](research/find_faq_questions/SKILL.md) | Mine FAQ questions into a sheet |
+| [evaluate_external_brand](research/evaluate_external_brand/SKILL.md) | Audit external brand mentions |
+| [build_crosslinks](research/build_crosslinks/SKILL.md) | Bootstrap `crosslinks.json` + select internal links (replaces legacy `init_crosslinks_json`) |
+
+### generate/
+
+| Skill | Purpose |
+|-------|---------|
+| [generate_faq_responses](generate/generate_faq_responses/SKILL.md) | Draft FAQ responses for sheet rows |
+
+### ops/
+
+| Skill | Purpose |
+|-------|---------|
+| [fetch_url](ops/fetch_url/SKILL.md) | Fetch page HTML |
+| [write_google_sheet](ops/write_google_sheet/SKILL.md) | Append/update Google Sheet rows |
+| [markdown_to_google_doc](ops/markdown_to_google_doc/SKILL.md) | Markdown → Google Doc upload |
+| [google_doc_to_markdown](ops/google_doc_to_markdown/SKILL.md) | Google Doc → Markdown |
+| [show_edits_in_google_doc](ops/show_edits_in_google_doc/SKILL.md) | Inline editorial markup |
+| [accept_edits_google_doc](ops/accept_edits_google_doc/SKILL.md) | Finalize Doc markup |
+| [evaluate_content](ops/evaluate_content/SKILL.md) | LLM content evaluation |
+| [publish_wordpress_from_google_doc](ops/publish_wordpress_from_google_doc/SKILL.md) | Doc → WordPress draft |
+| [youtube_transcription](ops/youtube_transcription/SKILL.md) | YouTube → transcript |
+| [wikitext_editing](ops/wikitext_editing/SKILL.md) | Wikitext helpers |
+| [browser_automation](ops/browser_automation/SKILL.md) | Browserbase fallback |
+
+## Not shipped yet
+
+- `_workflows/stage_content/` — workspace CMS publish router (add when you need staging)
+
+## Maintenance
+
+- Per-skill quality: [setup/maintain_skills/SKILL.md](../setup/maintain_skills/SKILL.md)
+- Workflow layout and run order: [setup/maintain_workflows/SKILL.md](../setup/maintain_workflows/SKILL.md)
