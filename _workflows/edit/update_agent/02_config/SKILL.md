@@ -1,15 +1,15 @@
 ---
-name: update_agent_01_config
+name: update_agent_02_config
 description: >-
-  Shared update agent step 1: resolve workspace_root, source URL, FAQ flag, fetch
+  Shared update agent step 2: resolve workspace_root, source URL, FAQ flag, fetch
   steps, prompt paths, and Drive folder from workspace config and credentials.
-"last updated": 2026-06-21T00:00:00+00:00
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": never
 ---
 
-# Update agent — 01 Config
+# Update agent — 02 Config
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md).
+Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
 ## Inputs (from chat or workspace wrapper)
 
@@ -26,7 +26,7 @@ Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.
 4. Resolve `drive_folder_id` from config, else credentials, else stop and ask.
 5. Resolve `include_faq` from chat override, else config (default `true`).
 6. Resolve `source_fetch_steps` from config (may be empty).
-7. Resolve `enhance_prompt_path` and `diff_summary_prompt_path` relative to `{workspace_root}/_workflows/generate/update_agent/` when set.
+7. Resolve `enhance_prompt_path` and `diff_summary_prompt_path` relative to `{workspace_root}/_workflows/edit/update_agent/` when set.
 8. Log `[run-debug] workflow=_workflows/update_agent | CONFIG | workspace=… include_faq=… fetch_steps=N`.
 
 ## Outputs (carry forward)
@@ -35,4 +35,4 @@ Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.
 - `source_fetch_steps`, `enhance_prompt_path`, `diff_summary_prompt_path`, `output_format`
 - `drive_folder_id`, merged credentials, `calendar` block when configured
 
-Next: [../02-fetch-source/SKILL.md](../02_fetch_source/SKILL.md)
+Next: [../03_fetch_source/SKILL.md](../03_fetch_source/SKILL.md)

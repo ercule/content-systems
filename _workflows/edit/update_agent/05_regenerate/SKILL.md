@@ -1,15 +1,15 @@
 ---
-name: update_agent_04_regenerate
+name: update_agent_05_regenerate
 description: >-
-  Shared update agent step 4: call the enhancement model to produce a full
+  Shared update agent step 5: call the enhancement model to produce a full
   replacement article with crosslinks woven in and optional FAQ section.
-"last updated": 2026-06-21T00:00:00+00:00
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": never
 ---
 
-# Update agent — 04 Regenerate
+# Update agent — 05 Regenerate
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md).
+Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
 ## Rule: full document only
 
@@ -60,8 +60,8 @@ Use `gemini.model_smart` or `anthropic.model_smart` from `{workspace_root}/confi
 
 Parse the response to a single string: `enhanced_markdown` or `enhanced_html` matching `output_format`.
 
-## Change summary (for step 05)
+## Change summary (for step 07)
 
 Build a bullet list of what changed: crosslinks added (URL + anchor text), FAQ count when applicable, dated-year substitutions, and any structural notes. Store as `change_summary_markdown`.
 
-Next: [../05-human-gate/SKILL.md](../05_human_gate/SKILL.md)
+Next: [../06_human_gate/SKILL.md](../06_human_gate/SKILL.md) (optional — skip unless the user asks to preview before Doc upload)
