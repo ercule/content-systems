@@ -66,9 +66,10 @@ Pass order: color markup → insert section → paragraph styles → trim empty 
 
 ## Run
 
-Script: [apply_inline_doc_markup.py](../../../scripts/google_doc/apply_inline_doc_markup.py)
+Follow the Google Docs API steps above. Workspaces may provide a local runner; this public repo ships the skill procedure only.
 
 ```bash
+# Example workspace runner (optional):
 python3 scripts/google_doc/apply_inline_doc_markup.py \
   "https://docs.google.com/document/d/{DOC_ID}/edit" \
   --plan {workspace_root}/tmp/inline-markup-plan.json

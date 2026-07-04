@@ -80,7 +80,7 @@ Session: `{session_id}` · Replay after close: https://browserbase.com/sessions/
    - **Live (interactive):** `live.debugger_fullscreen_url`
    - **Replay (after close):** `https://browserbase.com/sessions/{session.id}`
 
-Scripts: import [`browserbase_live.py`](../../../scripts/lib/browserbase_live.py) and use `LiveSessionReporter.print_open()` / `print_before_ask()` / `print_reminder()` so terminal output repeats the URL every ~15s during waits.
+Repeat the live session URL block in terminal output every ~15s during waits (not only once at session start):
 
 ```text
 [run-debug] browser=browserbase | session_id={id} | live={debugger_fullscreen_url} | replay=https://browserbase.com/sessions/{id}

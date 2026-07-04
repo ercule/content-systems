@@ -44,10 +44,10 @@ Before accept: confirm inserted sections use correct `namedStyleType`. See [show
 
 ## Run
 
-Script: [resolve_doc_markup.py](../../../scripts/google_doc/resolve_doc_markup.py)
+Follow the Google Docs API steps above. Workspaces may provide a local runner; this public repo ships the skill procedure only.
 
 ```bash
-# Preview counts (no mutation)
+# Preview counts (no mutation) — example workspace runner (optional):
 python3 scripts/google_doc/resolve_doc_markup.py \
   "https://docs.google.com/document/d/{DOC_ID}/edit" accept --dry-run
 

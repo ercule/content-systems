@@ -7,13 +7,13 @@ Most marketing teams have tools (CMS, docs, sheets, analytics) and knowledge (me
 | Layer | What it is | Where it lives in this repo |
 |-------|------------|-----------------------------|
 | **Marketing brain** | What the agent *knows* — approved messaging, voice, proof, competitive context, content inventory | [`_context/`](_context/README.md), optional [`_assets/`](setup/sync_assets/SKILL.md), [`config.json`](setup/config.example.json) |
-| **Marketing hands** | What the agent *does* — fetch pages, mine FAQs, draft copy, mark up edits, publish to CMS | [`_workflows/`](_workflows/README.md), [`scripts/`](scripts/README.md), [`setup/run_workflow/`](setup/run_workflow/SKILL.md) |
+| **Marketing hands** | What the agent *does* — fetch pages, mine FAQs, draft copy, mark up edits, publish to CMS | [`_workflows/`](_workflows/README.md), [`setup/run_workflow/`](setup/run_workflow/SKILL.md) |
 
 This repository ships: a demo brain ([Gallivant](_context/reference/gallivant-origin.md)) in an attempt to extend Janessa Lantz' [context builder](https://github.com/janessa-lantz/context-builder/) and production-ready hands (Google Doc markup, FAQ pipelines, page refresh, WordPress publish, and more).
 
-Each skill is a `SKILL.md` file an agent reads and follows; deterministic steps call Python scripts in [scripts/](scripts/README.md).
+Each skill is a `SKILL.md` file an agent reads and follows step by step.
 
-Clone this repository and work from its **root** — the directory that contains `config.json`, `credentials.json`, `_context/`, `_workflows/`, `setup/`, and `scripts/`.
+Clone this repository and work from its **root** — the directory that contains `config.json`, `credentials.json`, `_context/`, `_workflows/`, and `setup/`.
 
 **Agents (Claude Code, Claude, Cursor):** read this file end to end before the first skill run. Execute the [Agent checklist](#agent-checklist) in order. Ask the user for missing values. **Do not print, log, or commit secrets.**
 
@@ -30,7 +30,7 @@ This repo is a starter kit for that model:
 3. **Connect credentials once** — `credentials.json` at repo root; skills resolve keys through a shared contract ([run_workflow](setup/run_workflow/SKILL.md)).
 4. **Extend** — add your own orchestrators under `_workflows/`, swap in your canon, and fork or contribute back as your needs grow.
 
-The brain feeds the hands: `_context/` and `_assets/` inform what skills produce; `_workflows/` and `scripts/` execute against Google Docs, your CMS, search APIs, and LLMs.
+The brain feeds the hands: `_context/` and `_assets/` inform what skills produce; `_workflows/` executes against Google Docs, your CMS, search APIs, and LLMs.
 
 ---
 
@@ -85,7 +85,6 @@ Skills that write or evaluate content should read the brain *before* generating 
 | Path | Role |
 |------|------|
 | [_workflows/](_workflows/README.md) | **Skills by job type** — `research/`, `generate/`, `edit/`, `ops/`. Each folder has a `SKILL.md` the agent executes step by step. |
-| [scripts/](scripts/README.md) | **Deterministic runners** — Python for Doc markup, transcription, maintenance scans. Skills link here; they do not embed script logic inline. |
 | [setup/run_workflow/](setup/run_workflow/SKILL.md) | **Step 0 contract** — credential resolution, context assembly, HTTP logging, Browserbase handoff. Every skill starts here. |
 
 ### Supporting infrastructure
@@ -207,7 +206,7 @@ git pull --ff-only
 1. Read [run_workflow/SKILL.md](setup/run_workflow/SKILL.md).
 2. Read the target skill's `SKILL.md` (see [Skill catalog](#skill-catalog)).
 3. Run context assembly only if the skill reads `_context/` or `_assets/`.
-4. Execute steps; run `python3 scripts/...` from repo root when the skill names a script.
+4. Execute the skill steps; confirm `[run-debug]` lines appear when the skill asks for them.
 5. Confirm `[run-debug]` lines appear — they are the agent's execution trace.
 
 **Good first runs (low risk):**
@@ -227,7 +226,7 @@ This is a standalone starter you own end to end. Typical paths:
 | **Run shipped skills** | Clone, configure, pick a skill from [I want to…](#i-want-to) |
 | **Add your brand** | Replace `_context/` with your messaging canon; keep the same file roles |
 | **Add a custom pipeline** | Create `_workflows/{edit\|generate\|ops}/{your_pipeline}/SKILL.md`; link to shipped skills — do not copy their steps |
-| **Add a new atomic skill** | Add under `_workflows/ops/` (or the right category) plus any scripts in `scripts/` |
+| **Add a new atomic skill** | Add under `_workflows/ops/` (or the right category) |
 | **Sync live site copy** | Maintain `external_assets.md` and run [sync_assets](setup/sync_assets/SKILL.md) |
 
 Shipped skills in `_workflows/` are the canonical implementations. Your custom orchestrators should link down to them. If you improve a shared skill, contribute it back upstream so others benefit.
@@ -293,18 +292,14 @@ Templates: [setup/config.example.json](setup/config.example.json), [setup/creden
 5. **Execute** — small steps, `[run-debug]` logging
 6. **End of run** — update `"last run"` in skill frontmatter (ISO date)
 
-```bash
-python3 scripts/google_doc/apply_inline_doc_markup.py --help
-```
-
 **Editorial markup pipeline:**
 
 ```
 [your _workflows/ pipeline or plan JSON]
         ↓  inline-markup-plan.json
-show_edits_in_google_doc  →  scripts/google_doc/apply_inline_doc_markup.py
-        ↓  human review in Google Doc
-accept_edits_google_doc   →  scripts/google_doc/resolve_doc_markup.py
+show_edits_in_google_doc  →  human review in Google Doc
+        ↓
+accept_edits_google_doc   →  finalized Doc
 ```
 
 **Typical agentic content loop:**
@@ -364,7 +359,6 @@ Do not link agents to these until the skill files exist.
 │   ├── maintain_workflows/
 │   ├── config.example.json
 │   └── credentials.example.json
-├── scripts/                      Python runners
 ```
 
 ### Ephemeral data
@@ -388,8 +382,7 @@ Do not commit:
 
 - Populated `credentials.json`
 - Anything under `**/tmp/`
-- Local Python envs (`**/.venv/`, e.g. under `scripts/video_transcription/`)
-- Transcription scratch (`scripts/**/youtube_transcripts/`)
+- Local Python envs (`**/.venv/`)
 
 ---
 
@@ -403,12 +396,6 @@ Do not commit:
 ---
 
 ## Maintenance
-
-```bash
-python3 scripts/maintain/scan_step_zero.py
-python3 scripts/maintain/scan_skill_links.py
-python3 scripts/maintain/scan_reacts_to.py
-```
 
 See [setup/maintain_skills/SKILL.md](setup/maintain_skills/SKILL.md) and [setup/maintain_workflows/SKILL.md](setup/maintain_workflows/SKILL.md).
 

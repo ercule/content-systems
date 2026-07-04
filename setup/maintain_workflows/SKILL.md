@@ -22,7 +22,7 @@ Resolve `{workspace_root}` by walking up from the active skill until you find `c
 
 - **Orchestrator** — one root `SKILL.md` per workflow (the folder that names the pipeline).
 - **Numbered steps** — each pipeline step is a subfolder `{NN}_{slug}/SKILL.md` under that workflow folder. Step 01 is always preflight (see below). Most workflows have two or more numbered steps after preflight.
-- **Atomic utilities** — a single root `SKILL.md` with no numbered subfolders is allowed only for small shared helpers invoked by other skills (not standalone pipelines). Do not add new standalone pipelines as single-file skills — use `01_preflight` plus downstream steps instead. Python runners live in the content-systems library — see [scripts/README.md](../../scripts/README.md).
+- **Atomic utilities** — a single root `SKILL.md` with no numbered subfolders is allowed only for small shared helpers invoked by other skills (not standalone pipelines). Do not add new standalone pipelines as single-file skills — use `01_preflight` plus downstream steps instead. Deterministic runners belong in the workspace that owns the integration, not in this public skills library.
 - Step folders use `{NN}_{slug}` with zero-padded numbers starting at `01` (`01`, `02`, …). No letter-suffix steps. No `{00}_*` folders.
 - Final produce step: `{NN}_output` (Google Doc, Markdown file, or thin wrapper over [markdown_to_google_doc](../../_workflows/ops/markdown_to_google_doc/SKILL.md)).
 - Use `_` as the only word separator in workflow and step folder names. Do not use `-`.
@@ -235,13 +235,13 @@ For per-skill structure, frontmatter, links, and content quality, apply [maintai
 
 ### 4. Verify and report
 
-- Run [scan_step_zero.py](../../scripts/maintain/scan_step_zero.py) and [scan_reacts_to.py](../../scripts/maintain/scan_reacts_to.py) from the repo root when available (step 5 reuses the reacts-to scanner).
+- Manually verify step 01 preflight links and run order on every orchestrator touched in this pass (step 5 covers reacts-to separately).
 - Run [maintain_skills/SKILL.md](../maintain_skills/SKILL.md) verify steps on every orchestrator and step skill touched in this pass.
 - Run this file against itself and flag any updates needed.
 
 ### 5. Check reacts-to triggers
 
-Run [scan_reacts_to.py](../../scripts/maintain/scan_reacts_to.py) from the repo root when available. It lists every main workflow skill that declares `"reacts to"`, flags invalid items (manual-run wording or vague external sources), compares `"last run"` against time-like triggers, and prints groups:
+Review every main workflow skill that declares `"reacts to"`. Flag invalid items (manual-run wording or vague external sources), compare `"last run"` against time-like triggers, and group findings as:
 
 1. Invalid reacts-to — fix or remove in the skill frontmatter before treating the workflow as schedulable; re-run the scanner until this group is empty
 2. Likely due — time-based triggers where the interval has elapsed or `"last run"` is `never`

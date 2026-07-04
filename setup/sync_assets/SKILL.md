@@ -4,7 +4,7 @@ description: >-
   Sync workspace reference assets into {workspace_root}/_assets from local paths and
   external_assets.md (URLs, Google Docs). Writes asset-manifest.md with last-updated
   timestamps. Run as context assembly before workflows that read workspace canon.
-"last updated": 2026-06-20
+"last updated": 2026-06-28T23:00:00+00:00
 "last run": never
 ---
 
@@ -13,7 +13,7 @@ description: >-
 Materialize a workspace's approved reference layer into `{workspace_root}/_assets/` so
 downstream skills read stable local copies, not live URLs.
 
-Step 0: Read [run_workflow/SKILL.md](../run_workflow/SKILL.md) (workflow standards: runtime HTTP, logging, ephemeral rules).
+Read [run_workflow/SKILL.md](../run_workflow/SKILL.md) before running this step.
 
 ## When to run
 
@@ -95,7 +95,7 @@ Log line prefix:
       - Read text. Binary files (NUL byte in first 8 KiB): log WARN and skip.
       - Write to the output path. Set `sync_status=ok`, `last_updated` = now (UTC ISO-8601).
    3. **URL** (including Google Docs):
-      - Run [fetch_url_html/SKILL.md](../../_workflows/ops/fetch_url_html/SKILL.md) with `input={source}`.
+      - Run [fetch_url/SKILL.md](../../_workflows/ops/fetch_url/SKILL.md) with `input={source}`.
       - On empty `content_html`, log WARN with fetch status and continue.
       - Convert HTML to plain text (strip tags; preserve paragraph breaks). Cap at 200,000
         characters; log WARN if truncated.
@@ -168,5 +168,5 @@ provenance. Prefer entries with `sync_status=ok`.
 
 ## Related skills
 
-- [fetch_url_html/SKILL.md](../../_workflows/ops/fetch_url_html/SKILL.md) — URL and Google Doc fetch
+- [fetch_url/SKILL.md](../../_workflows/ops/fetch_url/SKILL.md) — URL and Google Doc fetch
 - [run_workflow/SKILL.md](../run_workflow/SKILL.md) — context assembly hook

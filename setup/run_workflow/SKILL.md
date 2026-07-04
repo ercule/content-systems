@@ -3,7 +3,7 @@ name: utilities_run_workflow
 description: >-
   Shared execution context for all workflow skills: runtime HTTP contract, context assembly,
   credential resolution, small-step runs
-"last updated": 2026-06-21
+"last updated": 2026-06-28T23:00:00+00:00
 "last run": 2026-06-14
 ---
 
@@ -86,9 +86,9 @@ Skills name the JSON path they need (for example `google.oauth_token_unified`, `
 
 ## Adding a new skill
 
-If the skill is part of a workflow sequence, link this file as Step 0. From `_workflows/{category}/{name}/`, use `../../../setup/run_workflow/SKILL.md` (add one `../` per path segment to repo root). From `_workflows/{category}/{name}/{NN}_{step}/`, use `../../../../setup/run_workflow/SKILL.md`.
+If the skill is part of a workflow sequence, step 01 (and later steps when standalone) opens with a link to this file — do not call it "Step 0". From `_workflows/{category}/{name}/`, use `../../../setup/run_workflow/SKILL.md` (add one `../` per path segment to repo root). From `_workflows/{category}/{name}/{NN}_{step}/`, use `../../../../setup/run_workflow/SKILL.md`. See [maintain_workflows/SKILL.md](../maintain_workflows/SKILL.md) for step numbering.
 
-If the workflow has more than three steps, add a dedicated `01_preflight` step before other work. See [setup/maintain_workflows/SKILL.md](../maintain_workflows/SKILL.md).
+Every workflow starts with a dedicated `01_preflight` step. See [setup/maintain_workflows/SKILL.md](../maintain_workflows/SKILL.md).
 
 If the skill is a main workflow orchestrator, add a `"reacts to"` list in frontmatter for observable triggers only. See [setup/maintain_workflows/SKILL.md](../maintain_workflows/SKILL.md).
 
