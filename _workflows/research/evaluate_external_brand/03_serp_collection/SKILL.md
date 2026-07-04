@@ -1,20 +1,20 @@
 ---
-name: external_linter_02_serp_collection
+name: evaluate_external_brand_03_serp_collection
 description: >-
-  Step 02 for the shared external linter: run the two bare-brand SERPs via
+  Step 03 for evaluate_external_brand: run the two bare-brand SERPs via
   SerpAPI (up to position 50 each), merge and dedupe organic results, and drop
   every result on the workspace's own domain to produce the external page set.
-"last updated": 2026-06-08
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": 2026-06-09
 ---
 
-# External Linter - 02 SERP Collection
+# Evaluate external brand — 03 SERP collection
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md).
+Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
 ## Inputs
 
-From [../01-config-and-sheet/SKILL.md](../01_config_and_sheet/SKILL.md):
+From [../02_config_and_sheet/SKILL.md](../02_config_and_sheet/SKILL.md):
 
 - `workspace_name` — confirmed brand string.
 - `workspace_hosts` — apex host exclusion set.
@@ -26,7 +26,7 @@ From chat or caller:
 
 ## Credentials
 
-- SerpAPI: `./credentials.json` at `serpapi.api_key`.
+- SerpAPI: `{workspace_root}/credentials.json` at `serpapi.api_key`.
 
 ## 1. Build the two queries
 
@@ -48,7 +48,7 @@ Params:
 - `engine=google`
 - `q={query}`
 - `num={max_results}` (default `50`)
-- `api_key={serpapi.api_key}` from `./credentials.json` (resolved at `workspace_root`) (`serpapi.api_key`)
+- `api_key={serpapi.api_key}` from `{workspace_root}/credentials.json` (resolved at `workspace_root`) (`serpapi.api_key`)
 - when `serp_location` is supplied, also pass its `location` / `gl` / `hl` values.
 
 Google no longer honors `num` or a hand-built `start` offset reliably: a single call returns only the first page (~5–10 organic results), and reissuing the same query with `start=10/20/…` just returns page 1 again. **Paginate by following the `serpapi_pagination.next` URL** from each response instead of constructing `start` yourself. Append `api_key` to that `next` URL and keep following it until you have covered positions 1–`max_results` or there is no `next` link. (Verified behavior: a manual `start` loop collapses to ~10 results; following `next` for 5 pages yields ~50.)
@@ -62,7 +62,7 @@ Keep only organic results whose absolute position is `<= max_results`.
 Log per query:
 
 ```text
-[run-debug] workflow=_workflows/external_linter | SERP | query="..." results=N
+[run-debug] workflow=_workflows/evaluate_external_brand | SERP | query="..." results=N
 ```
 
 ## 3. Drop owned-domain results
@@ -74,7 +74,7 @@ Drop the result when its apex host equals (or is a subdomain of) any host in `wo
 Log per query:
 
 ```text
-[run-debug] workflow=_workflows/external_linter | SERP | query="..." kept=N dropped_owned=N
+[run-debug] workflow=_workflows/evaluate_external_brand | SERP | query="..." kept=N dropped_owned=N
 ```
 
 ## 4. Merge and dedupe across both queries
@@ -87,7 +87,7 @@ Preserve a stable order: sort by best (lowest) `position` seen across the two qu
 
 ## Outputs for next step
 
-Carry these values to [../03-extract-and-append/SKILL.md](../03_extract_and_append/SKILL.md):
+Carry these values to [../04_extract_and_append/SKILL.md](../04_extract_and_append/SKILL.md):
 
 - `external_results` — array of `{ url, title, snippet, best_position, queries }`, deduped and owned-domain-free.
 
@@ -99,7 +99,7 @@ Pass through unchanged:
 Log:
 
 ```text
-[run-debug] workflow=_workflows/external_linter | MERGE | external_results=N
+[run-debug] workflow=_workflows/evaluate_external_brand | MERGE | external_results=N
 ```
 
 ## Checks
@@ -110,3 +110,5 @@ Log:
 - [ ] Results merged and deduped by normalized URL across both queries.
 - [ ] `external_results` ordered by best SERP position.
 - [ ] No temporary files left behind.
+
+Next: [../04_extract_and_append/SKILL.md](../04_extract_and_append/SKILL.md)

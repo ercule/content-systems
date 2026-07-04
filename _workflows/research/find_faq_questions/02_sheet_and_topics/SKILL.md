@@ -1,15 +1,15 @@
 ---
-name: faq_question_finder_01_sheet_and_topics
+name: find_faq_questions_02_sheet_and_topics
 description: >-
-  Step 01 for the shared FAQ finder: resolve the Google Sheet, validate Strategy
+  Step 02 for find_faq_questions: resolve the Google Sheet, validate Strategy
   and FAQ Coverage tabs, map headers, and build the topic queue plus dedupe sets.
-"last updated": 2026-06-07T19:32:00+00:00
-"last run": 2026-06-27
+"last updated": 2026-06-28T23:30:00+00:00
+"last run": 2026-07-02
 ---
 
-# FAQ Finder - 01 Sheet And Topics
+# Find FAQ questions — 02 Sheet And Topics
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md).
+Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
 ## Inputs
 
@@ -17,7 +17,7 @@ Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.
 
 ## Credentials
 
-- Google OAuth: `./credentials.json` at `google.oauth_token_unified`.
+- Google OAuth: `{workspace_root}/credentials.json` at `google.oauth_token_unified`.
 
 Refresh the Google access token once at the start of the workflow. Use it for every Sheets API call. Do not log tokens.
 
@@ -39,7 +39,7 @@ Authorization: Bearer {access_token}
 Log:
 
 ```text
-[run-debug] workflow=_workflows/faq_question_finder | SHEET | title="..." strategy="..." faq="..."
+[run-debug] workflow=_workflows/find_faq_questions | SHEET | title="..." strategy="..." faq="..."
 ```
 
 ## 2. Map Or Create FAQ Coverage Headers
@@ -62,7 +62,7 @@ If row 1 is empty, write the preferred header row.
 
 If row 1 exists but any required header is missing, add the missing header at the end of the row. Do not rename existing headers unless the match is obvious and case-only.
 
-Only this workflow's append step writes data. It writes `Topic`, `Question`, and `Source`. It must not write `Response Page` or `Draft Response`; those columns belong to the [faq-question-responder](../../faq_question_responder/SKILL.md) workflow.
+Only this workflow's append step writes data. It writes `Topic`, `Question`, and `Source`. It must not write `Response Page` or `Draft Response`; those columns belong to the [generate_faq_responses](../../../generate/generate_faq_responses/SKILL.md) workflow.
 
 ## 3. Build Dedupe Sets
 
@@ -81,7 +81,7 @@ Normalize source URLs by lowercasing scheme and host, dropping fragments, droppi
 Log:
 
 ```text
-[run-debug] workflow=_workflows/faq_question_finder | DEDUPE | existing_topics=N existing_questions=N existing_sources=N
+[run-debug] workflow=_workflows/find_faq_questions | DEDUPE | existing_topics=N existing_questions=N existing_sources=N
 ```
 
 ## 4. Read Strategy Topics
@@ -103,12 +103,12 @@ If no topics remain, continue anyway: GSC always runs and mines questions on its
 Log:
 
 ```text
-[run-debug] workflow=_workflows/faq_question_finder | QUEUE | topics=N max={max_new_topics}
+[run-debug] workflow=_workflows/find_faq_questions | QUEUE | topics=N max={max_new_topics}
 ```
 
 ## Outputs For Next Step
 
-Carry these values to [../02-source-collection/SKILL.md](../02_source_collection/SKILL.md):
+Carry these values to [../03_source_collection/SKILL.md](../03_source_collection/SKILL.md):
 
 - `spreadsheet_id`
 - `strategy_tab_title`
@@ -128,3 +128,5 @@ Carry these values to [../02-source-collection/SKILL.md](../02_source_collection
 - [ ] Existing topics, questions, and source URLs loaded.
 - [ ] Full `strategy_topics` list built for GSC regex matching.
 - [ ] Topic queue built and capped.
+
+Next: [../03_source_collection/SKILL.md](../03_source_collection/SKILL.md)

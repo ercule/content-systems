@@ -1,20 +1,20 @@
 ---
-name: external_linter_03_extract_and_append
+name: evaluate_external_brand_04_extract_and_append
 description: >-
-  Step 03 for the shared external linter: fetch each external page, extract the
+  Step 04 for evaluate_external_brand: fetch each external page, extract the
   single paragraph that talks about the brand, and append one Site | Mention
   row per page to the new sheet as it is found.
-"last updated": 2026-06-08
+"last updated": 2026-06-28T23:30:00+00:00
 "last run": 2026-06-09
 ---
 
-# External Linter - 03 Extract And Append
+# Evaluate external brand - 03 Extract And Append
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md).
+Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
 ## Inputs
 
-From [../02-serp-collection/SKILL.md](../02_serp_collection/SKILL.md):
+From [../03_serp_collection/SKILL.md](../03_serp_collection/SKILL.md):
 
 - `external_results` — array of `{ url, title, snippet, best_position, queries }`.
 - `workspace_name`
@@ -26,8 +26,8 @@ From chat or caller:
 
 ## Credentials
 
-- Google OAuth for Sheets: `./credentials.json` at `google.oauth_token_unified`.
-- Anthropic: `./credentials.json` at `anthropic.api_key`, used for paragraph extraction.
+- Google OAuth for Sheets: `{workspace_root}/credentials.json` at `google.oauth_token_unified`.
+- Anthropic: `{workspace_root}/credentials.json` at `anthropic.api_key`, used for paragraph extraction.
 
 Do not log API keys, OAuth tokens, raw page bodies, or full model prompts.
 
@@ -90,8 +90,8 @@ Expect a handful of `403` bot walls on every brand SERP. Review-aggregator and f
 Log:
 
 ```text
-[run-debug] workflow=_workflows/external_linter | FETCH | url=... status=... chars=N
-[run-debug] workflow=_workflows/external_linter | FETCH_RETRY | url=... attempt=N status=... chars=N reason=...
+[run-debug] workflow=_workflows/evaluate_external_brand | FETCH | url=... status=... chars=N
+[run-debug] workflow=_workflows/evaluate_external_brand | FETCH_RETRY | url=... attempt=N status=... chars=N reason=...
 ```
 
 ## 2. Extract the relevant paragraph
@@ -143,7 +143,7 @@ Expect a non-trivial share of `non_verbatim` results — roughly a quarter of fe
 Log:
 
 ```text
-[run-debug] workflow=_workflows/external_linter | VERIFY | url=... verbatim={true|false}
+[run-debug] workflow=_workflows/evaluate_external_brand | VERIFY | url=... verbatim={true|false}
 ```
 
 Apply the [Mention quality rules](../SKILL.md#mention-quality-rules):
@@ -156,7 +156,7 @@ Apply the [Mention quality rules](../SKILL.md#mention-quality-rules):
 Log:
 
 ```text
-[run-debug] workflow=_workflows/external_linter | EXTRACT | url=... mention_chars=N mentions_brand={true|false}
+[run-debug] workflow=_workflows/evaluate_external_brand | EXTRACT | url=... mention_chars=N mentions_brand={true|false}
 ```
 
 ## 3. Append the row as you go
@@ -183,7 +183,7 @@ If an append call fails, log it, keep the row in `failed_appends`, and continue 
 Log:
 
 ```text
-[run-debug] workflow=_workflows/external_linter | APPEND | url=... row=N
+[run-debug] workflow=_workflows/evaluate_external_brand | APPEND | url=... row=N
 ```
 
 ## Outputs
@@ -202,7 +202,7 @@ Report to the user: rows written, pages that failed to fetch, and the new sheet 
 If any pages were written as `(No data)` because they could not be scraped (entries in `failed_pages`), call this out explicitly in the summary: list those page URLs and note that they **might need manual content scraping** to capture the brand mention the linter could not extract automatically. Keep this separate from `(no relevant paragraph found)` rows, which are pages that scraped fine but genuinely had no relevant paragraph.
 
 ```text
-[run-debug] workflow=_workflows/external_linter | DONE | rows=N pages_failed=N needs_manual_scrape=N sheet={sheet_url}
+[run-debug] workflow=_workflows/evaluate_external_brand | DONE | rows=N pages_failed=N needs_manual_scrape=N sheet={sheet_url}
 ```
 
 ## Checks

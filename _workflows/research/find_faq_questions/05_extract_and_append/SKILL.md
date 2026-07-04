@@ -1,22 +1,22 @@
 ---
-name: faq_question_finder_04_extract_and_append
+name: find_faq_questions_05_extract_and_append
 description: >-
-  Step 04 for the shared FAQ finder: extract questions from collected sources,
+  Step 05 for find_faq_questions: extract questions from collected sources,
   filter and dedupe them, then append Topic, Question, and Source rows to FAQ
   Coverage.
-"last updated": 2026-06-07T19:32:00+00:00
-"last run": 2026-06-27
+"last updated": 2026-06-28T23:30:00+00:00
+"last run": 2026-07-02
 ---
 
-# FAQ Finder - 04 Extract And Append
+# Find FAQ questions — 05 Extract And Append
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md).
+Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
-This step writes the base `Topic | Question | Source` rows. The optional `Response Page` and `Draft Response` columns are filled afterward by the separate [faq-question-responder](../../faq_question_responder/SKILL.md) workflow.
+This step writes the base `Topic | Question | Source` rows. The optional `Response Page` and `Draft Response` columns are filled afterward by the separate [generate_faq_responses](../../../generate/generate_faq_responses/SKILL.md) workflow.
 
 ## Inputs
 
-From [../01-sheet-and-topics/SKILL.md](../01_sheet_and_topics/SKILL.md):
+From [../02_sheet_and_topics/SKILL.md](../02_sheet_and_topics/SKILL.md):
 
 - `spreadsheet_id`
 - `faq_tab_title`
@@ -24,11 +24,11 @@ From [../01-sheet-and-topics/SKILL.md](../01_sheet_and_topics/SKILL.md):
 - `existing_questions`
 - `existing_sources`
 
-From [../02-source-collection/SKILL.md](../02_source_collection/SKILL.md):
+From [../03_source_collection/SKILL.md](../03_source_collection/SKILL.md):
 
 - `source_bundles`
 
-From [../03-gsc-questions/SKILL.md](../03_gsc_questions/SKILL.md):
+From [../04_gsc_questions/SKILL.md](../04_gsc_questions/SKILL.md):
 
 - `gsc_questions`
 - `main_domain_host`
@@ -40,8 +40,8 @@ From chat or caller:
 
 ## Credentials
 
-- Google OAuth for Sheets: `./credentials.json` at `google.oauth_token_unified`.
-- Anthropic: `./credentials.json` at `anthropic.api_key`, used for question extraction.
+- Google OAuth for Sheets: `{workspace_root}/credentials.json` at `google.oauth_token_unified`.
+- Anthropic: `{workspace_root}/credentials.json` at `anthropic.api_key`, used for question extraction.
 
 Do not log API keys, OAuth tokens, raw source bodies, or full model prompts.
 
@@ -83,7 +83,7 @@ If parsing still fails:
 - Retry once with a short output-repair prompt.
 - If parsing still fails, log the first 500 characters of the response and treat that source as zero questions.
 
-GSC questions do not pass through the model. They were already filtered in [../03-gsc-questions/SKILL.md](../03_gsc_questions/SKILL.md).
+GSC questions do not pass through the model. They were already filtered in [../04_gsc_questions/SKILL.md](../04_gsc_questions/SKILL.md).
 
 ## 2. Filter And Dedupe
 
@@ -117,7 +117,7 @@ Build one row per surviving question:
   - `Reddit {thread_url}` for Reddit results.
   - `GSC {top_page_url}` where `{top_page_url}` is the page that showed up in the Search Console results.
 
-Do not write `Response Page`, `Draft Response`, `LLM Response`, `Mentioned`, `Topics`, `% Mentioned`, or any other column here. The optional `Response Page` and `Draft Response` columns are handled by the separate [faq-question-responder](../../faq_question_responder/SKILL.md) workflow.
+Do not write `Response Page`, `Draft Response`, `LLM Response`, `Mentioned`, `Topics`, `% Mentioned`, or any other column here. The optional `Response Page` and `Draft Response` columns are handled by the separate [generate_faq_responses](../../../generate/generate_faq_responses/SKILL.md) workflow.
 
 ## 4. Append Rows To FAQ Coverage As You Go
 
@@ -139,13 +139,13 @@ Use an encoded range that covers the three output columns, for example:
 
 Appending one row per call is fine. To reduce request volume, you may append the surviving rows from one source bundle in one small call. Do not hold rows across multiple bundles to batch later. After each successful append, update the in-memory dedupe sets. Mine and append GSC questions the same way.
 
-Record the appended row number for each row from the append response `updates.updatedRange` (e.g. `'FAQ Coverage'!A124:C124` -> row `124`; a batched append returns a contiguous block, so map each row in append order). Collect these into `appended_rows_detail` so the [faq-question-responder](../../faq_question_responder/SKILL.md) workflow can fill the optional columns on the exact rows.
+Record the appended row number for each row from the append response `updates.updatedRange` (e.g. `'FAQ Coverage'!A124:C124` -> row `124`; a batched append returns a contiguous block, so map each row in append order). Collect these into `appended_rows_detail` so the [generate_faq_responses](../../../generate/generate_faq_responses/SKILL.md) workflow can fill the optional columns on the exact rows.
 
 If an append call fails, log it, keep the row in `failed_append_batches`, and continue with the next source rather than aborting the run.
 
 ## Handoff To The Responder
 
-This is the final step of the finder. If the [faq-question-responder](../../faq_question_responder/SKILL.md) workflow runs next in the same session, hand off these values so it can fill `Response Page` and `Draft Response` on the exact rows just appended. The responder can also run standalone and rediscover rows from the sheet.
+This is the final step of the finder. If the [generate_faq_responses](../../../generate/generate_faq_responses/SKILL.md) workflow runs next in the same session, hand off these values so it can fill `Response Page` and `Draft Response` on the exact rows just appended. The responder can also run standalone and rediscover rows from the sheet.
 
 - `appended_rows_detail`: array of `{ row_number, topic, question, source }`, in append order.
 - `header_map`
@@ -165,9 +165,9 @@ Return:
 ## Logging
 
 ```text
-[run-debug] workflow=_workflows/faq_question_finder | EXTRACT | topic="..." source=reddit questions=N
-[run-debug] workflow=_workflows/faq_question_finder | APPEND | topic="..." rows=N
-[run-debug] workflow=_workflows/faq_question_finder | DONE | appended_rows=N skipped_dupes=N failed_sources=N
+[run-debug] workflow=_workflows/find_faq_questions | EXTRACT | topic="..." source=reddit questions=N
+[run-debug] workflow=_workflows/find_faq_questions | APPEND | topic="..." rows=N
+[run-debug] workflow=_workflows/find_faq_questions | DONE | appended_rows=N skipped_dupes=N failed_sources=N
 ```
 
 ## Checks

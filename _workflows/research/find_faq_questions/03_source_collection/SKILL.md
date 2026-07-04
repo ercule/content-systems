@@ -1,21 +1,21 @@
 ---
-name: faq_question_finder_02_source_collection
+name: find_faq_questions_03_source_collection
 description: >-
-  Step 02 for the shared FAQ finder: collect source text from Reddit and
+  Step 03 for find_faq_questions: collect source text from Reddit and
   LinkedIn via SerpAPI, bounded by a recency window.
-"last updated": 2026-06-07T19:32:00+00:00
-"last run": 2026-06-27
+"last updated": 2026-06-28T23:30:00+00:00
+"last run": 2026-07-02
 ---
 
-# FAQ Finder - 02 Source Collection
+# Find FAQ questions — 03 Source Collection
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md).
+Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
-This step collects Reddit and LinkedIn sources only. Google Search Console runs separately in [../03-gsc-questions/SKILL.md](../03_gsc_questions/SKILL.md).
+This step collects Reddit and LinkedIn sources only. Google Search Console runs separately in [../04_gsc_questions/SKILL.md](../04_gsc_questions/SKILL.md).
 
 ## Inputs
 
-From [../01-sheet-and-topics/SKILL.md](../01_sheet_and_topics/SKILL.md):
+From [../02_sheet_and_topics/SKILL.md](../02_sheet_and_topics/SKILL.md):
 
 - `topic_queue` - new Strategy topics, used to drive Reddit and LinkedIn searches.
 - `existing_questions`
@@ -28,7 +28,7 @@ From chat or caller:
 
 ## Credentials
 
-- SerpAPI: `./credentials.json` at `serpapi.api_key`.
+- SerpAPI: `{workspace_root}/credentials.json` at `serpapi.api_key`.
 
 ## 1. Collect Reddit And LinkedIn Sources
 
@@ -78,7 +78,7 @@ Apply the SerpAPI recency handling above. Use the `tbs` window as the recency ga
 
 ## Outputs For Next Step
 
-Carry these values to [../03-gsc-questions/SKILL.md](../03_gsc_questions/SKILL.md):
+Carry these values to [../04_gsc_questions/SKILL.md](../04_gsc_questions/SKILL.md):
 
 - `source_bundles`: array of `{ topic, source_label, source_url, source_text, published_date, confidence }`. `source_text` is built from SerpAPI result fields (`title`, `snippet`, `snippet_highlighted_words`, `about_this_result.source.description`), plus an optional fetched LinkedIn body. `published_date` is the SERP date when present, otherwise `serp-window` to denote it was admitted by the `tbs` recency window. Bundles with an explicit SERP date before the cutoff are not carried forward.
 - `failed_sources_count`
@@ -86,9 +86,9 @@ Carry these values to [../03-gsc-questions/SKILL.md](../03_gsc_questions/SKILL.m
 ## Logging
 
 ```text
-[run-debug] workflow=_workflows/faq_question_finder | SERP | topic="..." source=reddit results=N kept=N cutoff={cutoff_date}
-[run-debug] workflow=_workflows/faq_question_finder | SOURCE | source=reddit url=... serp_date={date_or_serp-window} chars=N
-[run-debug] workflow=_workflows/faq_question_finder | SKIP | source=linkedin url=... reason=too_old serp_date={date}
+[run-debug] workflow=_workflows/find_faq_questions | SERP | topic="..." source=reddit results=N kept=N cutoff={cutoff_date}
+[run-debug] workflow=_workflows/find_faq_questions | SOURCE | source=reddit url=... serp_date={date_or_serp-window} chars=N
+[run-debug] workflow=_workflows/find_faq_questions | SKIP | source=linkedin url=... reason=too_old serp_date={date}
 ```
 
 ## Checks

@@ -1,23 +1,23 @@
 ---
-name: faq_question_finder_03_gsc_questions
+name: find_faq_questions_04_gsc_questions
 description: >-
-  Step 03 for the shared FAQ finder: resolve the Google Search Console property,
+  Step 04 for find_faq_questions: resolve the Google Search Console property,
   mine question candidates, and match them to Strategy topics.
-"last updated": 2026-06-07T19:32:00+00:00
-"last run": 2026-06-27
+"last updated": 2026-06-28T23:30:00+00:00
+"last run": 2026-07-02
 ---
 
-# FAQ Finder - 03 GSC Questions
+# Find FAQ questions — 04 GSC Questions
 
-Step 0: Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md).
+Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
 ## Inputs
 
-From [../01-sheet-and-topics/SKILL.md](../01_sheet_and_topics/SKILL.md):
+From [../02_sheet_and_topics/SKILL.md](../02_sheet_and_topics/SKILL.md):
 
 - `strategy_topics` - the full Strategy topic list, used to regex-match GSC questions to topics.
 
-Carried from [../02-source-collection/SKILL.md](../02_source_collection/SKILL.md), pass through unchanged:
+Carried from [../03_source_collection/SKILL.md](../03_source_collection/SKILL.md), pass through unchanged:
 
 - `source_bundles`
 - `failed_sources_count`
@@ -32,8 +32,8 @@ From chat or caller:
 
 ## Credentials
 
-- Google OAuth for GSC: `./credentials.json` at `google.oauth_token_unified`. The token must include `https://www.googleapis.com/auth/webmasters.readonly`.
-- Optional fallback account: `./credentials.json` at `google.oauth_token_unified_2`, if present. Used only when the primary token cannot read a matching property. Generate it by running `node google-oauth-add-token.mjs` from the repo root.
+- Google OAuth for GSC: `{workspace_root}/credentials.json` at `google.oauth_token_unified`. The token must include `https://www.googleapis.com/auth/webmasters.readonly`.
+- Optional fallback account: `{workspace_root}/credentials.json` at `google.oauth_token_unified_2`, if present. Used only when the primary token cannot read a matching property. Generate it by running `node google-oauth-add-token.mjs` from the repo root.
 
 ## 1. Resolve GSC Property
 
@@ -42,7 +42,7 @@ GSC always runs, so always resolve a property.
 Resolve `gsc_site_url` in this order:
 
 1. If the caller passed `gsc_site_url`, use it verbatim.
-2. Else if `workspace_slug` (or legacy `client`) is set, read ``{workspace_root}/config.json`` and collect candidate domains:
+2. Else if `workspace_slug` (or legacy `client`) is set, read `{workspace_root}/config.json` and collect candidate domains:
    - `gsc_site_url`, `site_url`, or `site` if present.
    - `webflow.domains[*]`.
    - Any `*_url` host.
@@ -58,7 +58,7 @@ Each entry has a `permissionLevel`. Only `siteOwner`, `siteFullUser`, and `siteR
 
 Prefer a readable `sc-domain:{apex}`. Otherwise accept a readable URL-prefix property whose host matches the candidate host.
 
-Set `main_domain_host` to the resolved apex host (e.g. `acme.com`) so the [faq-question-responder](../../faq_question_responder/SKILL.md) workflow can look up main-domain Response Pages. Derive it from the matched property, the passed `gsc_site_url`, or the first candidate domain from ``{workspace_root}/config.json``. If no domain can be determined, set it to null.
+Set `main_domain_host` to the resolved apex host (e.g. `acme.com`) so the [generate_faq_responses](../../../generate/generate_faq_responses/SKILL.md) workflow can look up main-domain Response Pages. Derive it from the matched property, the passed `gsc_site_url`, or the first candidate domain from `{workspace_root}/config.json`. If no domain can be determined, set it to null.
 
 If a candidate matches a property only at `siteUnverifiedUser`, skip GSC, log `gsc=skipped reason=insufficient_permission level=siteUnverifiedUser property={siteUrl}`, and report that the OAuth account must be granted Full or Restricted access to that property in Search Console (Settings -> Users and permissions). Do not attempt the query; it will `403`.
 
@@ -148,7 +148,7 @@ Keep the surviving rows as the GSC question candidate list, each carrying its `q
 
 ### Match questions to topics by regex
 
-Map questions to topics by running a per-topic regex against the whole candidate list, not by token overlap against the new-topics queue. Use the full `strategy_topics` list from [../01-sheet-and-topics/SKILL.md](../01_sheet_and_topics/SKILL.md), so every Strategy topic gets relevant questions even when it is already present in `FAQ Coverage`.
+Map questions to topics by running a per-topic regex against the whole candidate list, not by token overlap against the new-topics queue. Use the full `strategy_topics` list from [../02_sheet_and_topics/SKILL.md](../02_sheet_and_topics/SKILL.md), so every Strategy topic gets relevant questions even when it is already present in `FAQ Coverage`.
 
 For each topic:
 
@@ -161,7 +161,7 @@ For each topic:
 2. Match the regex against each candidate question (case-insensitive).
 3. From the matches, rank by `impressions` descending and keep the top 5 (the GSC per-topic cap). These become rows with `Topic = {topic}`.
 
-A question may match more than one topic's regex; that is fine. Run-level question dedupe in [../04-extract-and-append/SKILL.md](../04_extract_and_append/SKILL.md) ensures it is written only once, under the first topic that claims it. Process topics in `strategy_topics` order so the assignment is deterministic.
+A question may match more than one topic's regex; that is fine. Run-level question dedupe in [../05_extract_and_append/SKILL.md](../05_extract_and_append/SKILL.md) ensures it is written only once, under the first topic that claims it. Process topics in `strategy_topics` order so the assignment is deterministic.
 
 ### Significant-word fallback before GSC
 
@@ -173,17 +173,17 @@ A full-phrase regex misses common real queries. Before falling back to `GSC`, ru
 
 ## Outputs For Next Step
 
-Carry these values to [../04-extract-and-append/SKILL.md](../04_extract_and_append/SKILL.md):
+Carry these values to [../05_extract_and_append/SKILL.md](../05_extract_and_append/SKILL.md):
 
 - `gsc_questions`: array of `{ topic, question, source }`.
 - `main_domain_host`: resolved site apex host for the responder's Response Page lookups, or null.
-- `source_bundles`: passed through unchanged from step 02.
-- `failed_sources_count`: passed through unchanged from step 02.
+- `source_bundles`: passed through unchanged from step 03.
+- `failed_sources_count`: passed through unchanged from step 03.
 
 ## Logging
 
 ```text
-[run-debug] workflow=_workflows/faq_question_finder | GSC | property={siteUrl} window={start}..{end} rows_fetched=N kept_questions=N
+[run-debug] workflow=_workflows/find_faq_questions | GSC | property={siteUrl} window={start}..{end} rows_fetched=N kept_questions=N
 ```
 
 ## Checks
