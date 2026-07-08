@@ -35,6 +35,9 @@ If the plan file is missing, stop and ask the caller to supply one from their ed
 ```json
 {
   "replaces": [["old text verbatim", "new text"]],
+  "styled_replaces": [
+    {"old": "Old heading\n", "new": "New heading\n", "style": "HEADING_2"}
+  ],
   "insert_after": [["anchor substring", " text to insert"]],
   "strike_only": ["text to strike without replacement"],
   "insert_section": {
@@ -45,11 +48,12 @@ If the plan file is missing, stop and ask the caller to supply one from their ed
       {"style": "NORMAL_TEXT", "text": "Body paragraph.\n"}
     ]
   },
+  "insert_sections": [],
   "trim_replacements": [["\n\n\nHeading", "\n\nHeading"]]
 }
 ```
 
-At least one of `replaces`, `insert_after`, `strike_only`, or `insert_section` is required. Every `old text` string must match the Doc body exactly.
+At least one of `replaces`, `styled_replaces`, `insert_after`, `strike_only`, `insert_section`, or `insert_sections` is required.
 
 ## Inline markup palette
 

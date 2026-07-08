@@ -153,19 +153,78 @@ def load_plan(path: Path) -> dict:
     return data
 
 
+def find_blue_text_range(body: list, needle: str) -> tuple[int, int]:
+    """Find API start/end of blue, non-strikethrough text matching needle exactly."""
+    runs = []
+    for el in body:
+        if "paragraph" not in el:
+            continue
+        for pe in el["paragraph"].get("elements", []):
+            if "textRun" not in pe:
+                continue
+            tr = pe["textRun"]
+            text = tr.get("content", "")
+            if not text:
+                continue
+            style = tr.get("textStyle", {})
+            rgb = style.get("foregroundColor", {}).get("color", {}).get("rgbColor", {})
+            is_blue = (
+                abs(rgb.get("red", 0) - BLUE["red"]) <= 0.08
+                and abs(rgb.get("green", 0) - BLUE["green"]) <= 0.08
+                and abs(rgb.get("blue", 0) - BLUE["blue"]) <= 0.08
+            )
+            runs.append(
+                {
+                    "start": pe["startIndex"],
+                    "end": pe["endIndex"],
+                    "text": text,
+                    "blue": is_blue and not style.get("strikethrough"),
+                }
+            )
+    full = "".join(r["text"] for r in runs)
+    idx = full.find(needle)
+    if idx < 0:
+        raise ValueError(f"blue insertion not found: {needle[:70]!r}")
+    pos = 0
+    for run in runs:
+        if pos <= idx < pos + len(run["text"]):
+            if not run["blue"]:
+                raise ValueError(f"text found but not blue markup: {needle[:70]!r}")
+            start = run["start"] + (idx - pos)
+            return start, start + len(needle)
+        pos += len(run["text"])
+    raise ValueError(f"blue insertion not found: {needle[:70]!r}")
+
+
+def pass_styled_replaces(doc_id: str, token: str, body: list, plan: dict):
+    styled = plan.get("styled_replaces") or []
+    if not styled:
+        return
+    requests = []
+    for item in styled:
+        s, e = find_blue_text_range(body, item["new"])
+        requests.append(para_style(s, e, item["style"]))
+    batch(doc_id, token, requests, "styled_replaces")
+
+
 def pass_color_markup(doc_id: str, token: str, body: list, plan: dict):
     replaces = [tuple(pair) for pair in plan.get("replaces", [])]
     insert_after = [tuple(pair) for pair in plan.get("insert_after", [])]
     strike_only = list(plan.get("strike_only", []))
+    styled_replaces = plan.get("styled_replaces") or []
 
     full, spans = build_index(body)
     ops = []
     for old, new in replaces:
         s, e = find_range(full, spans, old)
         ops.append(("replace", s, e, new))
+    for item in styled_replaces:
+        s, e = find_range(full, spans, item["old"])
+        ops.append(("replace", s, e, item["new"]))
     for anchor, text in insert_after:
         _, e = find_range(full, spans, anchor)
-        ops.append(("insert", e, e, text))
+        insert_at = e - 1 if anchor.endswith("\n") else e
+        ops.append(("insert", insert_at, insert_at, text))
     for old in strike_only:
         s, e = find_range(full, spans, old)
         ops.append(("strike", s, e, ""))
@@ -174,12 +233,13 @@ def pass_color_markup(doc_id: str, token: str, body: list, plan: dict):
     requests = []
     for kind, s, e, text in ops:
         if kind == "replace":
-            requests.append({"insertText": {"location": {"index": e}, "text": text}})
-            requests.append(blue_style(e, e + len(text)))
-            requests.append(strike_style(s, e))
+            old_len = e - s
+            requests.append({"insertText": {"location": {"index": s}, "text": text}})
+            requests.append(blue_style(s, s + len(text)))
+            requests.append(strike_style(s + len(text), s + len(text) + old_len))
         elif kind == "insert":
-            requests.append({"insertText": {"location": {"index": e}, "text": text}})
-            requests.append(blue_style(e, e + len(text)))
+            requests.append({"insertText": {"location": {"index": s}, "text": text}})
+            requests.append(blue_style(s, s + len(text)))
         elif kind == "strike":
             requests.append(strike_style(s, e))
     if requests:
@@ -201,26 +261,35 @@ def pass_insert_section(doc_id: str, token: str, body: list, plan: dict):
 
 
 def pass_paragraph_styles(doc_id: str, token: str, body: list, plan: dict):
-    section = plan.get("insert_section")
-    if not section:
-        return
-    anchor = section.get("paragraph_style_anchor")
-    blocks = [(b["style"], b["text"]) for b in section.get("blocks", [])]
-    if not anchor or not blocks:
-        return
-    full, spans = build_index(body)
-    start = full.find(anchor)
-    if start < 0:
-        print("[run-debug] inline_markup | pass=paragraph_styles | skipped (anchor not found)")
-        return
-    pos = start
     requests = []
-    for named, chunk in blocks:
-        s = char_to_api(spans, pos)
-        pos += len(chunk)
-        e = char_to_api(spans, pos)
-        requests.append(para_style(s, e, named))
-    batch(doc_id, token, requests, "paragraph_styles")
+
+    sections = []
+    if plan.get("insert_section"):
+        sections.append(plan["insert_section"])
+    sections.extend(plan.get("insert_sections") or [])
+
+    full, spans = build_index(body)
+    for section in sections:
+        anchor = section.get("paragraph_style_anchor")
+        blocks = [(b["style"], b["text"]) for b in section.get("blocks", [])]
+        if not anchor or not blocks:
+            continue
+        start = full.find(anchor)
+        if start < 0:
+            print(
+                "[run-debug] inline_markup | pass=paragraph_styles | "
+                f"skipped (anchor not found: {anchor[:40]!r})"
+            )
+            continue
+        pos = start
+        for named, chunk in blocks:
+            s = char_to_api(spans, pos)
+            pos += len(chunk)
+            e = char_to_api(spans, pos)
+            requests.append(para_style(s, e, named))
+
+    if requests:
+        batch(doc_id, token, requests, "paragraph_styles")
 
 
 def pass_trim(doc_id: str, token: str, plan: dict):
@@ -255,16 +324,26 @@ def main():
         "--plan",
         required=True,
         type=Path,
-        help="JSON plan file (replaces, insert_after, strike_only, insert_section, trim_replacements)",
+        help="JSON plan (replaces, styled_replaces, insert_after, strike_only, insert_section, insert_sections, trim_replacements)",
     )
     args = parser.parse_args()
     doc_id = doc_id_from_arg(args.doc)
     plan = load_plan(args.plan)
     if not any(
         plan.get(k)
-        for k in ("replaces", "insert_after", "strike_only", "insert_section")
+        for k in (
+            "replaces",
+            "styled_replaces",
+            "insert_after",
+            "strike_only",
+            "insert_section",
+            "insert_sections",
+        )
     ):
-        raise SystemExit("Plan must include at least one of: replaces, insert_after, strike_only, insert_section")
+        raise SystemExit(
+            "Plan must include at least one of: replaces, styled_replaces, "
+            "insert_after, strike_only, insert_section, insert_sections"
+        )
 
     try:
         token = load_token()
@@ -273,6 +352,12 @@ def main():
         pass_color_markup(doc_id, token, body, plan)
         body = fetch_body(doc_id, token)
         pass_insert_section(doc_id, token, body, plan)
+        for section in plan.get("insert_sections") or []:
+            pass_insert_section(
+                doc_id, token, fetch_body(doc_id, token), {"insert_section": section}
+            )
+        body = fetch_body(doc_id, token)
+        pass_styled_replaces(doc_id, token, body, plan)
         body = fetch_body(doc_id, token)
         pass_paragraph_styles(doc_id, token, body, plan)
         pass_trim(doc_id, token, plan)
