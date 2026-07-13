@@ -11,7 +11,7 @@ Read [setup/run_workflow/SKILL.md](../setup/run_workflow/SKILL.md) before runnin
 | **edit/** | Multi-step produce pipelines (e.g. page refresh) — produce only |
 | **research/** | Discovery and enrichment (FAQ mining, external audit, crosslinks) — produce only |
 | **generate/** | Content generation that writes net-new drafts — produce only |
-| **ops/** | Staging, publish, evaluate, and atomic utilities (fetch, Doc conversion, browser fallback) |
+| **ops/** | Staging, publish, evaluate, and shared ops helpers (fetch, Doc conversion, browser fallback) |
 
 Produce workflows never live in `ops/`. Staging and publish workflows always live in `ops/`.
 

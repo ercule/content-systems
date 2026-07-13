@@ -2,9 +2,9 @@
 name: utilities_maintain_skills
 description: >-
   Audit, repair, and bring up to quality individual SKILL.md files — structure,
-  content, links, frontmatter, deduplication, and cleanup. For workflow
-  orchestration, use maintain_workflows.
-"last updated": 2026-07-04T23:00:00+00:00
+  content, links, frontmatter, deduplication, no text-replacement prompts, and cleanup.
+  For workflow orchestration, use maintain_workflows.
+"last updated": 2026-07-10T06:45:00+00:00
 "last run": 2026-07-04
 ---
 
@@ -19,9 +19,10 @@ Skill-specific rules only. Workflow layout and preflight: [maintain_workflows/SK
 | Area | Correct | Wrong |
 |------|---------|-------|
 | Link style (this repo) | Repo-relative between skills in content-systems | Cross-repo `../` depth chains in workspace skills |
-| Shared skills | `{content_systems_public_root}/…` in workspace skills | Depth-counted `_content_systems_public/…` paths |
+| Shared skills | `{content_systems_public_root}/…` in workspace skills | Hard-coded relative depth chains into this repo from outside |
 | Deduplication | Link to canonical skill or `_context/` file | Copy run_workflow or shared ops instructions inline |
 | Preflight link | Step 01 opens with [run_workflow](../run_workflow/SKILL.md) link (not "Step 0") | Missing preflight link; `{00}_*` folders |
+| Text replacement | Inputs passed as named context the agent reads; prompt skills state requirements in prose | `{PLACEHOLDER}` templates, `.txt` fill-in files, or "substitute X into the template" instructions |
 
 ---
 
@@ -51,6 +52,25 @@ Workflow layout, step numbering, run_workflow links, preflight, and orchestrator
 - Plain text, headers, and flat bullets. No decorative separators, bold, or italic for emphasis.
 - When a skill reads canon, point at [README.md § Troubleshooting](../../README.md#troubleshooting) (`_context/README.md` trust levels).
 
+## No text replacement
+
+Do not use text replacement anywhere in a skill.
+
+Wrong:
+
+- Prompt templates with `{TOPIC}`, `{BRAND}`, `{RESEARCH_OUTPUT}`, or other placeholders filled via string substitution
+- Instructions like "substitute `{X}` into the template" or "literal string replacement"
+- `.txt`, `.md`, or other sidecar files treated as fill-in-the-blank templates
+- Scripts that merge variables into a prompt file before calling a model
+
+Right:
+
+- Name inputs in prose and tables; tell the agent what to read and apply
+- Numbered step skills (for example `03_writer/SKILL.md`) state tone, structure, and constraints in the skill body — the agent reads run inputs and linked artifacts as context, not as tokens to splice into a template
+- When a prior step produces an artifact, link to its path and describe how the next step uses it
+
+When auditing, flag any skill that describes placeholder substitution, hosts a replaceable template file, or depends on pre-call string merge. Refactor to a skill folder with requirements in `SKILL.md` body per [maintain_workflows — one folder per skill](../maintain_workflows/SKILL.md#workflow-layout).
+
 ## Deduplication
 
 Each instruction must live in exactly one canonical place. Elsewhere, link — do not copy or paraphrase.
@@ -75,7 +95,7 @@ If the skill is part of a workflow, also apply [maintain_workflows/SKILL.md](../
 
 ### 2. Audit and fix content quality
 
-Revise sections that fail the content quality standards above.
+Revise sections that fail the content quality standards above, including [No text replacement](#no-text-replacement).
 
 ### 3. Split oversized skills
 

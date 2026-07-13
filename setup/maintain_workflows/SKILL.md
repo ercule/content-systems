@@ -3,8 +3,9 @@ name: utilities_maintain_workflows
 description: >-
   Audit, repair, and bring up to quality multi-step workflow orchestrators and
   step sequences. Covers run order, preflight, produce vs stage, stage_content,
-  update_agent wrappers, reacts-to metadata, verb-first naming, and workflow due checks.
-"last updated": 2026-07-04T23:00:00+00:00
+  update_agent wrappers, reacts-to metadata, verb-first naming, one-folder-per-skill layout,
+  and workflow due checks.
+"last updated": 2026-07-10T06:45:00+00:00
 "last run": 2026-07-04
 ---
 
@@ -23,6 +24,7 @@ Workflow-specific rules only. Runtime paths, credentials, logging: [run_workflow
 | Produce vs stage | Produce pipelines end at Doc/Markdown/sheet; CMS API writes only in `stage_content` → publish sub-skills — never both in one workflow tree. |
 | Naming | Verb-first workflow folder names (`generate_*`, `publish_*`, `stage_*`); `_` separator only. |
 | Categories | Produce in `generate/`, `edit/`, `research/`; staging/publish/evaluate in `ops/`. |
+| One folder per skill | Every skill — orchestrator, numbered step, or auxiliary helper — lives in its own folder with exactly one `SKILL.md`. One folder, one skill; one skill, one folder. |
 | update_agent | One shared [update_agent](../../_workflows/edit/update_agent/SKILL.md); workspace wrappers link in after preflight — no duplicated downstream steps. |
 
 ---
@@ -38,16 +40,16 @@ Always run the reacts-to due check (step 5) across every main workflow skill in 
 Find the workspace root per [run_workflow/SKILL.md](../run_workflow/SKILL.md). Workflow skills live under `_workflows/`.
 
 - Orchestrator — one root `SKILL.md` per workflow (the folder that names the pipeline).
-- Numbered steps — each pipeline step is a subfolder `{NN}_{slug}/SKILL.md` under that workflow folder. Step 01 is always preflight (see below). Most workflows have two or more numbered steps after preflight.
-- Atomic utilities — a single root `SKILL.md` with no numbered subfolders is allowed only for small shared helpers invoked by other skills (not standalone pipelines). Do not add new standalone pipelines as single-file skills — use `01_preflight` plus downstream steps instead. Deterministic runners belong in the workspace that owns the integration, not in this public skills library.
+- One folder per skill — every skill in a workflow tree gets its own folder containing exactly one `SKILL.md`. Do not put two skills in one folder, two `SKILL.md` files in one folder, or loose prompt/template files beside a skill instead of in a dedicated skill folder.
+- Numbered steps — each pipeline step is a subfolder `{NN}_{slug}/SKILL.md` under that workflow folder. Step 01 is always preflight (see below). Most workflows have two or more numbered steps after preflight. Multi-step produce and stage pipelines must use this shape — do not ship them as a single root `SKILL.md` without numbered step folders.
 - Step folders use `{NN}_{slug}` with zero-padded numbers starting at `01` (`01`, `02`, …). No letter-suffix steps. No `{00}_*` folders.
 - Final produce step: `{NN}_output` (Google Doc, Markdown file, or thin wrapper over [markdown_to_google_doc](../../_workflows/ops/markdown_to_google_doc/SKILL.md)).
 - Use `_` as the only word separator in workflow and step folder names. Do not use `-`.
 - Category placement — every workflow lives under `_workflows/{category}/`:
   - Produce pipelines (`generate_*`, `edit_*`, `update_*`, `research_*`) live in `edit/`, `generate/`, or `research/` — never in `ops/`.
-  - Staging and publish pipelines (`stage_*`, `publish_*`, `evaluate_content`, and other atomic CMS/utility skills) live in `ops/` only — never in `edit/`, `generate/`, or `research/`. 
+  - Staging and publish pipelines (`stage_*`, `publish_*`, `evaluate_content`, and other CMS or ops skills) live in `ops/` only — never in `edit/`, `generate/`, or `research/`. 
 
-Per-skill frontmatter and link conventions: [maintain_skills/SKILL.md](../maintain_skills/SKILL.md).
+Per-skill frontmatter and link conventions: [maintain_skills/SKILL.md](../maintain_skills/SKILL.md). Prompt and template rules: [maintain_skills — No text replacement](../maintain_skills/SKILL.md#no-text-replacement).
 
 ## Workflow naming (verb-first)
 
@@ -77,7 +79,7 @@ Rules:
 - Numbered step folders describe their slice of the work (`01_preflight`, `02_fetch_source`); they do not need a verb prefix when the step role is already clear.
 - Shared library skills under the content-systems repo follow the same rule when added or renamed.
 
-When auditing, flag workflow folders that do not start with a recognized verb prefix, legacy `generate_llm_article` names, or workflows in the wrong category folder (produce outside `ops/`, staging/publish inside `ops/` only). Rename folder, orchestrator links, and frontmatter `name:` together — do not leave a mismatched folder and `name:`.
+When auditing, flag workflow folders that do not start with a recognized verb prefix, legacy `generate_llm_article` names, workflows in the wrong category folder (produce outside `ops/`, staging/publish inside `ops/` only), folders with more than one skill, or skills not in their own folder. Rename folder, orchestrator links, and frontmatter `name:` together — do not leave a mismatched folder and `name:`.
 
 ## Step numbering (no zero-indexing)
 
@@ -201,7 +203,7 @@ Good examples (patterns — use each workspace's own URLs and IDs in workspace s
 - A new video is published on https://www.youtube.com/@ExampleChannel after the last run date
 - Seven or more days have passed since the last run
 - The FAQ Coverage tab (https://docs.google.com/spreadsheets/d/EXAMPLE_SHEET_ID/edit?gid=0) has rows with status `approved` in column F and empty output in column G
-- A new MCP incident on https://vulnerablemcp.info is not yet covered in https://example.com/blog/example-post
+- A new item appears on https://example.com/feed.xml that is not yet covered in https://example.com/blog/example-post
 
 Bad examples (do not use):
 
@@ -229,7 +231,7 @@ List every workflow orchestrator in scope (root `SKILL.md` for a pipeline) and i
 
 For each workflow, apply [Architecture decisions](#architecture-decisions-enforce-on-audit), [Workflow layout](#workflow-layout), [Workflow naming](#workflow-naming-verb-first), [Step numbering](#step-numbering-no-zero-indexing), [Preflight step](#preflight-step-required), [Orchestrator vs step skills](#orchestrator-vs-step-skills), [Produce vs stage](#produce-vs-stage-hard-boundary), [Add stage_content](#add-stage_content-when-you-publish-to-a-cms), [One shared update agent](#one-shared-update-agent), and [Reacts to](#reacts-to-workflow-metadata). Path and credential checks: [run_workflow/SKILL.md](../run_workflow/SKILL.md). Logging: [run_workflow/SKILL.md](../run_workflow/SKILL.md) § Execution rules.
 
-For per-skill structure, frontmatter, links, and content quality, apply [maintain_skills/SKILL.md](../maintain_skills/SKILL.md) to every orchestrator and step skill in the workflow.
+For per-skill structure, frontmatter, links, and content quality, apply [maintain_skills/SKILL.md](../maintain_skills/SKILL.md) to every orchestrator and step skill in the workflow — including [one folder per skill](#workflow-layout) and [no text replacement](../maintain_skills/SKILL.md#no-text-replacement).
 
 ### 3. Repair orchestrators
 
