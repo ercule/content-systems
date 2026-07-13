@@ -3,7 +3,7 @@ name: utilities_run_workflow
 description: >-
   Shared execution context for all workflow skills: runtime HTTP contract, context assembly,
   credential resolution, small-step runs
-"last updated": 2026-07-04T23:00:00+00:00
+"last updated": 2026-07-13T20:00:00+00:00
 "last run": 2026-07-04
 ---
 
@@ -87,7 +87,7 @@ Adjust phases to match the active skill. Omit `context-assembly` when the skill 
 
 ### 6. Browserbase live session (when using Browserbase)
 
-Browserbase sessions require API keys - so this only applies if one is available. If you create a Browserbase session for any step, read [_workflows/ops/browser_automation/SKILL.md](../../_workflows/ops/browser_automation/SKILL.md) and repeat the live view URL conspicuously in every user message while the session is open (see `.cursor/rules/browserbase-live-session.mdc`). Paste the URL block immediately before any login/handoff ask — not only once at the start.
+Browserbase sessions require API keys - so this only applies if one is available. If you create a Browserbase session for any step, read [_workflows/ops/browser_automation/SKILL.md](../../_workflows/ops/browser_automation/SKILL.md) and follow its **Live session link** rules: repeat the live view URL conspicuously in every user message while the session is open, and paste the URL block immediately before any login/handoff ask — not only once at the start.
 
 ## Credentials
 

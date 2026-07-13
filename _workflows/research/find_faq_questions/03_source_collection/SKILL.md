@@ -4,7 +4,7 @@ description: >-
   Step 03 for find_faq_questions: collect source text from Reddit and
   LinkedIn via SerpAPI, bounded by a recency window.
 "last updated": 2026-06-28T23:30:00+00:00
-"last run": 2026-07-02
+"last run": 2026-07-08
 ---
 
 # Find FAQ questions — 03 Source Collection

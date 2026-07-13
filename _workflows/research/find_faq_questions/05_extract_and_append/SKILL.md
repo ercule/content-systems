@@ -5,7 +5,7 @@ description: >-
   filter and dedupe them, then append Topic, Question, and Source rows to FAQ
   Coverage.
 "last updated": 2026-06-28T23:30:00+00:00
-"last run": 2026-07-02
+"last run": 2026-07-08
 ---
 
 # Find FAQ questions — 05 Extract And Append

@@ -1,21 +1,19 @@
 ---
 name: find_faq_questions
 description: >-
-  Shared FAQ question finder converted from the n8n FAQ Finder template. Reads
-  topics from a Google Sheet Strategy tab, finds FAQ questions from Reddit,
-  LinkedIn, and Google Search Console, and appends them to the FAQ Coverage tab.
-  Use when the user asks to run or adapt the FAQ question finder workflow for any
-  workspace sheet. To fill Response Page and Draft Response afterward, run the
-  separate generate-faq-responses workflow.
-"last updated": 2026-06-28T23:30:00+00:00
-"last run": 2026-07-02
+  Shared FAQ question finder. Reads topics from a Google Sheet Strategy tab,
+  finds FAQ questions from Reddit, LinkedIn, and Google Search Console, and
+  appends them to the FAQ Coverage tab. Use when the user asks to run or adapt
+  the FAQ question finder workflow for any workspace sheet. To fill Response
+  Page and Draft Response afterward, run the separate generate-faq-responses
+  workflow.
+"last updated": 2026-07-13T20:00:00+00:00
+"last run": 2026-07-08
 ---
 
 # Find FAQ questions
 
 Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.
-
-Build calls at request time and do not depend on the exported n8n workflow IDs.
 
 Do not create, persist, or commit standalone runner scripts for this workflow. If a run needs local helper code, keep it ephemeral for that run only and remove it before finishing.
 
@@ -34,7 +32,8 @@ Log line prefix:
 - `max_new_topics` - optional, default `30`. Maximum Strategy topics processed per run.
 - `sources` - optional, default `reddit,linkedin`. Available sources: `reddit`, `linkedin`. Google Search Console always runs and is not controlled by this list.
 - `source_max_age_months` - optional, default `6`. Reddit and LinkedIn posts/articles older than this are discarded; only posts published less than this many months ago are used. Does not affect GSC, which uses `gsc_lookback_days`.
-- `gsc_site_url` - optional. The Search Console property, e.g. `sc-domain:acme.com` or `https://acme.com/`. If omitted, derive it from `workspace_slug` (legacy alias: `client`; see [Resolve GSC property](#resolve-gsc-property)).
+- `workspace_slug` - optional. Short workspace identifier used when deriving the GSC property from `{workspace_root}/config.json`.
+- `gsc_site_url` - optional. The Search Console property, e.g. `sc-domain:acme.com` or `https://acme.com/`. If omitted, derive it from `workspace_slug` (see [04 GSC Questions — Resolve GSC Property](04_gsc_questions/SKILL.md#1-resolve-gsc-property)).
 - `gsc_lookback_days` - optional, default `30`. GSC question mining window, ending on the most recent date GSC has data.
 - `gsc_min_words` - optional, default `5`. Minimum query word count (inclusive, so 5+ words).
 - `gsc_min_impressions` - optional, default `5` meaning strictly greater than 5 (keep queries with `impressions >= 6`).

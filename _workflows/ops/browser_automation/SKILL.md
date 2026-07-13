@@ -7,7 +7,7 @@ description: >-
   any skill that marks Browser (wp-admin) or Browser Fallback in its routing table.
   REQUIRED: post Browserbase live view URL to the user immediately after session
   create (see Live session link section); never only in run-debug logs.
-"last updated": 2026-06-28T23:30:00+00:00
+"last updated": 2026-07-13T20:00:00+00:00
 "last run": 2026-06-28
 ---
 
@@ -26,7 +26,7 @@ Prefer REST or HTTP APIs when they work. Switch to a browser path as soon as an 
 ## Path preference
 
 1. **Browserbase + Playwright** — preferred when available (see availability check below)
-2. **Chrome DevTools MCP** (`user-chrome-devtools`) — when Browserbase is not configured or session creation fails
+2. **Chrome DevTools MCP** (or an equivalent browser MCP your agent exposes) — when Browserbase is not configured or session creation fails
 
 Do not ask the user which path to use. Pick automatically from the check below.
 
@@ -98,10 +98,10 @@ When `config.browserbase.contexts.<name>.id` is set (non-secret), create session
 
 | Context key | Use |
 |-------------|-----|
-| `asana` | Saved login for a third-party web app (configure per workspace in `config.json`) |
+| `{app_name}` | Saved login for a third-party web app (configure per workspace in `config.json`) |
 
 ```python
-context_id = config["browserbase"]["contexts"]["asana"]["id"]
+context_id = config["browserbase"]["contexts"]["{app_name}"]["id"]
 session = bb.sessions.create(
     project_id=project_id,
     keep_alive=True,
@@ -114,7 +114,7 @@ session = bb.sessions.create(
 
 First-time login handoff: create session without a context (or with `persist: true` on a new context), give the user the live link, wait for login, then release the session and store the context id in `config.json`.
 
-Re-auth: if a saved context stops working (Asana forced logout), repeat the handoff and update `contexts.asana.id` or create a new context.
+Re-auth: if a saved context stops working (forced logout), repeat the handoff and update `contexts.{app_name}.id` or create a new context.
 
 ### Connect pattern
 
@@ -197,7 +197,7 @@ For fragile multi-step wp-admin work, run **one page/mock per BB session** so a 
 
 ## Chrome DevTools MCP fallback
 
-When Browserbase is unavailable or fails, use `user-chrome-devtools`:
+When Browserbase is unavailable or fails, use a Chrome DevTools MCP (or equivalent browser MCP) with tools like:
 
 | Tool | Use |
 |------|-----|

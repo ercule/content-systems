@@ -4,7 +4,7 @@ description: >-
   Step 01 for find_faq_questions: verify sheet access, credentials, and inputs
   before topic queue or SERP work.
 "last updated": 2026-06-28T23:30:00+00:00
-"last run": 2026-07-02
+"last run": 2026-07-08
 ---
 
 # Find FAQ questions — 01 Preflight

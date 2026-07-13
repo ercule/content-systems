@@ -3,8 +3,8 @@ name: find_faq_questions_04_gsc_questions
 description: >-
   Step 04 for find_faq_questions: resolve the Google Search Console property,
   mine question candidates, and match them to Strategy topics.
-"last updated": 2026-06-28T23:30:00+00:00
-"last run": 2026-07-02
+"last updated": 2026-07-13T20:00:00+00:00
+"last run": 2026-07-08
 ---
 
 # Find FAQ questions — 04 GSC Questions
@@ -24,8 +24,8 @@ Carried from [../03_source_collection/SKILL.md](../03_source_collection/SKILL.md
 
 From chat or caller:
 
-- `workspace_slug` - optional. Short workspace identifier used to derive the GSC property and `main_domain_host`. (`client` is accepted as a legacy alias.)
-- `gsc_site_url` - optional. If omitted, derive from `workspace_slug` (or legacy `client`).
+- `workspace_slug` - optional. Short workspace identifier used to derive the GSC property and `main_domain_host`.
+- `gsc_site_url` - optional. If omitted, derive from `workspace_slug`.
 - `gsc_lookback_days` - optional, default `30`.
 - `gsc_min_words` - optional, default `5`.
 - `gsc_min_impressions` - optional, default `5`, meaning keep rows with impressions `>= 6`.
@@ -33,7 +33,7 @@ From chat or caller:
 ## Credentials
 
 - Google OAuth for GSC: `{workspace_root}/credentials.json` at `google.oauth_token_unified`. The token must include `https://www.googleapis.com/auth/webmasters.readonly`.
-- Optional fallback account: `{workspace_root}/credentials.json` at `google.oauth_token_unified_2`, if present. Used only when the primary token cannot read a matching property. Generate it by running `node google-oauth-add-token.mjs` from the repo root.
+- Optional fallback account: `{workspace_root}/credentials.json` at `google.oauth_token_unified_2`, if present. Used only when the primary token cannot read a matching property. Generate it with the standard Google OAuth installed-app flow (Desktop client in `google.oauth_installed_client`).
 
 ## 1. Resolve GSC Property
 
@@ -42,7 +42,7 @@ GSC always runs, so always resolve a property.
 Resolve `gsc_site_url` in this order:
 
 1. If the caller passed `gsc_site_url`, use it verbatim.
-2. Else if `workspace_slug` (or legacy `client`) is set, read `{workspace_root}/config.json` and collect candidate domains:
+2. Else if `workspace_slug` is set, read `{workspace_root}/config.json` and collect candidate domains:
    - `gsc_site_url`, `site_url`, or `site` if present.
    - `webflow.domains[*]`.
    - Any `*_url` host.
@@ -167,7 +167,7 @@ A question may match more than one topic's regex; that is fine. Run-level questi
 
 A full-phrase regex misses common real queries. Before falling back to `GSC`, run a second pass over the still-unassigned candidates that matches on each topic's distinctive word(s):
 
-1. For each topic, drop generic modifier words (e.g. `protection`, `based`, `trading`, `crypto`, `defi`, `order`, `chain`) and keep the remaining significant token(s): `slippage protection` -> `slippage`, `mev protection` -> `mev`, `dex aggregator` -> `aggregator`, `cross chain swaps` -> `swaps`.
+1. For each topic, drop generic modifier words (e.g. `policy`, `management`, `based`, `expense`, `travel`, `booking`) and keep the remaining significant token(s): `expense policy` -> `expense`, `travel booking` -> `travel` / `booking`, `receipt capture` -> `receipt`, `per diem limits` -> `diem`.
 2. Build a case-insensitive regex from those significant token(s), using the same singular/plural handling as the full-phrase regex, and test it against each unassigned candidate.
 3. Assign each unassigned question to the topic whose significant token it contains. When several topics qualify, pick the one whose token is the most specific (longest / rarest across `strategy_topics`). Respect the per-topic GSC cap of 5.
 
