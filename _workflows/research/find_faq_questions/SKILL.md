@@ -8,7 +8,7 @@ description: >-
   Page and Draft Response afterward, run the separate generate-faq-responses
   workflow.
 "last updated": 2026-07-13T20:00:00+00:00
-"last run": 2026-07-08
+"last run": 2026-07-26
 ---
 
 # Find FAQ questions
