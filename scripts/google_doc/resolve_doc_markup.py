@@ -132,12 +132,41 @@ def merge_ranges(runs: list[dict]) -> list[tuple[int, int]]:
     return merged
 
 
-def delete_ranges(token: str, doc_id: str, ranges: list[tuple[int, int]]) -> int:
+def shrink_delete_range(
+    start: int, end: int, index_to_char: dict[int, str]
+) -> tuple[int, int] | None:
+    """Drop segment-ending newlines; Docs API rejects deleting those."""
+    s, e = start, end
+    while s < e and index_to_char.get(e - 1) == "\n":
+        e -= 1
+    while s < e and index_to_char.get(s) == "\n":
+        s += 1
+    if s >= e:
+        return None
+    return s, e
+
+
+def delete_ranges(
+    token: str,
+    doc_id: str,
+    ranges: list[tuple[int, int]],
+    index_to_char: dict[int, str] | None = None,
+) -> int:
     if not ranges:
+        return 0
+    safe: list[tuple[int, int]] = []
+    for s, e in ranges:
+        if index_to_char is not None:
+            shrunk = shrink_delete_range(s, e, index_to_char)
+            if shrunk is None:
+                continue
+            s, e = shrunk
+        safe.append((s, e))
+    if not safe:
         return 0
     requests = [
         {"deleteContentRange": {"range": {"startIndex": s, "endIndex": e}}}
-        for s, e in sorted(ranges, key=lambda r: r[0], reverse=True)
+        for s, e in sorted(safe, key=lambda r: r[0], reverse=True)
     ]
     api(
         "POST",
@@ -145,7 +174,7 @@ def delete_ranges(token: str, doc_id: str, ranges: list[tuple[int, int]]) -> int
         token,
         {"requests": requests},
     )
-    return len(ranges)
+    return len(safe)
 
 
 def reset_ranges(token: str, doc_id: str, ranges: list[tuple[int, int]]) -> int:
@@ -208,15 +237,24 @@ def resolve(token: str, doc_id: str, mode: str, dry_run: bool) -> dict:
         stats["dry_run"] = True
         return stats
 
+    index_to_char: dict[int, str] = {}
+    for run in walk_text_runs(body):
+        for offset, ch in enumerate(run["text"]):
+            index_to_char[run["start"] + offset] = ch
+
     if mode == "accept":
-        stats["deleted_ranges"] = delete_ranges(token, doc_id, del_ranges)
+        stats["deleted_ranges"] = delete_ranges(
+            token, doc_id, del_ranges, index_to_char
+        )
         body = fetch_body(token, doc_id)
         _, additions_left = classify_runs(walk_text_runs(body))
         stats["normalized_ranges"] = reset_ranges(
             token, doc_id, merge_ranges(additions_left)
         )
     elif mode == "reject":
-        stats["deleted_ranges"] = delete_ranges(token, doc_id, add_ranges)
+        stats["deleted_ranges"] = delete_ranges(
+            token, doc_id, add_ranges, index_to_char
+        )
         body = fetch_body(token, doc_id)
         deletions_left, _ = classify_runs(walk_text_runs(body))
         stats["normalized_ranges"] = reset_ranges(

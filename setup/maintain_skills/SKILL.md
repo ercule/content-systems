@@ -2,9 +2,10 @@
 name: utilities_maintain_skills
 description: >-
   Audit, repair, and bring up to quality individual SKILL.md files — structure,
-  content, links, frontmatter, deduplication, no text-replacement prompts, and cleanup.
-  For workflow orchestration, use maintain_workflows.
-"last updated": 2026-07-10T06:45:00+00:00
+  content, links, frontmatter, deduplication, affirmative instructions,
+  no text-replacement prompts, and cleanup. For workflow orchestration, use
+  maintain_workflows.
+"last updated": 2026-07-16T05:38:00+00:00
 "last run": 2026-07-04
 ---
 
@@ -47,37 +48,45 @@ Workflow layout, step numbering, run_workflow links, preflight, and orchestrator
 ## Content quality
 
 - Human readable; aim for a tenth-grade reading level.
-- Use "must" and "do not" for requirements; plain language elsewhere.
+- Use "must" for requirements; plain language elsewhere.
+- State what to do. Every instruction names the required action or outcome. Prefer "Write X", "Use Y", "Keep Z" over "Do not write X", "Avoid Y", "Never Z".
 - Include examples only when they prevent mistakes — a sample request shape, a snippet, or an API call. No decorative examples.
 - Plain text, headers, and flat bullets. No decorative separators, bold, or italic for emphasis.
 - When a skill reads canon, point at [README.md § Troubleshooting](../../README.md#troubleshooting) (`_context/README.md` trust levels).
 
+## Affirmative instructions
+
+Skills prescribe actions. They omit prohibitions, anti-patterns, and "what not to do" lists.
+
+When a draft or existing skill forbids something, rewrite it as the positive requirement that replaces it:
+
+| Instead of | Write |
+|------------|-------|
+| Do not copy instructions between skills | Link to the canonical skill |
+| Avoid placeholder templates | Name inputs in prose; the agent reads artifacts as context |
+| Never hard-code secrets in the skill body | Resolve secrets from `credentials.json` |
+
+When auditing, rewrite every "do not" / "don't" / "never" / "avoid" instruction into the action the agent should take. Keep contrast tables only in this maintain skill (and similar audit skills) as rewrite examples for maintainers.
+
 ## No text replacement
 
-Do not use text replacement anywhere in a skill.
+Skills pass inputs as named context the agent reads. Requirements live in prose in the skill body.
 
-Wrong:
-
-- Prompt templates with `{TOPIC}`, `{BRAND}`, `{RESEARCH_OUTPUT}`, or other placeholders filled via string substitution
-- Instructions like "substitute `{X}` into the template" or "literal string replacement"
-- `.txt`, `.md`, or other sidecar files treated as fill-in-the-blank templates
-- Scripts that merge variables into a prompt file before calling a model
-
-Right:
+Required pattern:
 
 - Name inputs in prose and tables; tell the agent what to read and apply
 - Numbered step skills (for example `03_writer/SKILL.md`) state tone, structure, and constraints in the skill body — the agent reads run inputs and linked artifacts as context, not as tokens to splice into a template
 - When a prior step produces an artifact, link to its path and describe how the next step uses it
 
-When auditing, flag any skill that describes placeholder substitution, hosts a replaceable template file, or depends on pre-call string merge. Refactor to a skill folder with requirements in `SKILL.md` body per [maintain_workflows — one folder per skill](../maintain_workflows/SKILL.md#workflow-layout).
+When auditing, flag any skill that describes placeholder substitution (`{TOPIC}`, `{BRAND}`, and similar), hosts a replaceable template file, or depends on pre-call string merge. Refactor to a skill folder with requirements in `SKILL.md` body per [maintain_workflows — one folder per skill](../maintain_workflows/SKILL.md#workflow-layout).
 
 ## Deduplication
 
-Each instruction must live in exactly one canonical place. Elsewhere, link — do not copy or paraphrase.
+Each instruction must live in exactly one canonical place. Elsewhere, link to that source.
 
 When consolidating during a maintain pass, keep the most specific canonical copy, replace duplicates with a Markdown link, and update callers.
 
-Eval exception: skills that score or gate on quality (`content_eval`, `*-eval`, numbered eval steps) may restate criteria they check against, but must point at the canonical reference and must not add requirements beyond it.
+Eval exception: skills that score or gate on quality (`content_eval`, `*-eval`, numbered eval steps) may restate criteria they check against, and must point at the canonical reference while matching its requirements exactly.
 
 When auditing, flag the same instruction in two or more skills unless an eval skill is exercising that exception.
 
@@ -95,7 +104,7 @@ If the skill is part of a workflow, also apply [maintain_workflows/SKILL.md](../
 
 ### 2. Audit and fix content quality
 
-Revise sections that fail the content quality standards above, including [No text replacement](#no-text-replacement).
+Revise sections that fail the content quality standards above, including [Affirmative instructions](#affirmative-instructions) and [No text replacement](#no-text-replacement).
 
 ### 3. Split oversized skills
 
@@ -111,7 +120,7 @@ Skills over 200 lines should likely be split. Create new files, update callers, 
 
 - Delete scratch files, empty stubs, and zero-byte placeholders created during this pass.
 - Delete obsolete runner scripts only after skill steps fully replace them.
-- Do not delete active prompts or assets without checking dependents.
+- Confirm dependents before deleting active prompts or assets.
 
 ### 6. Verify and report
 

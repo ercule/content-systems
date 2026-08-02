@@ -6,7 +6,7 @@ description: >-
   Markdown must delegate here — do not duplicate conversion rules, HTML shell, or
   upload recipe in workspace skills.
 "last updated": 2026-06-28T23:30:00+00:00
-"last run": never
+"last run": "2026-07-23"
 ---
 
 # Markdown → Google Doc (shared)

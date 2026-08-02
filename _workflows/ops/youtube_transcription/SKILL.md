@@ -5,7 +5,7 @@ description: >-
   or timedtext are unavailable. Use when the user asks for a local transcript
   fallback.
 "last updated": 2026-06-28T23:30:00+00:00
-"last run": 2026-06-14
+"last run": "2026-07-23"
 ---
 
 # YouTube transcription (local fallback)
