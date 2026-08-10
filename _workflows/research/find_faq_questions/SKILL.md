@@ -7,8 +7,8 @@ description: >-
   the FAQ question finder workflow for any workspace sheet. To fill Response
   Page and Draft Response afterward, run the separate generate-faq-responses
   workflow.
-"last updated": 2026-07-13T20:00:00+00:00
-"last run": 2026-07-26
+"last updated": 2026-08-06T12:00:00+00:00
+"last run": 2026-08-09
 ---
 
 # Find FAQ questions
@@ -29,7 +29,8 @@ Log line prefix:
 
 - `sheet_url_or_id` - required. Google Sheet URL or bare spreadsheet ID.
 - `workspace_root` - optional. Repo root (this repository's root). Used to derive the GSC property when `gsc_site_url` is not given, and to merge `{workspace_root}/credentials.json`.
-- `max_new_topics` - optional, default `30`. Maximum Strategy topics processed per run.
+- `topics` - optional. Comma-separated Strategy topic names (case-insensitive) to process for this run. When set, both the Reddit/LinkedIn `topic_queue` and the GSC `strategy_topics` regex list are limited to these topics only. When omitted, behavior is unchanged (all Strategy topics, subject to `max_new_topics` for SERP).
+- `max_new_topics` - optional, default `30`. Maximum Strategy topics processed per run (ignored for queue size when `topics` already names a shorter explicit list).
 - `sources` - optional, default `reddit,linkedin`. Available sources: `reddit`, `linkedin`. Google Search Console always runs and is not controlled by this list.
 - `source_max_age_months` - optional, default `6`. Reddit and LinkedIn posts/articles older than this are discarded; only posts published less than this many months ago are used. Does not affect GSC, which uses `gsc_lookback_days`.
 - `workspace_slug` - optional. Short workspace identifier used when deriving the GSC property from `{workspace_root}/config.json`.
@@ -89,6 +90,7 @@ Discard any candidate that is not a genuine human FAQ. Drop the query when any o
 - It injects context that a person would not type into search, e.g. `my location is`, `i am located in`, `assume i am`, `pretend`.
 - It contains more than one `?`, or has text after the first `?` (a compound instruction such as `... homepage.?`).
 - It is primarily about a third-party brand or entity unrelated to the workspace's topics (e.g. funding amounts for other companies, "official website url for {brand}"). Keep competitor-comparison questions only when they also name the workspace's topic space (feature flags, releases, rollouts, experimentation, etc.).
+- It is about an adjacent but off-topic sense of a Strategy keyword. For topic `api monitoring` (and similar API topics), drop credit/brand/social/alarm/home-security/SEO-rank/logo/"have i been pwned" monitoring, maritime/vessel monitoring, and other non-HTTP-API senses unless the question clearly means monitoring HTTP/OpenAPI/REST/GraphQL APIs or API endpoints/workflows.
 - It contains stray punctuation runs (e.g. `.?`, `?.`, `..`) or trailing sentence fragments.
 
 ### Require fully-formed questions
@@ -141,6 +143,7 @@ The end state is appended rows in `FAQ Coverage` with `Topic`, `Question`, and `
 ```text
 Task Progress:
 - [ ] Sheet URL/ID confirmed from chat
+- [ ] Optional `topics` filter validated against Strategy when provided
 - [ ] Google access token refreshed
 - [ ] [01_preflight/SKILL.md](01_preflight/SKILL.md) completed
 - [ ] [02_sheet_and_topics/SKILL.md](02_sheet_and_topics/SKILL.md) completed

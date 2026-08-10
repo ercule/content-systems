@@ -3,8 +3,8 @@ name: find_faq_questions_02_sheet_and_topics
 description: >-
   Step 02 for find_faq_questions: resolve the Google Sheet, validate Strategy
   and FAQ Coverage tabs, map headers, and build the topic queue plus dedupe sets.
-"last updated": 2026-06-28T23:30:00+00:00
-"last run": 2026-07-26
+"last updated": 2026-08-06T12:00:00+00:00
+"last run": 2026-08-09
 ---
 
 # Find FAQ questions — 02 Sheet And Topics
@@ -14,6 +14,7 @@ Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) befo
 ## Inputs
 
 - `sheet_url_or_id` - required. Google Sheet URL or bare spreadsheet ID.
+- `topics` - optional. Comma-separated Strategy topic names to scope this run (case-insensitive).
 
 ## Credentials
 
@@ -88,22 +89,36 @@ Log:
 
 Read `🎯 Strategy!A2:A`. Trim empty values and dedupe case-insensitively while preserving sheet order.
 
-Build `strategy_topics`: the full deduped topic list after dropping empty and header-like values (`Topic`). This list is used to regex-match GSC questions to topics in step 03, so it includes topics already present in `FAQ Coverage`.
+Build `strategy_topics_all`: the full deduped topic list after dropping empty and header-like values (`Topic`).
+
+### Optional `topics` scope
+
+When the caller passed `topics` (comma-separated names):
+
+1. Split on commas, trim, and lowercase for matching.
+2. Keep only Strategy rows whose normalized name equals one of the requested names (case-insensitive exact match on the topic cell).
+3. If any requested name is missing from Strategy, stop and report the missing names plus the available Strategy topics.
+4. Set `strategy_topics` to that filtered list (preserve Strategy sheet order). Both GSC regex matching and SERP use this scoped list.
+5. Log: `[run-debug] workflow=_workflows/find_faq_questions | TOPICS_FILTER | requested=N matched=N names=...`
+
+When `topics` is omitted, set `strategy_topics` = `strategy_topics_all` (unchanged behavior).
+
+`strategy_topics` is used to regex-match GSC questions to topics in step 04, so when unscoped it still includes topics already present in `FAQ Coverage`.
 
 Then build the SERP `topic_queue` from `strategy_topics` by skipping:
 
 - Header-like values such as `Topic`.
-- Topics already present in `existing_topics`.
+- Topics already present in `existing_topics` — **except** when `topics` was passed explicitly; in that case re-run Reddit/LinkedIn for the requested topics even if they already appear in `FAQ Coverage` (still dedupe individual questions later).
 - Exact normalized duplicate topics.
 
-Cap the queue at `max_new_topics`.
+Cap the queue at `max_new_topics` unless `topics` already names a shorter explicit list (then use that list length as the effective cap).
 
-If no topics remain, continue anyway: GSC always runs and mines questions on its own. Tell the user there were no new Strategy topics, then proceed with GSC-only mining.
+If no topics remain, continue anyway: GSC always runs and mines questions on its own (scoped to `strategy_topics` when set). Tell the user there were no new Strategy topics, then proceed with GSC-only mining.
 
 Log:
 
 ```text
-[run-debug] workflow=_workflows/find_faq_questions | QUEUE | topics=N max={max_new_topics}
+[run-debug] workflow=_workflows/find_faq_questions | QUEUE | topics=N max={max_new_topics} scoped={yes|no}
 ```
 
 ## Outputs For Next Step
