@@ -5,8 +5,8 @@ description: >-
   native Google Doc via Drive multipart upload. All workflows that create Docs from
   Markdown must delegate here — do not duplicate conversion rules, HTML shell, or
   upload recipe in workspace skills.
-"last updated": 2026-06-28T23:30:00+00:00
-P26-08-16
+"last updated": 2026-08-17T07:00:00+00:00
+"last run": 2026-08-16
 ---
 
 # Markdown → Google Doc (shared)
@@ -20,6 +20,8 @@ Log line prefix: `[run-debug] workflow=<caller> | markdown_to_google_doc | <fact
 Any workflow step whose primary output is a **new Google Doc** created from Markdown (or from an HTML fragment produced upstream). Callers own prompt generation, link checks, sheet notify, and CMS staging — this skill owns HTML conversion, shell wrapping, Drive upload, and post-upload verification.
 
 Do not copy the block rules, inline escaping procedure, DOCTYPE shell, or multipart recipe into workspace `SKILL.md` files. Link here and pass the inputs below.
+
+Do **not** substitute Jeeves `google_doc_create` (or Docs API `insertText` + `createParagraphBullets`). That path inherits the Doc's NORMAL_TEXT `spaceBelow` (10pt in branded templates such as Proxima Nova) and draws list glyphs from that font, so bullets look like spaced-out paragraphs or missing discs. Drive HTML multipart import is the conversion; `li { margin-bottom: 2pt; }` in the shell is what keeps lists tight.
 
 Callers:
 
@@ -72,11 +74,11 @@ When a caller skill specifies stricter layout rules than a preset (for example a
 
 Drive's HTML → Google Doc import breaks when `<ul>` / `<li>` / `<p>` boundaries are wrong. Walk the source top to bottom:
 
-1. Headings: `# title` → one `<h1>`; `## title` → one `<h2>`; `###` → `<h3>`. Close any open `<ul>` before emitting a heading.
-2. Horizontal rule: a line that is only `---` → `<hr />`. Close open `<ul>` first.
-3. Bullet lists: lines starting with `- ` share one `<ul>`. First `- ` after non-list context opens `<ul>`. Each `- ` → `<li>…</li>`.
-4. Paragraphs: other non-empty lines → `<p>…</p>`. Close `<ul>` before `<p>`, headings, or `<hr />`.
-5. Sanity check: count `<ul>` and `</ul>` — must match. No `<li>` outside lists.
+1. Headings: `# title` → one `<h1>`; `## title` → one `<h2>`; `###` → `<h3>`. Close any open `<ul>` or `<ol>` before emitting a heading.
+2. Horizontal rule: a line that is only `---` → `<hr />`. Close open lists first.
+3. Bullet lists: lines starting with `- ` share one `<ul>`. First `- ` after non-list context opens `<ul>`. Each `- ` → `<li>…</li>`. Numbered lines matching `^\d+\. ` share one `<ol>` the same way. Close the other list type before opening a new one.
+4. Paragraphs: other non-empty lines → `<p>…</p>`. Close `<ul>` / `<ol>` before `<p>`, headings, or `<hr />`. Blank lines do not close a list.
+5. Sanity check: count `<ul>` and `</ul>` — must match. Same for `<ol>`. No `<li>` outside lists.
 
 Allowed tags: `h1`–`h4`, `p`, `ul`, `ol`, `li`, `a`, `strong`, `em`, `code`, `pre`, `blockquote`, `br`, `table`, `thead`, `tbody`, `tr`, `th`, `td`, `hr`.
 
