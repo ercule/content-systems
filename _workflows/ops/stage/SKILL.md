@@ -5,7 +5,9 @@ description: >-
   Google Docs into the CMS as drafts. Use when the user says "stage", "stage
   approved", "what's approved on the calendar", or asks to push approved
   calendar items to the CMS. Client CMS recipes live in
-  _clients/{client}/_workflows/ops/stage/SKILL.md.
+  _clients/{client}/_workflows/ops/stage/SKILL.md, or in
+  _clients/{client}/_workflows/ops/stage_content/SKILL.md when the client
+  has no ops/stage skill.
 "last updated": 2026-08-16T00:00:00+00:00
 "last run": 2026-08-17
 ---
@@ -18,7 +20,7 @@ Log line prefix: `[run-debug] workflow=_workflows/ops/stage | <PHASE> | <facts>`
 
 This is a staging workflow. The file you keep is a CMS draft. Never publish live unless the user explicitly asks in this conversation.
 
-The client skill at `_workflows/ops/stage/SKILL.md` is the entry point. It links here for the scan-and-offer protocol, then names the CMS recipe. Do not invent a CMS path.
+The client skill at `_workflows/ops/stage/SKILL.md` is the entry point. If that file is missing, use `_workflows/ops/stage_content/SKILL.md` when it exists. The client skill links here for the scan-and-offer protocol, then names the CMS recipe. Do not invent a CMS path.
 
 ## Configuration
 
@@ -63,7 +65,7 @@ CMS credentials are named in the client skill. Load them only after the user con
 2. Read the Calendar tab.
 3. Filter ready rows.
 4. Offer. Stop here until the user confirms which rows to stage.
-5. For each confirmed row, follow the **CMS** section in the client `ops/stage` skill. Then write the CMS editor or preview URL back to `cms_url_column` when that column is configured (see [write_google_sheet](../write_google_sheet/SKILL.md)).
+5. For each confirmed row, follow the **CMS** section in the client `ops/stage` skill, or run that client's `stage_content` workflow when `ops/stage` is absent. Then write the CMS editor or preview URL back to `cms_url_column` when that column is configured (see [write_google_sheet](../write_google_sheet/SKILL.md)).
 
 ## Read the Calendar
 
@@ -116,4 +118,4 @@ On success, report the CMS editor URL and preview URL. Write the editor URL back
 
 ## End of run
 
-Per [run_workflow](../../../setup/run_workflow/SKILL.md): update `last run` on this skill and on the client `ops/stage` skill that ran.
+Per [run_workflow](../../../setup/run_workflow/SKILL.md): update `last run` on this skill and on the client `ops/stage` or `ops/stage_content` skill that ran.
