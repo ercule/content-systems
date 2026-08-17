@@ -9,7 +9,7 @@ Read [setup/run_workflow/SKILL.md](../setup/run_workflow/SKILL.md) before runnin
 | Folder | Role |
 |--------|------|
 | **edit/** | Multi-step produce pipelines (e.g. page refresh) — produce only |
-| **research/** | Discovery and enrichment (FAQ mining, external audit, crosslinks) — produce only |
+| **research/** | Discovery and enrichment (FAQ mining, topic ideas, external audit, crosslinks) — produce only |
 | **generate/** | Content generation that writes net-new drafts — produce only |
 | **ops/** | Staging, publish, evaluate, and shared ops helpers (fetch, Doc conversion, browser fallback) |
 
@@ -30,6 +30,7 @@ Verb-first workflow folder names (`update_agent`, `build_crosslinks`, `stage_con
 | Skill | Purpose |
 |-------|---------|
 | [find_faq_questions](research/find_faq_questions/SKILL.md) | Mine FAQ questions into a sheet |
+| [generate_topic_ideas](research/generate_topic_ideas/SKILL.md) | Research a brand and write Topic / Tag / Rel rows to `topicIdeas` |
 | [evaluate_external_brand](research/evaluate_external_brand/SKILL.md) | Audit external brand mentions |
 | [build_crosslinks](research/build_crosslinks/SKILL.md) | Bootstrap `crosslinks.json` + select internal links (replaces legacy `init_crosslinks_json`) |
 
@@ -37,6 +38,7 @@ Verb-first workflow folder names (`update_agent`, `build_crosslinks`, `stage_con
 
 | Skill | Purpose |
 |-------|---------|
+| [generate_article](generate/generate_article/SKILL.md) | Net-new article → Google Doc (context pack, research, reviewed prompt, draft, components, mechanical rewrite) |
 | [generate_faq_responses](generate/generate_faq_responses/SKILL.md) | Draft FAQ responses for sheet rows |
 
 ### ops/
