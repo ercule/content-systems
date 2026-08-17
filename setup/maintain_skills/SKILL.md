@@ -3,10 +3,10 @@ name: utilities_maintain_skills
 description: >-
   Audit, repair, and bring up to quality individual SKILL.md files — structure,
   content, links, frontmatter, deduplication, affirmative instructions,
-  no text-replacement prompts, and cleanup. For workflow orchestration, use
-  maintain_workflows.
-"last updated": 2026-07-16T05:38:00+00:00
-"last run": 2026-07-04
+  no text-replacement prompts, lists instead of tables, and cleanup. For
+  workflow orchestration, use maintain_workflows.
+"last updated": 2026-08-16T05:25:00+00:00
+"last run": 2026-08-16
 ---
 
 Audit, repair, and report on individual `SKILL.md` files. Preserve intent, fix broken structure, and revise content to match the standards below.
@@ -17,21 +17,17 @@ Architecture reference: [README.md § Documentation map](../../README.md#documen
 
 Skill-specific rules only. Workflow layout and preflight: [maintain_workflows/SKILL.md](../maintain_workflows/SKILL.md). Runtime paths, credentials, logging: [run_workflow/SKILL.md](../run_workflow/SKILL.md). Credential/config policy: [README.md § Credentials](../../README.md#credentials).
 
-| Area | Correct | Wrong |
-|------|---------|-------|
-| Link style (this repo) | Repo-relative between skills in content-systems | Cross-repo `../` depth chains in workspace skills |
-| Shared skills | `{content_systems_public_root}/…` in workspace skills | Hard-coded relative depth chains into this repo from outside |
-| Deduplication | Link to canonical skill or `_context/` file | Copy run_workflow or shared ops instructions inline |
-| Preflight link | Step 01 opens with [run_workflow](../run_workflow/SKILL.md) link (not "Step 0") | Missing preflight link; `{00}_*` folders |
-| Text replacement | Inputs passed as named context the agent reads; prompt skills state requirements in prose | `{PLACEHOLDER}` templates, `.txt` fill-in files, or "substitute X into the template" instructions |
-
----
+- Link style (this repo): use repo-relative links between skills in content-systems. Flag workspace skills that chain `../` into this repo.
+- Shared skills: workspace skills link with `{content_systems_public_root}/…`.
+- Deduplication: link to the canonical skill or `_context/` file.
+- Preflight link: step 01 opens with a [run_workflow](../run_workflow/SKILL.md) link (not "Step 0" or `{00}_*` folders).
+- Text replacement: name inputs in prose; the agent reads artifacts as context. Flag `{PLACEHOLDER}` templates, `.txt` fill-in files, and "substitute X into the template" instructions.
 
 By default, run this on the 10 least recently updated skills in scope. Skip paths the user marks out of scope.
 
 When the file is a workflow orchestrator or a numbered step in a pipeline, also run [maintain_workflows/SKILL.md](../maintain_workflows/SKILL.md) on that workflow.
 
-Output is a short summary (see step 6). No persistent artifacts — delete any scratch files created during the pass before finishing.
+Output is a short summary (see step 6). No persistent artifacts — delete any scratch files created during this pass before finishing.
 
 ## Structure
 
@@ -52,6 +48,7 @@ Workflow layout, step numbering, run_workflow links, preflight, and orchestrator
 - State what to do. Every instruction names the required action or outcome. Prefer "Write X", "Use Y", "Keep Z" over "Do not write X", "Avoid Y", "Never Z".
 - Include examples only when they prevent mistakes — a sample request shape, a snippet, or an API call. No decorative examples.
 - Plain text, headers, and flat bullets. No decorative separators, bold, or italic for emphasis.
+- Lists, not tables: replace every Markdown pipe table with a simple bulleted list. Put the key first, then a colon, then the rest. Apply this to skill bodies and to artifacts a skill tells the agent to write. JSON code samples may stay as fenced code.
 - When a skill reads canon, point at [README.md § Troubleshooting](../../README.md#troubleshooting) (`_context/README.md` trust levels).
 
 ## Affirmative instructions
@@ -60,13 +57,11 @@ Skills prescribe actions. They omit prohibitions, anti-patterns, and "what not t
 
 When a draft or existing skill forbids something, rewrite it as the positive requirement that replaces it:
 
-| Instead of | Write |
-|------------|-------|
-| Do not copy instructions between skills | Link to the canonical skill |
-| Avoid placeholder templates | Name inputs in prose; the agent reads artifacts as context |
-| Never hard-code secrets in the skill body | Resolve secrets from `credentials.json` |
+- Instead of "Do not copy instructions between skills": Link to the canonical skill
+- Instead of "Avoid placeholder templates": Name inputs in prose; the agent reads artifacts as context
+- Instead of "Never hard-code secrets in the skill body": Resolve secrets from `credentials.json`
 
-When auditing, rewrite every "do not" / "don't" / "never" / "avoid" instruction into the action the agent should take. Keep contrast tables only in this maintain skill (and similar audit skills) as rewrite examples for maintainers.
+When auditing, rewrite every "do not" / "don't" / "never" / "avoid" instruction into the action the agent should take. Keep these instead-of rewrite examples only in this maintain skill (and similar audit skills).
 
 ## No text replacement
 
@@ -74,7 +69,7 @@ Skills pass inputs as named context the agent reads. Requirements live in prose 
 
 Required pattern:
 
-- Name inputs in prose and tables; tell the agent what to read and apply
+- Name inputs in prose and bullets; tell the agent what to read and apply
 - Numbered step skills (for example `03_writer/SKILL.md`) state tone, structure, and constraints in the skill body — the agent reads run inputs and linked artifacts as context, not as tokens to splice into a template
 - When a prior step produces an artifact, link to its path and describe how the next step uses it
 
@@ -104,7 +99,7 @@ If the skill is part of a workflow, also apply [maintain_workflows/SKILL.md](../
 
 ### 2. Audit and fix content quality
 
-Revise sections that fail the content quality standards above, including [Affirmative instructions](#affirmative-instructions) and [No text replacement](#no-text-replacement).
+Revise sections that fail the content quality standards above, including [Affirmative instructions](#affirmative-instructions), [No text replacement](#no-text-replacement), and lists instead of tables. Convert every pipe table to a bulleted list.
 
 ### 3. Split oversized skills
 
@@ -125,6 +120,7 @@ Skills over 200 lines should likely be split. Create new files, update callers, 
 ### 6. Verify and report
 
 - Manually check relative links in every SKILL.md you touched (or run a link checker in the workspace that owns these files).
+- Confirm zero Markdown pipe tables remain in files you touched.
 - Lint files you touched.
 - Update `"last updated"` on every file you changed.
 - Run this file against itself and flag any updates needed.
