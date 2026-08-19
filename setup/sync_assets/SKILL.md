@@ -5,6 +5,7 @@ description: >-
   external_assets.md (URLs, Google Docs). Writes asset-manifest.md with last-updated
   timestamps. Run as context assembly before workflows that read workspace canon.
 "last updated": 2026-07-04T21:20:00+00:00
+"last run": 2026-08-19
 P26-08-17
 ---
 

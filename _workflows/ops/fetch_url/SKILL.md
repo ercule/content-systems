@@ -4,6 +4,7 @@ description: >-
   Shared HTML fetch for update_agent and similar workflows. Given a URL or Google Doc,
   return canonical main-body HTML, plain-text title, and the resolved source URL.
 "last updated": 2026-06-28T23:30:00+00:00
+"last run": 2026-08-19
 P26-08-17
 ---
 

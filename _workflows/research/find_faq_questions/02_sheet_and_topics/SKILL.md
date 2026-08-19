@@ -4,7 +4,7 @@ description: >-
   Step 02 for find_faq_questions: resolve the Google Sheet, validate Strategy
   and FAQ Coverage tabs, map headers, and build the topic queue plus dedupe sets.
 "last updated": 2026-08-06T12:00:00+00:00
-"last run": 2026-08-09
+"last run": 2026-08-18
 ---
 
 # Find FAQ questions — 02 Sheet And Topics
