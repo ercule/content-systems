@@ -1,27 +1,27 @@
 ---
 name: markdown_to_google_doc
 description: >-
-  Canonical shared skill: convert Markdown (or a pre-built HTML fragment) to a
-  native Google Doc via Drive multipart upload. All workflows that create Docs from
-  Markdown must delegate here — do not duplicate conversion rules, HTML shell, or
-  upload recipe in workspace skills.
-"last updated": 2026-08-17T07:00:00+00:00
-"last run": 2026-08-16
+  Create a native Google Doc from Markdown (or an HTML fragment) via Drive
+  multipart HTML upload. Use for every new Doc Justin asks for: memos, plans,
+  articles, handoffs, anyone-with-the-link sharing. Also use whenever
+  google_doc_create, insertText, or createParagraphBullets would otherwise be
+  the next call. All workflows that create Docs from Markdown must delegate
+  here.
+"last updated": 2026-08-18T06:20:00+00:00
+"last run": 2026-08-19
 ---
 
-# Markdown → Google Doc (shared)
+# Markdown to Google Doc (shared)
 
 Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.
 
 Log line prefix: `[run-debug] workflow=<caller> | markdown_to_google_doc | <facts>`
 
-## When to use
+## First action
 
-Any workflow step whose primary output is a **new Google Doc** created from Markdown (or from an HTML fragment produced upstream). Callers own prompt generation, link checks, sheet notify, and CMS staging — this skill owns HTML conversion, shell wrapping, Drive upload, and post-upload verification.
+If Justin asked to create a Google Doc, this skill is the whole job, including one-off memos with no generate_article caller. Read this file, convert Markdown to HTML here, wrap it in the standard shell, and upload with Drive multipart (`mimeType: application/vnd.google-apps.document`). Jeeves is only for finding `folder_id`, setting link sharing after a successful upload, and reading the export to verify. `google_doc_create`, Docs `insertText`, and `createParagraphBullets` are not the conversion path: they split list items that contain `[text](url)` or a bare `https://` URL, drop a leading `#` heading, and inherit 10pt spaceBelow on bullets in branded templates.
 
-Do not copy the block rules, inline escaping procedure, DOCTYPE shell, or multipart recipe into workspace `SKILL.md` files. Link here and pass the inputs below.
-
-Do **not** substitute Jeeves `google_doc_create` (or Docs API `insertText` + `createParagraphBullets`). That path inherits the Doc's NORMAL_TEXT `spaceBelow` (10pt in branded templates such as Proxima Nova) and draws list glyphs from that font, so bullets look like spaced-out paragraphs or missing discs. Drive HTML multipart import is the conversion; `li { margin-bottom: 2pt; }` in the shell is what keeps lists tight.
+Callers own prompt generation, link checks, sheet notify, and CMS staging. This skill owns HTML conversion, shell wrapping, Drive upload, and post-upload verification. Workspace steps link here instead of copying block rules, inline escaping, the DOCTYPE shell, or the multipart recipe.
 
 Callers:
 
@@ -64,11 +64,14 @@ When a caller skill specifies stricter layout rules than a preset (for example a
 
 ## Procedure (always run in order)
 
-1. **Convert** — If `markdown` is set, walk it top to bottom using [Block rules](#block-rules) and [Inline rules](#inline-rules). Emit one HTML fragment (no outer `<html>` / `<body>`).
-2. **Metadata** — When the preset or `metadata_items` requires it, prepend the metadata `<ul>`, then optional `<hr />`, then the article fragment. When preset is `standalone_article` or `no_metadata`, the body is the fragment only.
-3. **Shell** — Wrap in [HTML shell](#html-shell) (`standard` or `minimal`).
-4. **Upload** — [Drive multipart create](#drive-upload).
-5. **Verify** — [Post-upload check](#post-upload-check) when `verify_export` is true.
+For a one-off memo: resolve `folder_id` (Jeeves `gdrive_list_files` is fine), `doc_name`, and `markdown`, then run these steps with `preset: standalone_article` or `no_metadata`.
+
+1. Convert — If `markdown` is set, walk it top to bottom using [Block rules](#block-rules) and [Inline rules](#inline-rules). Emit one HTML fragment (no outer `<html>` / `<body>`). Each source bullet that contains a link must become one `<li>` with an `<a href>` inside it.
+2. Metadata — When the preset or `metadata_items` requires it, prepend the metadata `<ul>`, then optional `<hr />`, then the article fragment. When preset is `standalone_article` or `no_metadata`, the body is the fragment only.
+3. Shell — Wrap in [HTML shell](#html-shell) (`standard` or `minimal`). Standard shell is required for list spacing (`li { margin-bottom: 2pt; }`).
+4. Upload — [Drive multipart create](#drive-upload).
+5. Verify — [Post-upload check](#post-upload-check) when `verify_export` is true.
+6. Share — If Justin asked for anyone-with-the-link access, set link sharing on the new `doc_id` after verify passes.
 
 ## Block rules
 
@@ -76,7 +79,7 @@ Drive's HTML → Google Doc import breaks when `<ul>` / `<li>` / `<p>` boundarie
 
 1. Headings: `# title` → one `<h1>`; `## title` → one `<h2>`; `###` → `<h3>`. Close any open `<ul>` or `<ol>` before emitting a heading.
 2. Horizontal rule: a line that is only `---` → `<hr />`. Close open lists first.
-3. Bullet lists: lines starting with `- ` share one `<ul>`. First `- ` after non-list context opens `<ul>`. Each `- ` → `<li>…</li>`. Numbered lines matching `^\d+\. ` share one `<ol>` the same way. Close the other list type before opening a new one.
+3. Bullet lists: lines starting with `- ` share one `<ul>`. First `- ` after non-list context opens `<ul>`. Each `- ` → one `<li>…</li>` (inline links stay inside that same `<li>` as `<a>` — never split a bullet around `[text](url)` or `https://`). Numbered lines matching `^\d+\. ` share one `<ol>` the same way. Close the other list type before opening a new one.
 4. Paragraphs: other non-empty lines → `<p>…</p>`. Close `<ul>` / `<ol>` before `<p>`, headings, or `<hr />`. Blank lines do not close a list.
 5. Sanity check: count `<ul>` and `</ul>` — must match. Same for `<ol>`. No `<li>` outside lists.
 
@@ -183,8 +186,9 @@ To replace body in place on retry: `PATCH …/upload/drive/v3/files/{id}?uploadT
 When `verify_export` is true:
 
 1. `GET https://www.googleapis.com/drive/v3/files/{id}/export?mimeType=text/plain&supportsAllDrives=true`
-2. Export must contain **zero** literal `<a href`, `</a>`, `<strong>`, or `**` sequences.
+2. Plain export must contain **zero** literal `<a href`, `</a>`, `<strong>`, or `**` sequences.
 3. Spot-check that at least one known body link exported as a real hyperlink.
+4. Also export `mimeType=text/html`. If the source had a list item containing a URL or `[text](url)`, that item must still be **one** `<li>` — not split into extra bullets. If it split, the upload used Jeeves `google_doc_create` or equivalent; recycle and redo via this skill.
 
 ## Failure handling
 
@@ -198,7 +202,8 @@ A 4xx from Drive must not roll back upstream work (research, CMS draft, etc.). S
 
 ## Caller checklist
 
-- [ ] Linked to this skill from the workspace step — no duplicated conversion or upload instructions.
+- [ ] Linked to this skill from the workspace step — conversion and upload instructions live only here.
+- [ ] Created the Doc with Drive HTML multipart upload from this skill.
 - [ ] Passed `doc_name`, `folder_id`, and `markdown` or `html_fragment`.
 - [ ] Chose the correct preset (or documented override).
-- [ ] Ran post-upload verify unless explicitly skipped.
+- [ ] Ran post-upload verify unless explicitly skipped, including one `<li>` per source bullet when those bullets contain links.
