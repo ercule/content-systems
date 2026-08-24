@@ -9,7 +9,7 @@ description: >-
   _clients/{client}/_workflows/ops/stage_content/SKILL.md when the client
   has no ops/stage skill.
 "last updated": 2026-08-16T00:00:00+00:00
-"last run": 2026-08-17
+"last run": 2026-08-23T06:40:00+00:00
 ---
 
 # Stage (shared)
@@ -104,6 +104,7 @@ Run the client CMS recipe for that Doc. Default is draft:
 - WordPress: `status=draft`.
 - HubSpot: `is_draft=true` / `publish_immediately: false`.
 - Prismic: Migration draft only. Publish in the Prismic UI.
+- Storyblok: omit `publish` (default unpublished). Never send `publish: true` / `publish: 1`.
 - GitHub: local branch + preview. No `git push` / `gh pr create` unless the user asks.
 - Sanity: prefer draft. HumanSignal's current publisher posts published — confirm before running.
 
