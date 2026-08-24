@@ -8,7 +8,7 @@ description: >-
   the next call. All workflows that create Docs from Markdown must delegate
   here.
 "last updated": 2026-08-18T06:20:00+00:00
-"last run": 2026-08-19
+"last run": 2026-08-23
 ---
 
 # Markdown to Google Doc (shared)

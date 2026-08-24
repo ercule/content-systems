@@ -4,7 +4,7 @@ description: >-
   Step 02: create a run folder and copy workspace context into it verbatim.
   Keep an existing folder that already has a prompt pack.
 "last updated": 2026-08-16T05:30:00+00:00
-"last run": never
+"last run": 2026-08-23
 ---
 
 # Generate article — 02 Context pack

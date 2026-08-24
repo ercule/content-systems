@@ -4,7 +4,7 @@ description: >-
   Step 03: write the inventory, a relevant-articles list, and a crosslinks list
   for this title. Later steps must use on-site URLs from the crosslinks list.
 "last updated": 2026-08-17T00:40:00+00:00
-"last run": never
+"last run": 2026-08-23
 ---
 
 # Generate article — 03 Research

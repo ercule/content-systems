@@ -4,7 +4,7 @@ description: >-
   Step 01: verify config, Drive folder, Google OAuth, a writing model, and run
   inputs before context or research work.
 "last updated": 2026-08-16T05:30:00+00:00
-"last run": never
+"last run": 2026-08-23
 ---
 
 # Generate article — 01 Preflight

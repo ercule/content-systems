@@ -5,7 +5,7 @@ description: >-
   bullets, extra instructions, then all copied context verbatim). End this run
   until the user accepts the pack.
 "last updated": 2026-08-17T00:40:00+00:00
-"last run": never
+"last run": 2026-08-23
 ---
 
 # Generate article — 04 Package prompt

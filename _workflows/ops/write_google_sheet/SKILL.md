@@ -5,7 +5,7 @@ description: >-
   row. Used for notify/catalog steps (content calendar, Output tab, Delivery tab).
   Skips cleanly when spreadsheet config is blank.
 "last updated": 2026-06-28T23:30:00+00:00
-P26-08-16
+"last run": 2026-08-23
 ---
 
 # Google Sheet write (shared)
