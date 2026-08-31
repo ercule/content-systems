@@ -4,7 +4,7 @@ description: >-
   Shared execution context for all workflow skills: runtime HTTP contract, context assembly,
   credential resolution, small-step runs
 "last updated": 2026-08-15T00:00:00+00:00
-"last run": 2026-08-23
+P26-08-27
 ---
 
 Canonical execution contract for workflow skills. [README.md § Documentation map](../../README.md#documentation-map).

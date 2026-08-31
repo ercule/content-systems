@@ -56,6 +56,7 @@ Verb-first workflow folder names (`update_agent`, `build_crosslinks`, `stage_con
 | [youtube_transcription](ops/youtube_transcription/SKILL.md) | YouTube → transcript |
 | [wikitext_editing](ops/wikitext_editing/SKILL.md) | Wikitext helpers |
 | [browser_automation](ops/browser_automation/SKILL.md) | Browserbase fallback |
+| [rewrite_and_remove](ops/rewrite_and_remove/SKILL.md) | Catalog AI-tells in a draft, then rewrite each catalog row |
 
 ## Not shipped yet
 
