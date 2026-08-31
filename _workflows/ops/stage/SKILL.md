@@ -106,7 +106,7 @@ Run the client CMS recipe for that Doc. Default is draft:
 - Prismic: Migration draft only. Publish in the Prismic UI.
 - Storyblok: omit `publish` (default unpublished). Never send `publish: true` / `publish: 1`.
 - GitHub: local branch + preview. No `git push` / `gh pr create` unless the user asks.
-- Sanity: prefer draft. HumanSignal's current publisher posts published — confirm before running.
+- Sanity: prefer draft. If this workspace's Sanity publisher posts live by default, confirm before running.
 
 On success, report the CMS editor URL and preview URL. Write the editor URL back to `cms_url_column` when configured. A sheet writeback failure must not roll back the CMS draft.
 
