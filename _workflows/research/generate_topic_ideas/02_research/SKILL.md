@@ -3,8 +3,8 @@ name: generate_topic_ideas_02_research
 description: >-
   Step 02 for generate_topic_ideas: research the brand, competitors, and
   category trends, then write structured notes for draft and score.
-"last updated": 2026-08-16T00:00:00+00:00
-"last run": 2026-08-16
+"last updated": 2026-08-31T03:45:00+00:00
+"last run": 2026-08-30
 ---
 
 # Generate topic ideas — 02 Research
@@ -19,7 +19,6 @@ From [../01_preflight/SKILL.md](../01_preflight/SKILL.md):
 
 - `brand_title`
 - `brand_domain`
-- `spreadsheet_id`
 - `workspace_root`
 
 ## Credentials
@@ -36,7 +35,7 @@ Use [fetch_url](../../../ops/fetch_url/SKILL.md) for brand and competitor pages.
 GET https://serpapi.com/search
 ```
 
-Params: `engine=google`, `q={query}`, `api_key` from credentials. Read `organic_results` (`link`, `title`, `snippet`). Ignore ads, people-also-ask, and knowledge graph. One page of results is enough for each query in this step.
+Params: `engine=google`, `q={query}`, `api_key` from credentials. Read `organic_results` (`link`, `title`, `snippet`). Use organic results only. One page of results is enough for each query in this step.
 
 ## STEP 1 — Brand/product research
 
@@ -44,7 +43,8 @@ Research `brand_title` using `https://{brand_domain}` and the web.
 
 1. Fetch the homepage with fetch_url.
 2. Fetch up to two linked product, platform, solutions, or use-case pages from that homepage.
-3. Determine the brand's primary business category (1–4 words). Use this category wherever later steps say "the category".
+3. Fetch one resources or blog page when the homepage links to one.
+4. Determine the brand's primary business category (1–4 words). Use this category wherever later steps say "the category".
 
 Summarize:
 
@@ -60,7 +60,7 @@ Identify 3–7 direct or close competitors in the same category.
 
 1. SerpAPI query: `{brand_title} competitors`
 2. SerpAPI query: `{category} software` or `{category} platform` when that is a better category query
-3. Fetch the homepage (and one product/solutions page when linked) for up to five competitors
+3. For up to five competitors, fetch the homepage, one product or solutions page when linked, and one resources or blog page when linked
 
 Output:
 

@@ -30,7 +30,7 @@ Verb-first workflow folder names (`update_agent`, `build_crosslinks`, `stage_con
 | Skill | Purpose |
 |-------|---------|
 | [find_faq_questions](research/find_faq_questions/SKILL.md) | Mine FAQ questions into a sheet |
-| [generate_topic_ideas](research/generate_topic_ideas/SKILL.md) | Research a brand and write Topic / Tag / Rel rows to `topicIdeas` |
+| [generate_topic_ideas](research/generate_topic_ideas/SKILL.md) | Research a brand and write scored topic ideas to markdown |
 | [evaluate_external_brand](research/evaluate_external_brand/SKILL.md) | Audit external brand mentions |
 | [build_crosslinks](research/build_crosslinks/SKILL.md) | Bootstrap `crosslinks.json` + select internal links (replaces legacy `init_crosslinks_json`) |
 
