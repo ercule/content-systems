@@ -3,8 +3,8 @@ name: generate_article_07_mechanical_rewrite
 description: >-
   Step 07: apply a fixed mechanical checklist to the manuscript (headings, dashes,
   images, AI-tells, crosslinks, word count). Overwrites the Markdown in place.
-"last updated": 2026-08-17T00:40:00+00:00
-"last run": never
+"last updated": 2026-08-31T00:00:00+00:00
+"last run": 2026-08-31
 ---
 
 # Generate article — 07 Mechanical rewrite
@@ -28,9 +28,9 @@ This step is a checklist. Voice already lives in the pack.
 2. H1 stays in title case. All other headings are sentence case except proper nouns, acronyms, and product names from the copied context files.
 3. Replace every em dash (Unicode —) with a comma, period, colon, or parentheses.
 4. Replace image tags and Markdown image syntax with the literal token `[image]` on its own line.
-5. Rewrite any sentence that uses these tells, keeping the meaning: "actually"; "gaps" (including "the real gaps"); "not just"; "do this, not that".
+5. Rewrite any sentence that uses these tells, keeping the meaning: "actually"; "gaps" (including "the real gaps"); "not just"; "do this, not that"; "is how you"; "is what you"; "is how we"; "is what keeps"; "tells you how"; "tells you what" (the definitional "X is how you Y" family).
 6. Keep every required first-party URL from `{id-or-slug}-crosslinks.md` in running prose. Do not drop or swap destinations. Do not freeze sidecar `anchor_text`. If the visible link text is a page title, product name, or "see [destination]," rewrite it into a phrase already in the sentence.
-7. Rewrite to remove: em dashes, "architecture", "shift", "structural" (replace with more plain spoken alternatives), "actual", "realities", "quiet", "silent", and adverb forms of those words
+7. Rewrite to remove: em dashes, "architecture", "shift", "structural" (replace with more plain spoken alternatives), "actual", "realities", "quiet", "silent", "shaped", "bar" (metaphor: "the bar", "uniqueness bar"; leave UI "search bar"), and adverb forms of those words
 
 ## Output
 
