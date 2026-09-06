@@ -4,7 +4,7 @@ description: >-
   Independent ops helper: catalog every AI-tell and filler hit in a Markdown
   draft, then rewrite each catalog row in place. Callers name the draft path.
 "last updated": 2026-08-29T20:42:00+00:00
-"last run": never
+"last run": 2026-09-03
 ---
 
 # Rewrite and remove

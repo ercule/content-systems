@@ -6,7 +6,7 @@ description: >-
   from the caller or another workflow. Trigger on "show edits in the doc",
   "red blue markup", or apply editorial plan to Google Doc.
 "last updated": 2026-06-28T23:30:00+00:00
-"last run": never
+"last run": 2026-09-04
 ---
 
 # Show edits in a Google Doc (inline markup)

@@ -9,7 +9,7 @@ description: >-
   _clients/{client}/_workflows/ops/stage_content/SKILL.md when the client
   has no ops/stage skill.
 "last updated": 2026-08-16T00:00:00+00:00
-"last run": 2026-08-31
+"last run": 2026-09-01
 ---
 
 # Stage (shared)
