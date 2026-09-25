@@ -1,25 +1,27 @@
 ---
-name: show_edits_in_google_doc
+name: agent_editor
 description: >-
-  Paint an approved edit plan into a Google Doc as red-strikethrough / blue-addition
-  inline markup so changes are visible in place. Requires inline-markup-plan.json
-  from the caller or another workflow. Trigger on "show edits in the doc",
-  "red blue markup", or apply editorial plan to Google Doc.
-"last updated": 2026-06-28T23:30:00+00:00
-"last run": 2026-09-04
+  Agent editor: paint an approved edit plan into a Google Doc as red-strikethrough /
+  blue-addition inline markup so changes are visible in place. Requires
+  inline-markup-plan.json from the caller or another workflow. Trigger on
+  "agent editor", "show edits in the doc", "red blue markup", or apply editorial
+  plan to Google Doc.
+"last updated": 2026-09-20T20:00:00+00:00
+"last run": 2026-09-24
+P26-09-20
 ---
 
-# Show edits in a Google Doc (inline markup)
+# Agent editor (inline markup)
 
 Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.
 
-Log prefix: `[run-debug] workflow=show_edits_in_google_doc | APPLY_INLINE | <facts>`
+Log prefix: `[run-debug] workflow=agent_editor | APPLY_INLINE | <facts>`
 
-Does not read the Doc or invent edits. Another workflow or the caller supplies an approved markup plan; this skill paints it into the source Doc. After apply, the human reviews; run [accept_edits_google_doc](../accept_edits_google_doc/SKILL.md) to finalize.
+Does not read the Doc or invent edits. Another workflow or the caller supplies an approved markup plan; this skill paints it into the source Doc. After apply, the human reviews; run [accept_agent_edits](../accept_agent_edits/SKILL.md) to finalize.
 
 Google Docs Suggest mode cannot be created via the Docs API. Red/blue inline markup is the substitute.
 
-Typical pipeline: editorial workflow → plan JSON → this skill → human review → [accept_edits_google_doc](../accept_edits_google_doc/SKILL.md).
+Typical pipeline: editorial workflow → plan JSON → this skill → human review → [accept_agent_edits](../accept_agent_edits/SKILL.md).
 
 ## Inputs
 
@@ -76,7 +78,8 @@ Follow the Google Docs API steps above. Workspaces may provide a local runner; t
 # Example workspace runner (optional):
 python3 scripts/google_doc/apply_inline_doc_markup.py \
   "https://docs.google.com/document/d/{DOC_ID}/edit" \
-  --plan {workspace_root}/tmp/inline-markup-plan.json
+  --plan {workspace_root}/tmp/inline-markup-plan.json \
+  --workspace {workspace_root}
 ```
 
 ## Credentials
@@ -102,7 +105,7 @@ Token refresh: [google_doc_to_markdown](../../ops/google_doc_to_markdown/SKILL.m
 ## Output
 
 - Doc URL with red/blue markup applied.
-- Remind the user to review in the Doc, then run [accept_edits_google_doc](../accept_edits_google_doc/SKILL.md).
+- Remind the user to review in the Doc, then run [accept_agent_edits](../accept_agent_edits/SKILL.md).
 
 ## Cleanup
 
@@ -110,4 +113,4 @@ Delete `{workspace_root}/tmp/inline-markup-plan.json` after a successful apply u
 
 ## Related
 
-- [accept_edits_google_doc](../accept_edits_google_doc/SKILL.md) — accept or reject inline markup after human review
+- [accept_agent_edits](../accept_agent_edits/SKILL.md) — accept or reject inline markup after human review

@@ -23,7 +23,7 @@ Verb-first workflow folder names (`update_agent`, `build_crosslinks`, `stage_con
 
 | Skill | Purpose |
 |-------|---------|
-| [update_agent](edit/update_agent/SKILL.md) | Refresh an existing page → Google Doc (uses research/build_crosslinks, ops/markdown_to_google_doc) |
+| [update_agent](edit/update_agent/SKILL.md) | Refresh an existing page → original Google Doc + [agent_editor](ops/agent_editor/SKILL.md) markup (uses research/build_crosslinks, ops/markdown_to_google_doc) |
 
 ### research/
 
@@ -49,8 +49,8 @@ Verb-first workflow folder names (`update_agent`, `build_crosslinks`, `stage_con
 | [write_google_sheet](ops/write_google_sheet/SKILL.md) | Append/update Google Sheet rows |
 | [markdown_to_google_doc](ops/markdown_to_google_doc/SKILL.md) | Markdown → Google Doc upload |
 | [google_doc_to_markdown](ops/google_doc_to_markdown/SKILL.md) | Google Doc → Markdown |
-| [show_edits_in_google_doc](ops/show_edits_in_google_doc/SKILL.md) | Inline editorial markup |
-| [accept_edits_google_doc](ops/accept_edits_google_doc/SKILL.md) | Finalize Doc markup |
+| [agent_editor](ops/agent_editor/SKILL.md) | Inline editorial markup (red/blue) |
+| [accept_agent_edits](ops/accept_agent_edits/SKILL.md) | Accept or reject agent_editor markup |
 | [evaluate_content](ops/evaluate_content/SKILL.md) | LLM content evaluation |
 | [publish_wordpress_from_google_doc](ops/publish_wordpress_from_google_doc/SKILL.md) | Doc → WordPress draft |
 | [youtube_transcription](ops/youtube_transcription/SKILL.md) | YouTube → transcript |

@@ -1,22 +1,22 @@
 ---
-name: accept_edits_google_doc
+name: accept_agent_edits
 description: >-
   Accept or reject inline red-strikethrough / blue-addition editorial markup in a
-  Google Doc after show_edits_in_google_doc. Trigger on "accept changes",
+  Google Doc after agent_editor. Trigger on "accept agent edits", "accept changes",
   "reject changes", "keep blue text", "remove red markup", or finalize editorial markup.
-"last updated": 2026-06-28T23:30:00+00:00
-"last run": never
+"last updated": 2026-09-20T20:00:00+00:00
+"last run": 2026-09-21
 ---
 
-# Accept edits in a Google Doc (inline markup)
+# Accept agent edits (inline markup)
 
 Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.
 
-Log prefix: `[run-debug] workflow=accept_edits_google_doc | RESOLVE | <facts>`
+Log prefix: `[run-debug] workflow=accept_agent_edits | RESOLVE | <facts>`
 
-Run after [show_edits_in_google_doc](../show_edits_in_google_doc/SKILL.md) has painted red/blue markup and the human has reviewed the Doc.
+Run after [agent_editor](../agent_editor/SKILL.md) has painted red/blue markup and the human has reviewed the Doc.
 
-Typical pipeline: editorial workflow → plan JSON → [show_edits_in_google_doc](../show_edits_in_google_doc/SKILL.md) → human review → this skill.
+Typical pipeline: editorial workflow → plan JSON → [agent_editor](../agent_editor/SKILL.md) → human review → this skill.
 
 ## Modes
 
@@ -34,7 +34,7 @@ Typical pipeline: editorial workflow → plan JSON → [show_edits_in_google_doc
 
 Tolerance ±0.08 per channel.
 
-Before accept: confirm inserted sections use correct `namedStyleType`. See [show_edits_in_google_doc paragraph styles](../show_edits_in_google_doc/SKILL.md#paragraph-styles-required-second-pass).
+Before accept: confirm inserted sections use correct `namedStyleType`. See [agent_editor paragraph styles](../agent_editor/SKILL.md#paragraph-styles-required-second-pass).
 
 ## Inputs
 
@@ -49,15 +49,18 @@ Follow the Google Docs API steps above. Workspaces may provide a local runner; t
 ```bash
 # Preview counts (no mutation) — example workspace runner (optional):
 python3 scripts/google_doc/resolve_doc_markup.py \
-  "https://docs.google.com/document/d/{DOC_ID}/edit" accept --dry-run
+  "https://docs.google.com/document/d/{DOC_ID}/edit" accept --dry-run \
+  --workspace {workspace_root}
 
 # Accept all markup (keep blue, delete red)
 python3 scripts/google_doc/resolve_doc_markup.py \
-  "https://docs.google.com/document/d/{DOC_ID}/edit" accept
+  "https://docs.google.com/document/d/{DOC_ID}/edit" accept \
+  --workspace {workspace_root}
 
 # Reject all markup (delete blue, restore red)
 python3 scripts/google_doc/resolve_doc_markup.py \
-  "https://docs.google.com/document/d/{DOC_ID}/edit" reject
+  "https://docs.google.com/document/d/{DOC_ID}/edit" reject \
+  --workspace {workspace_root}
 ```
 
 ## Credentials
@@ -79,6 +82,11 @@ Resolve from `{workspace_root}/credentials.json` per [setup/run_workflow/SKILL.m
 - Mode, deletion/addition range counts, Doc URL.
 - On live run: deleted range count and normalized (unstyled) range count.
 
+## Staging gate
+
+Do not stage or publish a Doc that still has red strikethrough or blue-addition markup. Run `resolve_doc_markup.py … accept --dry-run` first. If counts are non-zero, stop and tell the user to run this skill (accept or reject) before `{workspace_root}/_workflows/stage_content`.
+
 ## Related
 
-- [show_edits_in_google_doc](../show_edits_in_google_doc/SKILL.md) — paint approved plan as inline markup
+- [agent_editor](../agent_editor/SKILL.md) — paint approved plan as inline markup
+- [update_agent](../../edit/update_agent/SKILL.md) — produce path that paints markup and must not auto-accept

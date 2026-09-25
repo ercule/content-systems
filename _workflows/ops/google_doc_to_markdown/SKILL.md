@@ -5,7 +5,7 @@ description: >-
   Markdown (no model API required for the HTML-to-Markdown step). OAuth Bearer
   from merged repo credentials.
 "last updated": 2026-06-28T23:30:00+00:00
-"last run": 2026-09-01
+"last run": 2026-09-20
 ---
 
 # Google Doc to Markdown (shared)

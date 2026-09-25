@@ -3,8 +3,8 @@ name: update_agent_01_preflight
 description: >-
   Shared update agent step 1: verify config, credentials, paths, and inputs
   before fetch or model work.
-"last updated": 2026-06-28T23:30:00+00:00
-"last run": never
+"last updated": 2026-09-20
+"last run": 2026-09-24
 ---
 
 # Update agent — 01 Preflight
@@ -21,7 +21,7 @@ Stop with a clear error listing anything missing or broken. Do not continue to s
 | 03_fetch_source | `source_url` or workspace fetch steps; fetch_url or custom fetch |
 | 04_build_crosslinks | Page body from fetch; SerpAPI for site-restricted results |
 | 05_regenerate | Enhancement model (Gemini or Anthropic); optional prompt files |
-| 07_doc_handoff | Google Drive upload; optional Sheets calendar notify |
+| 07_doc_handoff | Google Drive upload; Docs API (`documents` scope); [apply_inline_doc_markup.py](../../../../scripts/google_doc/apply_inline_doc_markup.py); optional Sheets calendar notify |
 
 ## Validate configuration
 
@@ -36,17 +36,18 @@ Load `{workspace_root}/credentials.json` and resolve `@ref` per run_workflow.
 
 | Secret / API | Required when | Probe |
 |--------------|---------------|-------|
-| `google.oauth_token_unified` | Always (Doc handoff) | Refresh token once (`POST {token_uri}`) |
+| `google.oauth_token_unified` | Always (Doc handoff + agent_editor) | Refresh token once (`POST {token_uri}`) |
 | `serpapi.api_key` | crosslinks SerpAPI path | Present and non-empty |
-| `anthropic.api_key` or Gemini equivalent | Regenerate step | Present per configured model |
+| `anthropic.api_key` or Gemini equivalent | Markup-plan step | Present per configured model |
 | `drive_folder_id` | Doc upload | From config or credentials; non-empty |
 
-When `calendar.spreadsheet_id` is set, confirm Google OAuth scopes cover Sheets write.
+When `calendar.spreadsheet_id` is set, confirm Google OAuth scopes cover Sheets write. Confirm Documents scope for inline markup (`https://www.googleapis.com/auth/documents`).
 
 ## Probe paths
 
 - `source_url` — when required, `HEAD` or lightweight GET returns 2xx (follow one redirect).
 - `drive_folder_id` — Drive `files.get` or folder metadata returns 2xx.
+- Agent editor runner — `{content_systems_public}/scripts/google_doc/apply_inline_doc_markup.py` exists.
 
 Log: `[run-debug] workflow=_workflows/update_agent | PREFLIGHT | ok workspace=… source=… drive=…`
 

@@ -2,8 +2,7 @@
 name: generate_article_04_package_prompt
 description: >-
   Step 04: write one prompt in four parts (two-sentence brief, seven voice
-  bullets, extra instructions, then all copied context verbatim). End this run
-  until the user accepts the pack.
+  bullets, extra instructions, then all copied context verbatim). Then continue to the draft.
 "last updated": 2026-08-17T00:40:00+00:00
 "last run": 2026-08-23
 ---
@@ -14,9 +13,7 @@ Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) befo
 
 Start this step after [../03_research/SKILL.md](../03_research/SKILL.md). Require `RUN_DIR/context/`, `{id-or-slug}-inventory.md`, `{id-or-slug}-relevant-articles.md`, and `{id-or-slug}-crosslinks.md`. If any are missing, list them and end the run.
 
-When `prompt-pack.md` and `prompt-pack.approved` already exist in `RUN_DIR`, leave the pack and go to [../05_draft/SKILL.md](../05_draft/SKILL.md).
-
-When `prompt-pack.md` exists and `prompt-pack.approved` is missing, return the existing pack and follow **End this run**. Do not rewrite the pack.
+When `prompt-pack.md` already exists in `RUN_DIR`, it is approved. Leave the pack and go to [../05_draft/SKILL.md](../05_draft/SKILL.md).
 
 ## Inputs
 
@@ -77,7 +74,7 @@ Paste every copied context file in full, in path-sorted order under `RUN_DIR/con
 
 Lines:
 
-- `status: awaiting_prompt_approval`
+- `status: prompt_approved`
 - `run_dir:` plus the `RUN_DIR` path
 - `title:` plus the article title
 
@@ -85,8 +82,8 @@ Lines:
 
 Return a pointer to `prompt-pack.md` to the user.
 
-If a person is in this chat: wait until they accept the pack (`yes`, `approved`, or equivalent). Then write an empty file `prompt-pack.approved` in `RUN_DIR`, set `run-status.md` to `status: prompt_approved`, and go to [../05_draft/SKILL.md](../05_draft/SKILL.md).
+If a person is in this chat: wait until they accept the pack (`yes`, `approved`, or equivalent). Then write an empty file `prompt-pack.md` in `RUN_DIR`, set `run-status.md` to `status: prompt_approved`, and go to [../05_draft/SKILL.md](../05_draft/SKILL.md).
 
-If no person is watching: end here. A later job starts at [../01_preflight/SKILL.md](../01_preflight/SKILL.md). That job continues through 02, 03, and 04 (reuse) into 05 only after `prompt-pack.approved` exists.
+If no person is watching: end here. A later job starts at [../01_preflight/SKILL.md](../01_preflight/SKILL.md). That job continues through 02, 03, and 04 (reuse) into 05 only after `prompt-pack.md` exists.
 
-Log: `[run-debug] workflow=_workflows/generate/generate_article | PACK | status=awaiting_prompt_approval path={RUN_DIR}/prompt-pack.md`
+Log: `[run-debug] workflow=_workflows/generate/generate_article | PACK | status=prompt_approved path={RUN_DIR}/prompt-pack.md`

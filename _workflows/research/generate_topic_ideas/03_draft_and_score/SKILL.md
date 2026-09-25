@@ -3,8 +3,8 @@ name: generate_topic_ideas_03_draft_and_score
 description: >-
   Step 03 for generate_topic_ideas: draft, prune, tag, and score 30–45
   unbranded topics from the research notes.
-"last updated": 2026-08-31T03:45:00+00:00
-"last run": 2026-08-30
+"last updated": 2026-09-17T04:45:00+00:00
+"last run": 2026-09-22
 ---
 
 # Generate topic ideas — 03 Draft and score
@@ -50,7 +50,7 @@ Output: the refined list of 30–45 topics, one per line.
 
 ## STEP 6 — Define tags and assign one tag per topic
 
-Define 4–7 high-level topical tags that capture the main areas for this brand. Examples of tag styles: `core data`, `analytics`, `supply chain`, `category & assortment`, `promotion & media`, `ai & agents`, `people & culture`.
+Define 4–7 high-level topical tags that capture the main areas for this brand. Follow the tag style on the [orchestrator](../SKILL.md#topic-quality-rules).
 
 Tags:
 
@@ -86,7 +86,7 @@ Save `{workspace_root}/tmp/generate_topic_ideas/topics.json` as a JSON array:
 
 ```json
 [
-  { "topic": "remote debugging", "tag": "dev tools", "relevance": 5 }
+  { "topic": "data pipelines", "tag": "platform", "relevance": 5 }
 ]
 ```
 

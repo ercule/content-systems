@@ -2,7 +2,7 @@
 name: generate_article_05_draft
 description: >-
   Step 05: write the article from the approved prompt pack. Requires
-  prompt-pack.approved. Follows that pack as the only spec.
+  prompt-pack.md. Follows that pack as the only spec.
 "last updated": 2026-08-16T05:30:00+00:00
 "last run": never
 ---
@@ -11,7 +11,7 @@ description: >-
 
 Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
-Start this step after [../04_package_prompt/SKILL.md](../04_package_prompt/SKILL.md). Require `prompt-pack.md` and `prompt-pack.approved` in `RUN_DIR`. If either is missing, report `status=awaiting_prompt_approval` and end this run with no manuscript.
+Start this step after [../04_package_prompt/SKILL.md](../04_package_prompt/SKILL.md). Require `prompt-pack.md` in `RUN_DIR`. If it is present, it is approved. If it is missing, name the missing file and stop.
 
 ## Input
 

@@ -4,7 +4,7 @@ description: >-
   Step 04 for generate_topic_ideas: write scored topics to markdown and JSON
   files.
 "last updated": 2026-08-31T03:45:00+00:00
-"last run": 2026-08-30
+"last run": 2026-09-22
 ---
 
 # Generate topic ideas — 04 Output

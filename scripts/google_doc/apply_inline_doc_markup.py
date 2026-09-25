@@ -2,7 +2,7 @@
 """Apply inline red-strikethrough / blue-addition editorial markup to a Google Doc.
 
 Reads a JSON plan (replaces, inserts, section blocks) and applies markup via
-documents.batchUpdate. Palette matches show_edits_in_google_doc defaults.
+documents.batchUpdate. Palette matches agent_editor defaults.
 """
 from __future__ import annotations
 
@@ -22,10 +22,12 @@ RED = {"red": 0.77, "green": 0.13, "blue": 0.12}
 BLUE = {"red": 0.0, "green": 0.4, "blue": 0.8}
 
 
-def load_token() -> str:
-    oauth = json.loads((workspace_root(__file__) / "credentials.json").read_text())[
-        "google"
-    ]["oauth_token_unified"]
+def load_token(workspace: Path | None = None) -> str:
+    root = workspace.resolve() if workspace else workspace_root(__file__)
+    creds = root / "credentials.json"
+    if not creds.is_file():
+        raise SystemExit(f"credentials.json not found at {creds}")
+    oauth = json.loads(creds.read_text())["google"]["oauth_token_unified"]
     body = urllib.parse.urlencode(
         {
             "grant_type": "refresh_token",
@@ -292,6 +294,42 @@ def pass_paragraph_styles(doc_id: str, token: str, body: list, plan: dict):
         batch(doc_id, token, requests, "paragraph_styles")
 
 
+def section_blocks_range(full: str, spans, section: dict) -> tuple[int, int] | None:
+    """API start/end covering every block in an inserted section."""
+    anchor = section.get("paragraph_style_anchor")
+    blocks = [(b["style"], b["text"]) for b in section.get("blocks", [])]
+    if not anchor or not blocks:
+        return None
+    start = full.find(anchor)
+    if start < 0:
+        return None
+    end = start + sum(len(chunk) for _, chunk in blocks)
+    return char_to_api(spans, start), char_to_api(spans, end)
+
+
+def pass_reblue_inserted_sections(doc_id: str, token: str, body: list, plan: dict):
+    """Named paragraph styles reset color; paint inserted section text blue again."""
+    sections = []
+    if plan.get("insert_section"):
+        sections.append(plan["insert_section"])
+    sections.extend(plan.get("insert_sections") or [])
+    if not sections:
+        return
+    full, spans = build_index(body)
+    requests = []
+    for section in sections:
+        rng = section_blocks_range(full, spans, section)
+        if not rng:
+            print(
+                "[run-debug] inline_markup | pass=reblue_insert | "
+                "skipped (anchor not found)"
+            )
+            continue
+        requests.append(blue_style(*rng))
+    if requests:
+        batch(doc_id, token, requests, "reblue_insert")
+
+
 def pass_trim(doc_id: str, token: str, plan: dict):
     trim = plan.get("trim_replacements", [])
     if not trim:
@@ -326,6 +364,11 @@ def main():
         type=Path,
         help="JSON plan (replaces, styled_replaces, insert_after, strike_only, insert_section, insert_sections, trim_replacements)",
     )
+    parser.add_argument(
+        "--workspace",
+        type=Path,
+        help="Client workspace root containing credentials.json (default: walk up from this script)",
+    )
     args = parser.parse_args()
     doc_id = doc_id_from_arg(args.doc)
     plan = load_plan(args.plan)
@@ -346,8 +389,8 @@ def main():
         )
 
     try:
-        token = load_token()
-        print(f"[run-debug] workflow=show_edits_in_google_doc | APPLY_INLINE | doc_id={doc_id}")
+        token = load_token(args.workspace)
+        print(f"[run-debug] workflow=agent_editor | APPLY_INLINE | doc_id={doc_id}")
         body = fetch_body(doc_id, token)
         pass_color_markup(doc_id, token, body, plan)
         body = fetch_body(doc_id, token)
@@ -360,6 +403,8 @@ def main():
         pass_styled_replaces(doc_id, token, body, plan)
         body = fetch_body(doc_id, token)
         pass_paragraph_styles(doc_id, token, body, plan)
+        body = fetch_body(doc_id, token)
+        pass_reblue_inserted_sections(doc_id, token, body, plan)
         pass_trim(doc_id, token, plan)
     except urllib.error.HTTPError as e:
         print(e.read().decode()[:500], file=sys.stderr)

@@ -12,7 +12,7 @@ description: >-
 
 Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
-Start this step after [../05_draft/SKILL.md](../05_draft/SKILL.md). Require `{id-or-slug}.md` and `prompt-pack.approved` in `RUN_DIR`. If either is missing, follow the missing-file stop in 05_draft.
+Start this step after [../05_draft/SKILL.md](../05_draft/SKILL.md). Require `{id-or-slug}.md` and `prompt-pack.md` in `RUN_DIR`. If either is missing, follow the missing-file stop in 05_draft.
 
 ## Inputs
 
@@ -50,4 +50,4 @@ Overwrite `{id-or-slug}.md` in `RUN_DIR`.
 
 Log: `[run-debug] workflow=_workflows/generate/generate_article | COMPONENTS | added={list}`
 
-Next: [../07_mechanical_rewrite/SKILL.md](../07_mechanical_rewrite/SKILL.md)
+Next: [../07_mechanical_catalog/SKILL.md](../07_mechanical_catalog/SKILL.md)

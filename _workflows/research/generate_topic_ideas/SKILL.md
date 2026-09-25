@@ -5,8 +5,8 @@ description: >-
   unbranded 1–4 word topics with one tag and a 0–5 relevance score to a
   markdown file. Use when the user asks to generate topic ideas or run
   topic research for a brand.
-"last updated": 2026-08-31T03:45:00+00:00
-"last run": 2026-08-30
+"last updated": 2026-09-17T04:45:00+00:00
+"last run": 2026-09-22
 ---
 
 # Generate topic ideas
@@ -57,7 +57,7 @@ These rules apply to every row before it is written, in step 03:
 - Length: 1–4 words, preferably 1–2. Letters and numbers only, plus punctuation that is part of a technical term.
 - Form: unbranded conceptual hubs. Each topic can host many long-tail queries. Use category language only.
 - Case: Topic and Tag are lowercase.
-- Tags: 4–7 short human-readable phrases (examples of tag style: `core data`, `analytics`, `supply chain`, `category & assortment`, `promotion & media`, `ai & agents`, `people & culture`). Each topic gets exactly one tag. Use each tag on multiple topics.
+- Tags: 4–7 short human-readable phrases (examples of tag style: `platform`, `use cases`, `integrations`, `operations`, `ai`). Each topic gets exactly one tag. Use each tag on multiple topics.
 - Relevance: 5 = core to the brand's product and main narrative; 4 = very important, strong adjacency; 3 = relevant but supporting; 2 = tangential or niche; 1–0 = weak.
 - Count: 30–45 rows after prune. Draft 50–70 candidates, then merge near-duplicates and drop topics that are too generic, too long-tail, or only weakly connected to the brand.
 

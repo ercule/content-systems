@@ -9,7 +9,7 @@ description: >-
   _clients/{client}/_workflows/ops/stage_content/SKILL.md when the client
   has no ops/stage skill.
 "last updated": 2026-08-16T00:00:00+00:00
-"last run": 2026-09-01
+"last run": 2026-09-20
 ---
 
 # Stage (shared)
@@ -116,6 +116,7 @@ On success, report the CMS editor URL and preview URL. Write the editor URL back
 - Do not log CMS tokens, JWTs, or Google OAuth secrets.
 - Do not stage a row with no Doc URL.
 - Do not treat Strategy-tab topics as Calendar rows.
+- Do not stage a Google Doc that still has red strikethrough or blue-addition [agent_editor](../agent_editor/SKILL.md) markup. Run [accept_agent_edits](../accept_agent_edits/SKILL.md) first (`resolve_doc_markup.py … accept --dry-run`; stop if counts are non-zero).
 
 ## End of run
 

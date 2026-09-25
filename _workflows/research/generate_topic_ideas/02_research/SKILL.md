@@ -4,7 +4,7 @@ description: >-
   Step 02 for generate_topic_ideas: research the brand, competitors, and
   category trends, then write structured notes for draft and score.
 "last updated": 2026-08-31T03:45:00+00:00
-"last run": 2026-08-30
+"last run": 2026-09-22
 ---
 
 # Generate topic ideas — 02 Research

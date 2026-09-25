@@ -8,7 +8,7 @@ description: >-
   the next call. All workflows that create Docs from Markdown must delegate
   here.
 "last updated": 2026-08-18T06:20:00+00:00
-"last run": 2026-09-03
+"last run": 2026-09-24
 ---
 
 # Markdown to Google Doc (shared)
@@ -25,7 +25,7 @@ Callers own prompt generation, link checks, sheet notify, and CMS staging. This 
 
 Callers:
 
-- update_agent step 06 — assembles handoff Markdown (body + change summary), then calls this skill with `preset: update_agent_default`.
+- update_agent step 07 — uploads the **original** article (no List of changes), then agent_editor paints markup. Calls this skill with `preset: update_agent_default`.
 - [google_doc_to_markdown](../google_doc_to_markdown/SKILL.md) — inverse (read Doc → Markdown).
 
 ## Inputs
@@ -56,7 +56,7 @@ OAuth: refresh token from `{workspace_root}/credentials.json` → `oauth_token_u
 |--------|-----------------|----------------------|-------|-----------------|
 | `standalone_article` | None | No | standard | llm_article_writer produce steps (body only before template extras) |
 | `no_metadata` | None | No | standard | buyers_guide, solutions_page, and similar long-form outputs |
-| `update_agent_default` | Original URL, Generated, Changes made | Yes | standard | update_agent step 06 |
+| `update_agent_default` | Original URL, Generated | Yes | standard | update_agent step 07 |
 | `video_article` | Caller-supplied items (source video, video ID, generated, pipeline) | Yes | standard | video_article_pipeline output steps |
 | `custom_metadata` | Caller `metadata_items` | Usually yes | standard | update_agent (post id, slug, etc.), competitive_pages (HTML comment headers) |
 
@@ -122,12 +122,11 @@ When preset is `update_agent_default` or caller uses equivalent items:
 <ul>
   <li><strong>Original URL:</strong> <a href="{url}">{url}</a></li>
   <li><strong>Generated:</strong> {YYYY-MM-DD HH:MM:SS} UTC</li>
-  <li><strong>Changes made:</strong> Crosslinks added: N; FAQ section: Yes|No</li>
 </ul>
 <hr />
 ```
 
-update_agent step 06 builds handoff Markdown (regenerated body plus a `## Changes made` section), then calls this skill with `preset: update_agent_default` or passes assembled `markdown` with `preset: standalone_article`.
+update_agent step 07 uploads the original article only. Do not prepend `## List of changes`. Red/blue [agent_editor](../agent_editor/SKILL.md) markup is the review surface. Do not add a "Changes made" metadata line.
 
 ## HTML shell
 

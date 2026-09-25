@@ -4,7 +4,7 @@ description: >-
   Step 01 for generate_topic_ideas: verify credentials, brand inputs, and
   output path before research or file writes.
 "last updated": 2026-08-31T03:45:00+00:00
-"last run": 2026-08-30
+"last run": 2026-09-22
 ---
 
 # Generate topic ideas — 01 Preflight

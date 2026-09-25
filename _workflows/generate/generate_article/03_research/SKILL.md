@@ -5,6 +5,9 @@ description: >-
   for this title. Later steps must use on-site URLs from the crosslinks list.
 "last updated": 2026-08-17T00:40:00+00:00
 "last run": 2026-08-23
+tools:
+  - web_search
+  - fetch_url
 ---
 
 # Generate article — 03 Research

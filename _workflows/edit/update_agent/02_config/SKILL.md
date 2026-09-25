@@ -4,7 +4,7 @@ description: >-
   Shared update agent step 2: resolve workspace_root, source URL, FAQ flag, fetch
   steps, prompt paths, and Drive folder from workspace config and credentials.
 "last updated": 2026-06-28T23:30:00+00:00
-"last run": never
+P26-09-20
 ---
 
 # Update agent — 02 Config
@@ -26,7 +26,7 @@ Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) befo
 4. Resolve `drive_folder_id` from config, else credentials, else stop and ask.
 5. Resolve `include_faq` from chat override, else config (default `true`).
 6. Resolve `source_fetch_steps` from config (may be empty).
-7. Resolve `enhance_prompt_path` and `diff_summary_prompt_path` relative to `{workspace_root}/_workflows/edit/update_agent/` when set.
+7. Resolve `enhance_prompt_path` and `diff_summary_prompt_path` relative to `{workspace_root}/_workflows/edit/update_agent/` when set. `diff_summary_prompt_path` is unused for the review Doc.
 8. Log `[run-debug] workflow=_workflows/update_agent | CONFIG | workspace=… include_faq=… fetch_steps=N`.
 
 ## Outputs (carry forward)

@@ -4,7 +4,7 @@
 Accept: delete red strikethrough text; keep blue text and reset it to default body style.
 Reject: delete blue text; keep red text and reset it to default body style.
 
-Markup colors match show_edits_in_google_doc inline markup defaults.
+Markup colors match agent_editor inline markup defaults.
 """
 from __future__ import annotations
 
@@ -25,8 +25,12 @@ ADD_RGB = (0.0, 0.4, 0.8)
 RGB_TOLERANCE = 0.08
 
 
-def load_token() -> str:
-    creds = json.loads((workspace_root(__file__) / "credentials.json").read_text())
+def load_token(workspace: Path | None = None) -> str:
+    root = workspace.resolve() if workspace else workspace_root(__file__)
+    creds_path = root / "credentials.json"
+    if not creds_path.is_file():
+        raise SystemExit(f"credentials.json not found at {creds_path}")
+    creds = json.loads(creds_path.read_text())
     oauth = creds["google"]["oauth_token_unified"]
     body = urllib.parse.urlencode(
         {
@@ -281,18 +285,23 @@ def main():
         action="store_true",
         help="Report markup counts without mutating the Doc",
     )
+    parser.add_argument(
+        "--workspace",
+        type=Path,
+        help="Client workspace root containing credentials.json (default: walk up from this script)",
+    )
     args = parser.parse_args()
     doc_id = doc_id_from_arg(args.doc)
 
     try:
-        token = load_token()
+        token = load_token(args.workspace)
         stats = resolve(token, doc_id, args.mode, args.dry_run)
     except urllib.error.HTTPError as e:
         print(e.read().decode()[:500], file=sys.stderr)
         raise SystemExit(1) from e
 
     print(
-        f"[run-debug] workflow=accept_edits_google_doc | RESOLVE | "
+        f"[run-debug] workflow=accept_agent_edits | RESOLVE | "
         f"mode={stats['mode']} | dry_run={stats['dry_run']} | "
         f"deletion_ranges={stats['deletion_ranges']} | addition_ranges={stats['addition_ranges']}"
     )

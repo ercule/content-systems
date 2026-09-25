@@ -4,7 +4,7 @@ description: >-
   Shared update agent step 3: load the current page as HTML or Markdown via
   fetch_url or workspace-specific fetch steps declared in config.
 "last updated": 2026-06-28T23:30:00+00:00
-"last run": never
+P26-09-20
 ---
 
 # Update agent — 03 Fetch source

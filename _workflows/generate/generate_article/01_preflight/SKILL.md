@@ -18,7 +18,7 @@ Read the orchestrator [../SKILL.md](../SKILL.md). List every missing or broken c
 - 02_context_pack: `_context/`; [sync_assets](../../../../setup/sync_assets/SKILL.md); creates or reuses `RUN_DIR`
 - 03_research: `site_url`; [fetch_url](../../../ops/fetch_url/SKILL.md)
 - 04_package_prompt: files from 02 and 03
-- 05_draft: `prompt-pack.md` and `prompt-pack.approved` in the run folder
+- 05_draft: `prompt-pack.md` in the run folder
 - 06_components: manuscript; `components` list from config
 - 07_mechanical_rewrite: manuscript after components
 - 08_output: final Markdown; `drive_folder_id`; [markdown_to_google_doc](../../../ops/markdown_to_google_doc/SKILL.md)
@@ -42,14 +42,12 @@ Find the candidate folder:
 1. If `run_dir` is supplied, that folder is the candidate.
 2. Else look under `tmp/generate_article/{id-or-slug}/`. If several timestamp folders exist, use the newest that contains `prompt-pack.md`.
 
-Reuse (candidate contains `prompt-pack.md` and `prompt-pack.approved`):
+Reuse (candidate contains `prompt-pack.md`):
 
 - Set `RUN_DIR` to that folder so step 02 can reuse it.
 - If `title` is omitted, read it from `RUN_DIR/run-status.md`.
 
-Awaiting approval (candidate contains `prompt-pack.md` and no `prompt-pack.approved`):
-
-- Report `status=awaiting_prompt_approval` and end this run. Do not start 05. Do not start 02.
+- `prompt-pack.md` on disk is approval. Continue. Do not wait.
 
 New pack (no candidate, or the candidate has no `prompt-pack.md`):
 

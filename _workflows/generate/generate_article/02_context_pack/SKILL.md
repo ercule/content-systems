@@ -27,7 +27,7 @@ Run [sync_assets](../../../../setup/sync_assets/SKILL.md) from the workspace roo
 
 ## 2. Remove leftover tmp for this slug
 
-Under `tmp/generate_article/{id-or-slug}/`, delete timestamp folders that contain neither `prompt-pack.md` nor `prompt-pack.approved`. Never delete a folder that contains either of those files.
+Under `tmp/generate_article/{id-or-slug}/`, delete timestamp folders that contain no `prompt-pack.md`. Never delete a folder that contains either of those files.
 
 ## 3. Create a new run folder
 

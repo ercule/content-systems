@@ -8,7 +8,7 @@ description: >-
   REQUIRED: post Browserbase live view URL to the user immediately after session
   create (see Live session link section); never only in run-debug logs.
 "last updated": 2026-07-13T20:00:00+00:00
-"last run": 2026-06-28
+"last run": 2026-09-07
 ---
 
 # Browser automation (shared)

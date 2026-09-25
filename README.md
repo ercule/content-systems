@@ -4,7 +4,7 @@ Open-source agent skills for content operations, a foundation for agentic market
 
 Most marketing teams have tools (CMS, docs, sheets, analytics) and knowledge (messaging decks, brand guides, competitive intel) scattered across systems. Agents can connect those pieces, but only if you give them two things: something to know and something to follow. This repo provides the "follow" part (shared, reusable skills) and a shape for the "know" part (your messaging canon).
 
-This repository includes a demo brain called [Gallivant](_context/reference/gallivant-origin.md), a fictional enterprise travel-and-expense company used to try the system before you plug in a real brand, built on an extension of Janessa Lantz's [context builder](https://github.com/janessa-lantz/context-builder/). It also includes production-ready hands: Google Doc markup, FAQ pipelines, page refresh, WordPress publish, and more.
+This repository includes a demo brain called [Gallivant](_context/reference/gallivant-origin.md), a fictional enterprise travel-and-expense company used to try the system before you plug in a real brand, built on an extension of Janessa Lantz's [context builder](https://github.com/janessa-lantz/context-builder/). It also includes production-ready hands: agent editor (Google Doc markup), FAQ pipelines, page refresh, WordPress publish, and more.
 
 ## Getting started
 
@@ -75,7 +75,7 @@ Each architectural or layout rule lives in one canonical file. This README orien
 
 ## Example context: Gallivant
 
-The `_context/` folder includes fictional Gallivant messaging so you can see the system work before touching a real brand. Gallivant is an invented enterprise travel-and-expense company. Use it to see how canon files, such as `canon-*.md` and `brand-writing-identity.md`, constrain what an agent generates; to run the `evaluate_content` skill against known-good and known-bad samples; and to practice the editorial markup pipeline without touching a real CMS.
+The `_context/` folder includes fictional Gallivant messaging so you can see the system work before touching a real brand. Gallivant is an invented enterprise travel-and-expense company. Use it to see how canon files, such as `canon-*.md` and `brand-writing-identity.md`, constrain what an agent generates; to run the `evaluate_content` skill against known-good and known-bad samples; and to practice the agent editor pipeline without touching a real CMS.
 
 When you're ready for production, swap `_context/` for your company's messaging brain and keep the same hands.
 
