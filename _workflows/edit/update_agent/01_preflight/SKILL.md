@@ -4,7 +4,7 @@ description: >-
   Shared update agent step 1: verify config, credentials, paths, and inputs
   before fetch or model work.
 "last updated": 2026-09-20
-"last run": 2026-09-24
+"last run": 2026-09-27
 ---
 
 # Update agent — 01 Preflight
