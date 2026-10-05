@@ -15,7 +15,8 @@
   },
   "anthropic": {
     "model_smart": "claude-sonnet-5",
-    "model_fast": "claude-haiku-4-5"
+    "model_fast": "claude-haiku-4-5",
+    "max_tokens": 64000
   },
   "workflows_path": "."
 }

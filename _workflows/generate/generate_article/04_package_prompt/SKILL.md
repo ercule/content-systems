@@ -40,7 +40,7 @@ Exactly two sentences.
 
 Sentence 1 must follow this shape: Write an article with the title [title] for [company], [N] words.
 
-Example: Write an article with the title What is an expense report for Gallivant, 1200 words.
+Example: Write an article with the title What is an expense report for Gallivant, 1400 words.
 
 Use the run `title`, the company name from context, and `target_word_count` for N.
 

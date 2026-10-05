@@ -4,7 +4,7 @@ description: >-
   Shared execution context for all workflow skills: runtime HTTP contract, context assembly,
   credential resolution, small-step runs
 "last updated": 2026-08-15T00:00:00+00:00
-"last run": 2026-09-27
+"last run": 2026-10-05
 ---
 
 Canonical execution contract for workflow skills. [README.md § Documentation map](../../README.md#documentation-map).
@@ -45,6 +45,8 @@ Delete or wipe `tmp/` when this skill is run.
 ## AI models
 
 Only use models for which resolved credentials exist.
+
+Anthropic Messages calls use `max_tokens` from root `config.json` → `anthropic.max_tokens` (64000). Reasoning tokens count toward that cap. Do not send 8192 or 16000 for a long draft.
 
 ## End of run
 

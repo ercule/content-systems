@@ -28,7 +28,7 @@ Read the orchestrator [../SKILL.md](../SKILL.md). List every missing or broken c
 1. Walk up from this skill until you find `config.json`. That folder is the workspace root.
 2. Read `workflow_specific.generate_article` from the orchestrator config list. End the run if the block is missing.
 3. `site_url` and `drive_folder_id` must be non-empty.
-4. Use `target_word_count` 1200 and `min_first_party_links` 7 when those keys are omitted.
+4. Use `target_word_count` 1400 and `min_first_party_links` 7 when those keys are omitted.
 5. `components` values must be from this list: `key_takeaways`, `faqs`, `categories`. Use `key_takeaways` and `faqs` when the key is omitted.
 
 ## Validate inputs

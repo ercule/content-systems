@@ -24,9 +24,10 @@
     "max_tokens": 30000
   },
   "anthropic": {
-    "_comment": "Model IDs (non-secret).",
+    "_comment": "Model IDs (non-secret). max_tokens must cover reasoning plus the reply; 8192 truncates long drafts on current Sonnet.",
     "model_smart": "claude-sonnet-5",
-    "model_fast": "claude-haiku-4-5"
+    "model_fast": "claude-haiku-4-5",
+    "max_tokens": 64000
   },
   "workflows_path": "."
 }

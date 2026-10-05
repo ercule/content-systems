@@ -29,7 +29,7 @@ Set this block in `config.json`:
     "generate_article": {
       "site_url": "https://example.com",
       "drive_folder_id": "",
-      "target_word_count": 1200,
+      "target_word_count": 1400,
       "min_first_party_links": 7,
       "components": ["key_takeaways", "faqs"]
     }
@@ -39,7 +39,7 @@ Set this block in `config.json`:
 
 - `site_url`: site host for research, relevant articles, and crosslinks
 - `drive_folder_id`: Drive folder for the output Doc
-- `target_word_count`: body length target (default 1200). Key takeaways and FAQs sit outside this count
+- `target_word_count`: body length target (default 1400). Key takeaways and FAQs sit outside this count
 - `min_first_party_links`: how many distinct on-site URLs the crosslinks file and draft must include (default 7)
 - `components`: extra blocks step 06 adds. Values: `key_takeaways`, `faqs`, `categories`
 

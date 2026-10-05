@@ -18,11 +18,7 @@ The Doc is a copy of the live article. Markup is the review surface. Never prepe
 
 1. Assemble `markdown` (or `html_fragment`) from the **fetched original** (`source_markdown` or converted `source_html`). Start with `# {source_title}` when the body does not already include that H1.
 2. Set `doc_name` to `{source_title} (update)` unless the workspace overrides it.
-3. Run [../../../ops/markdown_to_google_doc/SKILL.md](../../../ops/markdown_to_google_doc/SKILL.md) with:
-
-- `markdown` — original article only
-- `doc_name`, `folder_id` — `drive_folder_id` from step 02
-- `preset: update_agent_default` (Original URL + Generated metadata, then the original body)
+3. Call `export_google_doc` with `path` set to the manuscript in RUN_DIR and `title` set to the Doc name. The tool reads the Drive folder from the client config.
 
 Inputs from upstream for metadata and logging:
 

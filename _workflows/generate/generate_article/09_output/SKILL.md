@@ -1,10 +1,12 @@
 ---
 name: generate_article_09_output
 description: >-
-  Step 09: create the Google Doc from final Markdown via the shared
-  markdown_to_google_doc skill, then delete the run folder on success.
+  Step 09: create the Google Doc from final Markdown by calling
+  export_google_doc, then delete the run folder on success.
 "last updated": 2026-08-16T05:30:00+00:00
 "last run": never
+tools:
+  - export_google_doc
 ---
 
 # Generate article — 09 Output
@@ -15,14 +17,7 @@ Start this step after [../08_mechanical_rewrites/SKILL.md](../08_mechanical_rewr
 
 ## Delivery
 
-Call [markdown_to_google_doc](../../../ops/markdown_to_google_doc/SKILL.md) with:
-
-- `markdown`: contents of `{id-or-slug}.md` in `RUN_DIR`
-- `doc_name`: H1 plain text from that file
-- `folder_id`: `workflow_specific.generate_article.drive_folder_id`
-- `preset`: `standalone_article`
-
-Pass those four inputs. Conversion, HTML shell, upload, and the post-upload check live in markdown_to_google_doc.
+Call `export_google_doc` with `path` set to the manuscript in RUN_DIR and `title` set to the Doc name. The tool reads the Drive folder from the client config.
 
 ## After a successful upload
 
