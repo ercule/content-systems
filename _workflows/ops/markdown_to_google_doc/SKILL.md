@@ -8,7 +8,7 @@ description: >-
   the next call. All workflows that create Docs from Markdown must delegate
   here.
 "last updated": 2026-08-18T06:20:00+00:00
-"last run": 2026-10-12
+"last run": "2026-10-20"
 ---
 
 # Markdown to Google Doc (shared)
@@ -19,7 +19,7 @@ Log line prefix: `[run-debug] workflow=<caller> | markdown_to_google_doc | <fact
 
 ## First action
 
-If Justin asked to create a Google Doc, this skill is the whole job, including one-off memos with no generate_article caller. Read this file, convert Markdown to HTML here, wrap it in the standard shell, and upload with Drive multipart (`mimeType: application/vnd.google-apps.document`). Jeeves is only for finding `folder_id`, setting link sharing after a successful upload, and reading the export to verify. `google_doc_create`, Docs `insertText`, and `createParagraphBullets` are not the conversion path: they split list items that contain `[text](url)` or a bare `https://` URL, drop a leading `#` heading, and inherit 10pt spaceBelow on bullets in branded templates.
+If Justin asked to create a Google Doc, this skill is the whole job, including one-off memos with no generate_article caller. Read this file, convert Markdown to HTML here, wrap it in the standard shell, and upload with Drive multipart (`mimeType: application/vnd.google-apps.document`). MCP helper tools are only for finding `folder_id`, setting link sharing after a successful upload, and reading the export to verify. `google_doc_create`, Docs `insertText`, and `createParagraphBullets` are not the conversion path: they split list items that contain `[text](url)` or a bare `https://` URL, drop a leading `#` heading, and inherit 10pt spaceBelow on bullets in branded templates.
 
 Callers own prompt generation, link checks, sheet notify, and CMS staging. This skill owns HTML conversion, shell wrapping, Drive upload, and post-upload verification. Workspace steps link here instead of copying block rules, inline escaping, the DOCTYPE shell, or the multipart recipe.
 
@@ -64,7 +64,7 @@ When a caller skill specifies stricter layout rules than a preset (for example a
 
 ## Procedure (always run in order)
 
-For a one-off memo: resolve `folder_id` (Jeeves `gdrive_list_files` is fine), `doc_name`, and `markdown`, then run these steps with `preset: standalone_article` or `no_metadata`.
+For a one-off memo: resolve `folder_id` (an MCP `gdrive_list_files` call is fine), `doc_name`, and `markdown`, then run these steps with `preset: standalone_article` or `no_metadata`.
 
 1. Convert — If `markdown` is set, walk it top to bottom using [Block rules](#block-rules) and [Inline rules](#inline-rules). Emit one HTML fragment (no outer `<html>` / `<body>`). Each source bullet that contains a link must become one `<li>` with an `<a href>` inside it.
 2. Metadata — When the preset or `metadata_items` requires it, prepend the metadata `<ul>`, then optional `<hr />`, then the article fragment. When preset is `standalone_article` or `no_metadata`, the body is the fragment only.
@@ -187,7 +187,7 @@ When `verify_export` is true:
 1. `GET https://www.googleapis.com/drive/v3/files/{id}/export?mimeType=text/plain&supportsAllDrives=true`
 2. Plain export must contain **zero** literal `<a href`, `</a>`, `<strong>`, or `**` sequences.
 3. Spot-check that at least one known body link exported as a real hyperlink.
-4. Also export `mimeType=text/html`. If the source had a list item containing a URL or `[text](url)`, that item must still be **one** `<li>` — not split into extra bullets. If it split, the upload used Jeeves `google_doc_create` or equivalent; recycle and redo via this skill.
+4. Also export `mimeType=text/html`. If the source had a list item containing a URL or `[text](url)`, that item must still be **one** `<li>` — not split into extra bullets. If it split, the upload used `google_doc_create` or an equivalent MCP tool instead of this skill; recycle and redo via this skill.
 
 ## Failure handling
 
