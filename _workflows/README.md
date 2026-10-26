@@ -53,7 +53,7 @@ Verb-first workflow folder names (`update_agent`, `build_crosslinks`, `stage_con
 | [accept_agent_edits](ops/accept_agent_edits/SKILL.md) | Accept or reject agent_editor markup |
 | [evaluate_content](ops/evaluate_content/SKILL.md) | LLM content evaluation |
 | [publish_wordpress_from_google_doc](ops/publish_wordpress_from_google_doc/SKILL.md) | Doc → WordPress draft |
-| [youtube_transcription](ops/youtube_transcription/SKILL.md) | YouTube → transcript |
+| [youtube_transcription](ops/youtube_transcription/SKILL.md) | YouTube or audio → transcript (Apple Speech Analyzer, not Whisper) |
 | [wikitext_editing](ops/wikitext_editing/SKILL.md) | Wikitext helpers |
 | [browser_automation](ops/browser_automation/SKILL.md) | Browserbase fallback |
 | [rewrite_and_remove](ops/rewrite_and_remove/SKILL.md) | Catalog AI-tells in a draft, then rewrite each catalog row |

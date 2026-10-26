@@ -1,51 +1,27 @@
 ---
 name: utilities_youtube_transcription
 description: >-
-  Transcribe YouTube videos locally with yt-dlp and Whisper when caption APIs
-  or timedtext are unavailable. Use when the user asks for a local transcript
-  fallback.
-"last updated": 2026-06-28T23:30:00+00:00
-"last run": "2026-08-26"
+  Transcribe a YouTube URL or local audio file with Apple SpeechAnalyzer.
+  Do not use Whisper or YouTube captions. Use when a workflow needs a transcript.
+"last updated": 2026-10-18T23:50:00+00:00
+"last run": never
 ---
 
-# YouTube transcription (local fallback)
+# YouTube transcription
 
-Many workspace workflows use [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) with an HTTP-first contract (timedtext, vendor APIs, etc.). This skill is separate: it runs yt-dlp plus OpenAI Whisper on the machine. Use it only when that local stack is appropriate (developer machine, batch jobs, or when the user explicitly wants Whisper output).
+Do not use Whisper, mlx-whisper, openai-whisper, the Whisper API, or YouTube timedtext.
 
-## When to use
+Follow [apple_speech_analyzer](../../../../../ercule-internal/workflows/apple_speech_analyzer/SKILL.md) (`$HOME/git/ercule-internal/workflows/apple_speech_analyzer/SKILL.md`). That skill is the procedure. Do not restate it here.
 
-- User asks to transcribe a YouTube URL locally.
-- HTTP caption fetches return empty or blocked and the user agrees to a local fallback.
-- You need a plain-text transcript file on disk for downstream editing (not for skills that forbid local runners — check the active workflow).
+## Run
 
-## Prerequisites
-
-- `yt-dlp` and `openai-whisper` installed in a workspace-local venv (not committed to this repo).
-- FFmpeg on `PATH` (`brew install ffmpeg` on macOS).
-- Whisper downloads model weights on first use (`base` is a reasonable default).
-
-## How to run
-
-From a workspace venv with yt-dlp and whisper installed:
+Outside the Cursor sandbox (`required_permissions: ["all"]`):
 
 ```bash
-yt-dlp -x --audio-format mp3 -o "downloads/%(title)s.%(ext)s" "https://www.youtube.com/watch?v=VIDEO_ID"
-whisper downloads/*.mp3 --model base --output_dir youtube_transcripts --output_format txt
+python3 {content_systems_public_root}/scripts/video_transcription/yt.py \
+  "https://www.youtube.com/watch?v=VIDEO_ID"
 ```
 
-Write output to `{workspace_root}/tmp/` or another scratch directory gitignored by the workspace.
+`yt.py` forwards every argument to `scripts/transcribe.py`, including `--phrases` and `--output-dir`.
 
-## Outputs
-
-- Plain-text transcript file suitable for downstream editing.
-- Remove temporary audio downloads after a successful run.
-
-## Operational notes
-
-- First run can take 30–60+ seconds loading Whisper; transcription time scales with audio length and model size.
-- Respect copyright and site terms; use for internal / licensed content as appropriate.
-- If installs fail, print the error and fix the environment (missing FFmpeg, etc.) before retrying.
-
-## Related
-
-- [Run a skill (shared context)](../../../setup/run_workflow/SKILL.md) — default patterns for credential-backed HTTP workflows.
+Read the path printed as `Transcript saved to:`. Drop the title line and the `====` separator. The body is the transcript. The script deletes the audio.
