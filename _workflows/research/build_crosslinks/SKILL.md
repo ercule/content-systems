@@ -5,7 +5,7 @@ description: >-
   crosslinks.json from site nav when missing, then select links for the target
   keyword (SerpAPI + workspace crosslinks.json).
 "last updated": 2026-06-28T23:30:00+00:00
-P26-09-20
+"last run": 2026-10-18
 ---
 
 # Build crosslinks

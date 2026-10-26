@@ -7,7 +7,7 @@ description: >-
   "agent editor", "show edits in the doc", "red blue markup", or apply editorial
   plan to Google Doc.
 "last updated": 2026-09-20T20:00:00+00:00
-"last run": 2026-10-12
+"last run": 2026-10-18
 P26-09-20
 ---
 
