@@ -106,7 +106,7 @@ If plain text is all you have, wrap the body in a Markdown fenced code block tit
 
 Perform conversion in the agent (no `generateContent` or other model HTTP call for this step unless a different workflow explicitly adds one). Strip Drive or Docs boilerplate wrappers, `style` blocks, and scripts. Map semantic HTML to GitHub-flavored Markdown: headings, paragraphs, ordered and unordered lists, links, bold, italic, code where obvious. Tables: preserve as Markdown tables when column count is stable; otherwise keep a simplified list form and note the compromise.
 
-If the HTML contains forbidden or unknown tags, flatten to text or Markdown equivalents and note what dropped.
+If the HTML contains disallowed or unknown tags, flatten to text or Markdown equivalents and note what dropped.
 
 ## Output
 

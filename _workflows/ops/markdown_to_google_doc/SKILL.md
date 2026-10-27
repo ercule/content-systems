@@ -85,7 +85,7 @@ Drive's HTML → Google Doc import breaks when `<ul>` / `<li>` / `<p>` boundarie
 
 Allowed tags: `h1`–`h4`, `p`, `ul`, `ol`, `li`, `a`, `strong`, `em`, `code`, `pre`, `blockquote`, `br`, `table`, `thead`, `tbody`, `tr`, `th`, `td`, `hr`.
 
-Forbidden: `script`, `iframe`, `img`, `svg`, `style`, `video`, `object`, `embed`, `input`, `form`. Link schemes: `http`, `https`, `mailto` only.
+Strip these tags: `script`, `iframe`, `img`, `svg`, `style`, `video`, `object`, `embed`, `input`, `form`. Link schemes: `http`, `https`, `mailto` only.
 
 ## Inline rules
 
