@@ -43,9 +43,9 @@ From chat or caller:
 - Google OAuth for Sheets: `{workspace_root}/credentials.json` at `google.oauth_token_unified`.
 - Anthropic: `{workspace_root}/credentials.json` at `anthropic.api_key`, used for question extraction.
 
-Do not log API keys, OAuth tokens, raw source bodies, or full model prompts.
+Redact API keys and OAuth tokens as `***` in logs, and omit raw source bodies and full model prompts.
 
-Process sources incrementally. For each source bundle, extract, filter, build rows, and append them before moving to the next bundle. Do not collect every question first and append once at the end. This keeps partial progress visible and protects it if the run fails.
+Process sources incrementally. For each source bundle, extract, filter, build rows, and append them before moving to the next bundle. Append after each bundle instead of collecting every question first. This keeps partial progress visible and protects it if the run fails.
 
 ## 1. Extract Questions From One Source Bundle
 
@@ -63,12 +63,12 @@ Rules:
 - Use sentence case.
 - Return only questions relevant to the topic: {topic}
 - Each question must be fully-formed: start with a question word or auxiliary verb, end with exactly one "?", and read as a complete grammatical question.
-- Do not output keyword phrases or noun fragments with a "?" appended.
-- Do not output LLM-probe or instruction text (e.g. "return the url", "my location is"), compound queries, or questions about unrelated third-party brands.
+- Output only genuine questions, not keyword phrases or noun fragments with a "?" appended.
+- Output single, on-topic questions, leaving out LLM-probe or instruction text (e.g. "return the url", "my location is"), compound queries, and questions about unrelated third-party brands.
 - Ignore blocked-network text, cookie banners, nav chrome, and scrape errors.
 - Prefer questions that are explicitly present in the source.
 - The source text is in page order. Prefer questions that appear higher up (title and opening text) over questions lower down (later comments/replies), and return them in that order.
-- Do not include commentary, numbering, Markdown, or duplicate questions.
+- Output unique questions only, as plain text without commentary, numbering, or Markdown.
 
 Source text (in page order, top to bottom):
 <<<
@@ -76,7 +76,7 @@ Source text (in page order, top to bottom):
 >>>
 ```
 
-Parse the model response as JSON. Models often wrap JSON in Markdown fences or add a short sentence before it. Before parsing, strip surrounding fences and take the substring from the first `{` to the last `}`. Do not `JSON.parse` the raw response directly; a fenced payload can fail and drop every question from the source.
+Parse the model response as JSON. Models often wrap JSON in Markdown fences or add a short sentence before it. Before parsing, strip surrounding fences and take the substring from the first `{` to the last `}`. Parse only the extracted substring; a fenced payload can fail and drop every question from the source.
 
 If parsing still fails:
 
@@ -117,11 +117,11 @@ Build one row per surviving question:
   - `Reddit {thread_url}` for Reddit results.
   - `GSC {top_page_url}` where `{top_page_url}` is the page that showed up in the Search Console results.
 
-Do not write `Response Page`, `Draft Response`, `LLM Response`, `Mentioned`, `Topics`, `% Mentioned`, or any other column here. The optional `Response Page` and `Draft Response` columns are handled by the separate [generate_faq_responses](../../../generate/generate_faq_responses/SKILL.md) workflow.
+Write only the `Topic`, `Question`, and `Source` columns here; leave `Response Page`, `Draft Response`, `LLM Response`, `Mentioned`, `Topics`, `% Mentioned`, or any other column here. The optional `Response Page` and `Draft Response` columns are handled by the separate [generate_faq_responses](../../../generate/generate_faq_responses/SKILL.md) workflow.
 
 ## 4. Append Rows To FAQ Coverage As You Go
 
-Append rows for the current source bundle right after you build them, then move on to the next bundle. Do not wait for all sources to finish.
+Append rows for the current source bundle right after you build them, then move on to the next bundle. Append without waiting for all sources to finish.
 
 Append to the mapped `Topic`, `Question`, and `Source` columns in `FAQ Coverage` using the Sheets append endpoint:
 
@@ -137,7 +137,7 @@ Use an encoded range that covers the three output columns, for example:
 'FAQ Coverage'!A:C
 ```
 
-Appending one row per call is fine. To reduce request volume, you may append the surviving rows from one source bundle in one small call. Do not hold rows across multiple bundles to batch later. After each successful append, update the in-memory dedupe sets. Mine and append GSC questions the same way.
+Appending one row per call is fine. To reduce request volume, you may append the surviving rows from one source bundle in one small call. Append each bundle's rows before moving on. After each successful append, update the in-memory dedupe sets. Mine and append GSC questions the same way.
 
 Record the appended row number for each row from the append response `updates.updatedRange` (e.g. `'FAQ Coverage'!A124:C124` -> row `124`; a batched append returns a contiguous block, so map each row in append order). Collect these into `appended_rows_detail` so the [generate_faq_responses](../../../generate/generate_faq_responses/SKILL.md) workflow can fill the optional columns on the exact rows.
 

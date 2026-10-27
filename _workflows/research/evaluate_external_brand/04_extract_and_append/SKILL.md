@@ -29,15 +29,15 @@ From chat or caller:
 - Google OAuth for Sheets: `{workspace_root}/credentials.json` at `google.oauth_token_unified`.
 - Anthropic: `{workspace_root}/credentials.json` at `anthropic.api_key`, used for paragraph extraction.
 
-Do not log API keys, OAuth tokens, raw page bodies, or full model prompts.
+Redact API keys and OAuth tokens as `***` in logs, and omit raw page bodies and full model prompts.
 
-Process pages incrementally. For each external result, fetch → extract → append before moving to the next. Do not collect every mention first and append once at the end; this keeps partial progress visible if the run fails.
+Process pages incrementally. For each external result, fetch → extract → append before moving to the next. Append after each page instead of collecting every mention first; this keeps partial progress visible if the run fails.
 
 ## 1. Fetch the page (local Playwright — the only path)
 
 For each `external_results` entry, in order, render the page with a local Playwright Chromium browser and extract `document.body.innerText` after the page has had time to hydrate. This is the **only** fetch path: there is no shared-skill fetch, no `curl` fallback, and no SERP-snippet fallback.
 
-Use a local Playwright runtime. If Playwright is not already available, create an ephemeral virtualenv or temporary package install for the run, install Playwright and Chromium, and remove the temporary files before finishing. Do not commit runner scripts, package manifests, browser caches, or other generated artifacts.
+Use a local Playwright runtime. If Playwright is not already available, create an ephemeral virtualenv or temporary package install for the run, install Playwright and Chromium, and remove the temporary files before finishing. Keep runner scripts, package manifests, browser caches, and other generated artifacts out of commits.
 
 ### Runtime setup (load-bearing — this is where runs actually break)
 
@@ -83,9 +83,9 @@ If the primary attempt returns a transient navigation error, a timeout, a non-2x
 3. Keep the best rendered body across attempts. If any attempt produces a 2xx response and >=200 chars of text, use that body for extraction.
 4. If all attempts fail, record the page in `failed_pages` with `url`, final `status`, `chars`, `attempts`, and a short `reason`, then write `Mention = (No data)`.
 
-Do not substitute the search snippet, `curl` HTML, or any other source as a fallback — Playwright-rendered page text is the only source allowed for verbatim mentions.
+Use Playwright-rendered page text as the only source (no search snippet, `curl` HTML, or other fallback) — Playwright-rendered page text is the only source allowed for verbatim mentions.
 
-Expect a handful of `403` bot walls on every brand SERP. Review-aggregator and finance hosts reliably block headless Chromium — observed on `g2.com`, `capterra.com`, `trustpilot.com`, and `seekingalpha.com`. These are normal `(No data)` rows after the bounded retries above, not a runtime bug; don't burn time retrying them further.
+Expect a handful of `403` bot walls on every brand SERP. Review-aggregator and finance hosts reliably block headless Chromium — observed on `g2.com`, `capterra.com`, `trustpilot.com`, and `seekingalpha.com`. These are normal `(No data)` rows after the bounded retries above, not a runtime bug; stop retrying them after the bounded retries.
 
 Log:
 
@@ -111,7 +111,7 @@ Return JSON only:
 { "mention": "the exact paragraph text", "mentions_brand": true }
 
 Rules:
-- Copy an exact, unmodified span of the page text character for character. Do not paraphrase, summarize, translate, fix grammar/spelling, reorder, or stitch sentences from different places. The returned text must appear verbatim in the page.
+- Copy an exact, unmodified span of the page text character for character. Keep the original wording, spelling, and order within a single place on the page. The returned text must appear verbatim in the page.
 - Return exactly one paragraph (you may trim surrounding boilerplate/nav/whitespace).
 - Ignore cookie banners, navigation, "related articles" lists, ads, and scrape-error text.
 - If no paragraph actually describes or mentions {workspace_name}, set "mentions_brand" to false and return "mention": "".
@@ -123,22 +123,22 @@ Page text (top to bottom):
 >>>
 ```
 
-Parse the response as JSON. Models often wrap JSON in Markdown fences or add a sentence first: before parsing, strip surrounding fences and take the substring from the first `{` to the last `}`. Do not `JSON.parse` the raw response directly.
+Parse the response as JSON. Models often wrap JSON in Markdown fences or add a sentence first: before parsing, strip surrounding fences and take the substring from the first `{` to the last `}`. Parse only the extracted substring.
 
 If parsing fails, retry once with a short output-repair prompt. If it still fails, treat the page as no mention found and log the first 500 characters of the response.
 
 ### Verbatim verification (required gate)
 
-The model only *selects* the paragraph; it must never *author* it. Before a mention is allowed onto the sheet, confirm it is an exact span of the page:
+The model only *selects* the paragraph; it only selects. Before a mention is allowed onto the sheet, confirm it is an exact span of the page:
 
-1. Normalize both strings the same way: collapse every run of whitespace (spaces, tabs, newlines) to a single space and trim. Do not lowercase, strip punctuation, or alter characters — normalization is whitespace only.
+1. Normalize both strings the same way: collapse every run of whitespace (spaces, tabs, newlines) to a single space and trim. Keep case, punctuation, and characters as they are — normalization is whitespace only.
 2. Check that the normalized `mention` is a contiguous substring of the normalized rendered `document.body.innerText` from step 1.
-3. If it is **not** a substring, the model paraphrased, translated, fixed grammar, or stitched text together. Retry once with a repair instruction: "Return only an exact, unmodified span of the page text — copy it character for character, do not edit it." Re-run the same substring check on the retry.
-4. If the retry still fails the substring check, do not write the model's text. Set the cell to `(No data)` and record the page in `failed_pages` with reason `non_verbatim`.
+3. If it is **not** a substring, the model paraphrased, translated, fixed grammar, or stitched text together. Retry once with a repair instruction: "Return only an exact, unmodified span of the page text — copy it character for character, copy it as is." Re-run the same substring check on the retry.
+4. If the retry still fails the substring check, write `(No data)` instead of the model's text. Set the cell to `(No data)` and record the page in `failed_pages` with reason `non_verbatim`.
 
 Only mentions that pass this check (or the explicit `(...)` placeholders) are written. The cell value is taken from the page text span, not re-emitted by the model.
 
-Expect a non-trivial share of `non_verbatim` results — roughly a quarter of fetched pages in practice — and don't treat them as a bug. Review-aggregator, vendor-profile, and Q&A pages (e.g. Gartner, Quora, Atlassian Marketplace, company-profile roundups) render the brand description as fragmented list items, star ratings, and stitched UI text, so there is often no single contiguous paragraph to quote. The gate correctly rejects the model's reconstructed sentence and writes `(No data)`. That is the gate doing its job, not a failure to fix.
+Expect a non-trivial share of `non_verbatim` results — roughly a quarter of fetched pages in practice — and treat them as expected. Review-aggregator, vendor-profile, and Q&A pages (e.g. Gartner, Quora, Atlassian Marketplace, company-profile roundups) render the brand description as fragmented list items, star ratings, and stitched UI text, so there is often no single contiguous paragraph to quote. The gate correctly rejects the model's reconstructed sentence and writes `(No data)`. That is the gate doing its job, not a failure to fix.
 
 Log:
 
@@ -148,10 +148,10 @@ Log:
 
 Apply the [Mention quality rules](../SKILL.md#mention-quality-rules):
 
-- Use the verified page-text span (trimmed and whitespace-collapsed), capped at ~1200 characters (keep the leading brand-relevant portion if longer). When you cap a long paragraph, only truncate — never add or alter characters, so the cell stays an exact prefix of the page span.
+- Use the verified page-text span (trimmed and whitespace-collapsed), capped at ~1200 characters (keep the leading brand-relevant portion if longer). When you cap a long paragraph, only truncate — keep characters unchanged, so the cell stays an exact prefix of the page span.
 - If `mentions_brand` is false or `mention` is empty, set the cell to `(no relevant paragraph found)`. Still write the row so the gap is visible.
 - If the mention failed the verbatim verification gate above, set the cell to `(No data)`. Still write the row.
-- If the page could not be fetched after the bounded Playwright retries in step 1, set the cell to `(No data)`. Keep the detailed fetch reason in `failed_pages`; do not fall back to the search snippet.
+- If the page could not be fetched after the bounded Playwright retries in step 1, set the cell to `(No data)`. Keep the detailed fetch reason in `failed_pages`; leave the search snippet out.
 
 Log:
 
@@ -161,7 +161,7 @@ Log:
 
 ## 3. Append the row as you go
 
-Right after extracting a page's mention, append one row to the sheet, then move on to the next page. Do not batch to the end.
+Right after extracting a page's mention, append one row to the sheet, then move on to the next page. Append row by row.
 
 ```http
 POST https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{encodedRange}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS

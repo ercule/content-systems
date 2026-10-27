@@ -53,7 +53,7 @@ Params:
 
 Google no longer honors `num` or a hand-built `start` offset reliably: a single call returns only the first page (~5–10 organic results), and reissuing the same query with `start=10/20/…` just returns page 1 again. **Paginate by following the `serpapi_pagination.next` URL** from each response instead of constructing `start` yourself. Append `api_key` to that `next` URL and keep following it until you have covered positions 1–`max_results` or there is no `next` link. (Verified behavior: a manual `start` loop collapses to ~10 results; following `next` for 5 pages yields ~50.)
 
-The per-page `position` field **resets to 1–10 on every page**, so it is not a global rank. Do not dedupe or cap on the raw `position`. Compute an **absolute position** yourself as `(page_index * 10) + local_position` (or simply the running count of results seen in page order), and **dedupe by normalized `link`**, not by `position`. Deduping by the raw `position` will silently collapse every page down to ~10 results — this was a real bug.
+The per-page `position` field **resets to 1–10 on every page**, so it is not a global rank. Dedupe and cap on the computed absolute position. Compute an **absolute position** yourself as `(page_index * 10) + local_position` (or simply the running count of results seen in page order), and **dedupe by normalized `link`**, not by `position`. Deduping by the raw `position` will silently collapse every page down to ~10 results — this was a real bug.
 
 From each response, read the `organic_results` array. For each result keep `link` (the page URL), `title`, `snippet`, and the computed absolute position. Ignore non-organic blocks (ads, people-also-ask, knowledge graph, top stories).
 

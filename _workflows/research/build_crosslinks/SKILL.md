@@ -63,4 +63,4 @@ When the file already exists, skip bootstrap unless the caller asks to refresh t
 3. Rank entries relevant to the keyword and page topic; add SerpAPI site-restricted results when configured (`serpapi.api_key` in `{workspace_root}/credentials.json`).
 4. Emit `crosslinks`, `crosslinks_text` (one line per opportunity: `- {anchor} → {url}`), and `target_keyword`.
 
-Do not weave links into body copy here — update_agent step 05 does that.
+Leave weaving links into body copy to update_agent step 05.

@@ -18,7 +18,7 @@ Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before 
 
 Build calls at request time.
 
-Do not create, persist, or commit standalone runner scripts for this workflow. If a run needs local helper code, keep it ephemeral for that run only and remove it before finishing.
+Run this workflow without standalone runner scripts (no creating, persisting, or committing them). If a run needs local helper code, keep it ephemeral for that run only and remove it before finishing.
 
 ## What this does
 
@@ -49,7 +49,7 @@ Log line prefix:
 - `serp_location` — optional. SerpAPI `location`/`gl`/`hl` overrides; default unset (Google defaults).
 - `linter_model` — optional. Default `claude-sonnet-4-6` (root `config.json` at `anthropic.model_smart`). Must be a model on the permitted list in root `config.json`. Used to extract the relevant paragraph.
 
-Do not hardcode a workspace, brand string, or sheet ID in this shared skill. Always take them from chat or from `{workspace_root}/config.json`.
+Take the workspace, brand string, and sheet ID from chat or from `{workspace_root}/config.json`, keeping them out of this shared skill.
 
 ## Credentials
 
@@ -59,7 +59,7 @@ Read credentials from `{workspace_root}/credentials.json` (resolve `@ref` per ru
 - SerpAPI key: `serpapi.api_key`.
 - Anthropic key for paragraph extraction: `anthropic.api_key`.
 
-Refresh the Google access token once at the start of the run with `POST {token_uri}`. Reuse it for every Drive and Sheets call. Never log OAuth tokens, API keys, or raw prompt bodies.
+Refresh the Google access token once at the start of the run with `POST {token_uri}`. Reuse it for every Drive and Sheets call. Redact OAuth tokens and API keys as `***` in logs, and omit raw prompt bodies.
 
 ## Resolve workspace display name
 
@@ -68,11 +68,11 @@ Refresh the Google access token once at the start of the run with `POST {token_u
 1. If the caller passed `workspace_name`, use it verbatim.
 2. Else read `{workspace_root}/config.json` and use a `workspace_name` field if present.
 3. Else infer a candidate from the resolved apex domain (e.g. `acme.com` → `Acme`, `getwidget.io` → `Widget`) or this repo name.
-4. Show the inferred `workspace_name` and the exact two queries to the user and ask them to confirm or correct before running any search. The brand string materially changes the SERP, so do not guess silently.
+4. Show the inferred `workspace_name` and the exact two queries to the user and ask them to confirm or correct before running any search. The brand string materially changes the SERP, so ask instead of guessing.
 
 ## Sheet contract
 
-The workflow creates a brand-new spreadsheet (it never appends to an existing one). The single working tab uses this header row:
+The workflow creates a brand-new spreadsheet (it creates a new sheet each run). The single working tab uses this header row:
 
 ```text
 Site | Mention
@@ -86,7 +86,7 @@ Site | Mention
 These apply to every `Mention` before it is written, in step 04:
 
 - Keep exactly one paragraph per page: the one that most directly describes or characterizes the brand (what they are, what they do, a claim/opinion about them). Prefer a paragraph that names the brand.
-- Quote the page's own words. Lightly trim to a clean paragraph (collapse whitespace, drop trailing nav/boilerplate); do not paraphrase, summarize, translate, reorder, stitch together, or invent text.
+- Quote the page's own words. Lightly trim to a clean paragraph (collapse whitespace, drop trailing nav/boilerplate); keep the wording exact (no paraphrasing, summarizing, translating, reordering, stitching, or invented text).
 - Verbatim is mandatory and verified, not trusted. After the model returns a `mention`, the workflow must confirm it is a contiguous substring of the rendered page text (whitespace-normalized on both sides) before writing it. If it is not an exact span of the page, it is treated as a failed extraction — see step 04. The model selects which paragraph; it never authors the text.
 - Strip cookie banners, nav chrome, "related articles" lists, and scrape-error text.
 - If the page clearly ranks for the brand but no paragraph actually mentions or describes the brand (e.g. an unrelated page that merely contains the word), write `Mention = (no relevant paragraph found)` rather than forcing an unrelated quote. Still keep the row so the gap is visible.
@@ -101,7 +101,7 @@ Run these child skills in order:
 3. [03_serp_collection/SKILL.md](03_serp_collection/SKILL.md) — run the two brand SERPs (up to position `max_results`), merge, dedupe, and drop owned-domain results to produce `external_results`.
 4. [04_extract_and_append/SKILL.md](04_extract_and_append/SKILL.md) — render each external page with local Playwright, extract the relevant paragraph, and append each `Site | Mention` row to the sheet as soon as it is found.
 
-Append rows incrementally as each page is processed. Do not hold mentions in memory and write them only at the end of the run.
+Append rows incrementally as each page is processed. Write each mention as soon as it is found.
 
 The end state is a new Google Sheet in the workspace Drive folder with one `Site | Mention` row per external page (up to two queries × position 50, deduped). No website pages are edited.
 

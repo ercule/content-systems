@@ -60,11 +60,11 @@ Prefer a readable `sc-domain:{apex}`. Otherwise accept a readable URL-prefix pro
 
 Set `main_domain_host` to the resolved apex host (e.g. `acme.com`) so the [generate_faq_responses](../../../generate/generate_faq_responses/SKILL.md) workflow can look up main-domain Response Pages. Derive it from the matched property, the passed `gsc_site_url`, or the first candidate domain from `{workspace_root}/config.json`. If no domain can be determined, set it to null.
 
-If a candidate matches a property only at `siteUnverifiedUser`, skip GSC, log `gsc=skipped reason=insufficient_permission level=siteUnverifiedUser property={siteUrl}`, and report that the OAuth account must be granted Full or Restricted access to that property in Search Console (Settings -> Users and permissions). Do not attempt the query; it will `403`.
+If a candidate matches a property only at `siteUnverifiedUser`, skip GSC, log `gsc=skipped reason=insufficient_permission level=siteUnverifiedUser property={siteUrl}`, and report that the OAuth account must be granted Full or Restricted access to that property in Search Console (Settings -> Users and permissions). Skip the query; it will `403`.
 
 If the primary token finds no readable property (no match, or a match only at `siteUnverifiedUser`), and `google.oauth_token_unified_2` exists, refresh that fallback token and retry the sites lookup and property matching with it. Prefer the first account that yields a readable property. Log `gsc=fallback_token used=oauth_token_unified_2` when the fallback is what resolves the property.
 
-If no readable property matches under any available token, skip GSC, log `gsc=skipped reason=no_property`, and report which domains and accounts were tried. Do not guess an unverified property.
+If no readable property matches under any available token, skip GSC, log `gsc=skipped reason=no_property`, and report which domains and accounts were tried. Use only verified properties.
 
 ## 2. Mine GSC Questions
 
@@ -135,7 +135,7 @@ Question words:
 who, what, when, where, why, how, which, whom, whose, can, could, should, would, will, do, does, did, is, are, was, were, has, have, am
 ```
 
-Do not turn keyword phrases into questions. If a query only contains a question word mid-string, drop it unless it also contains `?`.
+Keep keyword phrases as they are, not rewritten into questions. If a query only contains a question word mid-string, drop it unless it also contains `?`.
 
 Normalize kept queries by trimming, collapsing whitespace, sentence-casing the first letter, and appending `?` if missing.
 

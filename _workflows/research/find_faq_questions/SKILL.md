@@ -15,7 +15,7 @@ description: >-
 
 Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.
 
-Do not create, persist, or commit standalone runner scripts for this workflow. If a run needs local helper code, keep it ephemeral for that run only and remove it before finishing.
+Run this workflow without standalone runner scripts (no creating, persisting, or committing them). If a run needs local helper code, keep it ephemeral for that run only and remove it before finishing.
 
 This shared workflow finds candidate questions from Reddit, LinkedIn, and Google Search Console. It appends only `Topic | Question | Source` rows to `FAQ Coverage`. The [generate_faq_responses](../../generate/generate_faq_responses/SKILL.md) workflow fills `Response Page` and `Draft Response` later.
 
@@ -40,7 +40,7 @@ Log line prefix:
 - `gsc_min_impressions` - optional, default `5` meaning strictly greater than 5 (keep queries with `impressions >= 6`).
 - `finder_model` - optional. Default `claude-sonnet-4-6` (root `config.json` at `anthropic.model_smart`). Must be a model on the permitted list in root `config.json`.
 
-Do not hardcode a sheet ID in this shared skill. Always take the sheet from chat or from a workspace wrapper skill.
+Take the sheet from chat or from a workspace wrapper skill, keeping sheet IDs out of this shared skill.
 
 ## Credentials
 
@@ -52,7 +52,7 @@ Read credentials from `{workspace_root}/credentials.json` (resolve `@ref` per ru
 - SerpAPI key: `serpapi.api_key`.
 - Anthropic key for question extraction: `anthropic.api_key`.
 
-Refresh the Google access token once at the start of the run with `POST {token_uri}`. Use the resulting access token on all Sheets calls. Never log OAuth tokens, API keys, or raw prompt bodies that contain sensitive workspace context.
+Refresh the Google access token once at the start of the run with `POST {token_uri}`. Use the resulting access token on all Sheets calls. Redact OAuth tokens and API keys as `***` in logs, and omit raw prompt bodies that contain sensitive workspace context.
 
 ## Sheet Contract
 
@@ -100,7 +100,7 @@ Only output a question that reads as a single, complete, grammatical question:
 - It must start with a question word (`who, what, when, where, why, how, which, whom, whose`) or an auxiliary/verb (`can, could, should, would, will, do, does, did, is, are, was, were, has, have, am`).
 - It must end with exactly one `?`.
 - Reject bare keyword phrases or noun fragments that merely have a `?` appended (e.g. `Tool that automatically finds and cleans up stale feature flags?`).
-- Use sentence case with a capitalized first letter. Do not paraphrase or invent a question from a keyword phrase; only keep questions that are already interrogative.
+- Use sentence case with a capitalized first letter. Keep the question as written; only keep questions that are already interrogative.
 
 ### Cap per source per topic
 
@@ -108,7 +108,7 @@ For each `(topic, source-type)` pair, output at most: 3 questions for `reddit`, 
 
 ### Use only recent Reddit and LinkedIn posts
 
-Only mine Reddit threads and LinkedIn posts/articles published within `source_max_age_months` (default 6), measured from today. Enforce recency from SerpAPI data: constrain the SERP query to a `tbs` date-range window of `[cutoff_date, today]`. When a result has an explicit SERP date, drop it if that date is before the cutoff. Do not skip undated results that come back inside the window. This rule does not apply to GSC, which is bounded by `gsc_lookback_days`.
+Only mine Reddit threads and LinkedIn posts/articles published within `source_max_age_months` (default 6), measured from today. Enforce recency from SerpAPI data: constrain the SERP query to a `tbs` date-range window of `[cutoff_date, today]`. When a result has an explicit SERP date, drop it if that date is before the cutoff. Keep undated results that come back inside the window. This rule does not apply to GSC, which is bounded by `gsc_lookback_days`.
 
 ## Run Order
 
@@ -120,7 +120,7 @@ Run these child skills in order:
 4. [04_gsc_questions/SKILL.md](04_gsc_questions/SKILL.md) — resolve the GSC property and mine GSC question candidates matched to Strategy topics.
 5. [05_extract_and_append/SKILL.md](05_extract_and_append/SKILL.md) — extract questions, filter them, and append each `Topic | Question | Source` row to `FAQ Coverage` as soon as it is found.
 
-Append rows incrementally as results are found. Do not hold questions in memory and write them only at the end of the run.
+Append rows incrementally as results are found. Write each question as soon as it is found.
 
 The end state is appended rows in `FAQ Coverage` with `Topic`, `Question`, and `Source` populated. No website pages are edited. To fill `Response Page` and `Draft Response` on those rows, run the [generate_faq_responses](../../generate/generate_faq_responses/SKILL.md) workflow next.
 

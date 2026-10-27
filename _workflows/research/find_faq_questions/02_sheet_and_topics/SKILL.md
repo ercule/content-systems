@@ -20,7 +20,7 @@ Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) befo
 
 - Google OAuth: `{workspace_root}/credentials.json` at `google.oauth_token_unified`.
 
-Refresh the Google access token once at the start of the workflow. Use it for every Sheets API call. Do not log tokens.
+Refresh the Google access token once at the start of the workflow. Use it for every Sheets API call. Redact tokens as `***` in logs.
 
 ## 1. Resolve Spreadsheet And Tabs
 
@@ -61,9 +61,9 @@ Topic | Question | Source | LLM Response | Draft Response | Response Page | Ment
 
 If row 1 is empty, write the preferred header row.
 
-If row 1 exists but any required header is missing, add the missing header at the end of the row. Do not rename existing headers unless the match is obvious and case-only.
+If row 1 exists but any required header is missing, add the missing header at the end of the row. Keep existing headers unless the match is obvious and case-only.
 
-Only this workflow's append step writes data. It writes `Topic`, `Question`, and `Source`. It must not write `Response Page` or `Draft Response`; those columns belong to the [generate_faq_responses](../../../generate/generate_faq_responses/SKILL.md) workflow.
+Only this workflow's append step writes data. It writes `Topic`, `Question`, and `Source`. It leaves `Response Page` and `Draft Response` empty; those columns belong to the [generate_faq_responses](../../../generate/generate_faq_responses/SKILL.md) workflow.
 
 ## 3. Build Dedupe Sets
 

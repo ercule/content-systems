@@ -26,7 +26,7 @@ From chat or caller:
 
 - Google OAuth for Drive + Sheets: `{workspace_root}/credentials.json` at `google.oauth_token_unified`. Scopes: `drive` and `spreadsheets`.
 
-Refresh the Google access token once at the start of the workflow. Reuse it for every Drive and Sheets call. Do not log tokens.
+Refresh the Google access token once at the start of the workflow. Reuse it for every Drive and Sheets call. Redact tokens as `***` in logs.
 
 ## 1. Read workspace config
 

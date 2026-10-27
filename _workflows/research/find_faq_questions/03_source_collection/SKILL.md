@@ -32,9 +32,9 @@ From chat or caller:
 
 ## 1. Collect Reddit And LinkedIn Sources
 
-For each topic, run enabled Reddit and LinkedIn searches. Process topics serially. Within one topic, sources may run in parallel if the user asked for parallelism and rate limits allow. Do not run a generic Google source. Use SerpAPI only to discover Reddit and LinkedIn URLs and snippets.
+For each topic, run enabled Reddit and LinkedIn searches. Process topics serially. Within one topic, sources may run in parallel if the user asked for parallelism and rate limits allow. Run only the Reddit and LinkedIn sources. Use SerpAPI only to discover Reddit and LinkedIn URLs and snippets.
 
-For each result, mine questions from SerpAPI fields in page order: title first, then snippet, highlighted words, and source description. Do not fetch Reddit pages. LinkedIn bodies may be fetched as a bonus only; do not depend on them. When a source is capped, keep questions that appear highest in the available text.
+For each result, mine questions from SerpAPI fields in page order: title first, then snippet, highlighted words, and source description. Mine Reddit from SerpAPI fields only. LinkedIn bodies may be fetched as a bonus only; treat them as optional. When a source is capped, keep questions that appear highest in the available text.
 
 ### Recency cutoff
 
@@ -42,7 +42,7 @@ Compute the cutoff once at the start of this step:
 
 - `cutoff_date` = today minus `source_max_age_months` months (default 6, so roughly 180 days back).
 
-Only Reddit threads and LinkedIn posts/articles published on or after `cutoff_date` may be mined. Enforce recency from SerpAPI data only. Do not fetch the source page to determine a date.
+Only Reddit threads and LinkedIn posts/articles published on or after `cutoff_date` may be mined. Enforce recency from SerpAPI data only. Take the date from SerpAPI data only.
 
 Constrain every SerpAPI query by date with a custom range so Google only returns results it dates within the window:
 
@@ -54,13 +54,13 @@ Apply recency from SerpAPI as follows:
 
 - Treat the `tbs` date-range window as the main recency gate.
 - When a result has a SERP date (top-level `date`, or a date parsed from the snippet), parse it and drop the source if it is before `cutoff_date`.
-- Do not skip a source merely because it has no explicit SERP `date`. The `tbs` window already bounds recency.
+- Keep a source even when it has no explicit SERP `date`. The `tbs` window already bounds recency.
 
 ### Reddit
 
 Call SerpAPI with query `{topic} site:reddit.com` and the recency `tbs` constraint above.
 
-Do not fetch `reddit.com` or the `.json` endpoint; both return `403` for unauthenticated/datacenter requests and there is no Reddit OAuth. Mine questions from the SerpAPI organic result itself, using these fields in page order:
+Use SerpAPI results for Reddit; `reddit.com` and the `.json` endpoint both return `403` for unauthenticated/datacenter requests and there is no Reddit OAuth. Mine questions from the SerpAPI organic result itself, using these fields in page order:
 
 - `title` (Reddit thread titles are frequently the FAQ itself, e.g. `Has AI automation actually worked for you?`).
 - `snippet` and `snippet_highlighted_words`.
@@ -72,9 +72,9 @@ Rank questions by where the text appears: `title` outranks `snippet`, which outr
 
 Call SerpAPI with query `{topic} site:linkedin.com` and the recency `tbs` constraint above.
 
-Mine questions from the same SerpAPI result fields as Reddit (`title`, `snippet`, `snippet_highlighted_words`, `about_this_result.source.description`), ranked by where they appear. LinkedIn article/post bodies sometimes load for unauthenticated clients; you may optionally fetch the body for richer text and rank questions higher when they appear near the top. Treat any fetched body as a bonus only: never depend on it, and never skip a source because the body failed to load.
+Mine questions from the same SerpAPI result fields as Reddit (`title`, `snippet`, `snippet_highlighted_words`, `about_this_result.source.description`), ranked by where they appear. LinkedIn article/post bodies sometimes load for unauthenticated clients; you may optionally fetch the body for richer text and rank questions higher when they appear near the top. Treat any fetched body as a bonus only: rely on the SerpAPI fields, and keep the source when the body fails to load.
 
-Apply the SerpAPI recency handling above. Use the `tbs` window as the recency gate and drop a source only when an explicit SERP date is before `cutoff_date`. Do not skip undated LinkedIn results that come back inside the window. Record each kept source as `LinkedIn` paired with the relevant LinkedIn post/article URL.
+Apply the SerpAPI recency handling above. Use the `tbs` window as the recency gate and drop a source only when an explicit SERP date is before `cutoff_date`. Keep undated LinkedIn results that come back inside the window. Record each kept source as `LinkedIn` paired with the relevant LinkedIn post/article URL.
 
 ## Outputs For Next Step
 
