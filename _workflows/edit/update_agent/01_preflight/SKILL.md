@@ -11,7 +11,7 @@ description: >-
 
 Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) before running this step.
 
-Stop with a clear error listing anything missing or broken. Do not continue to step 02 until preflight passes.
+Stop with a clear error listing anything missing or broken. Continue to step 02 only after preflight passes.
 
 ## Downstream inventory
 

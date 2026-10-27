@@ -34,7 +34,7 @@ When `source_fetch_steps` lists one or more workspace step skills (e.g. WordPres
 
 1. Run each step in order from `{workspace_root}/_workflows/edit/update_agent/`.
 2. The last step must emit the required outputs above.
-3. Do not fetch only one Prismic slice or one WordPress excerpt — the full article body the publish workflow will overwrite.
+3. Fetch the full article body the publish workflow will overwrite, not one Prismic slice or one WordPress excerpt.
 
 ## Normalization
 

@@ -24,13 +24,13 @@ Refresh an existing live page by copying the **current article** into a new Goog
 
 Typical edits: wrap existing phrases as internal crosslinks, append or improve FAQ when `include_faq` is true, replace stale "now" year references, plus any extras the workspace prompt names (Related reading, CTA, Key takeaways). Prefer wrap and insert over rewrite.
 
-Publishing to WordPress, Webflow, Prismic, HubSpot, or any other CMS is never part of this workflow. After review, run [accept_agent_edits](../../ops/accept_agent_edits/SKILL.md), then `{workspace_root}/_workflows/stage_content/SKILL.md` (add this skill when you publish to a CMS; see [setup/maintain_workflows/SKILL.md](../../../setup/maintain_workflows/SKILL.md)).
+Publishing to WordPress, Webflow, Prismic, HubSpot, or any other CMS stays outside this workflow. After review, run [accept_agent_edits](../../ops/accept_agent_edits/SKILL.md), then `{workspace_root}/_workflows/stage_content/SKILL.md` (add this skill when you publish to a CMS; see [setup/maintain_workflows/SKILL.md](../../../setup/maintain_workflows/SKILL.md)).
 
 ## Configuration
 
 Run this shared skill from `_workflows/edit/update_agent/SKILL.md`. Set `workflow_specific.update_agent` in `{workspace_root}/config.json` (see below).
 
-Optional: add a thin entry skill at `_workflows/edit/update_agent/SKILL.md` that resolves `workspace_root`, passes inputs, and links here — do not fork shared steps 05 or 07.
+Optional: add a thin entry skill at `_workflows/edit/update_agent/SKILL.md` that resolves `workspace_root`, passes inputs, and links here — reuse shared steps 05 and 07.
 
 ## Config block
 
@@ -60,7 +60,7 @@ In `{workspace_root}/config.json`:
 ```
 
 - `source_fetch_steps` — optional list of relative paths to workspace step skills that fetch the source and must output `source_url`, `source_title`, and `source_html` or `source_markdown`. When empty, step 03 uses [../../ops/fetch_url/SKILL.md](../../ops/fetch_url/SKILL.md) on a web URL from chat.
-- `include_faq` — when `false`, step 05 must not add an FAQ section.
+- `include_faq` — when `false`, step 05 adds no FAQ section.
 - `enhance_prompt_path` — optional workspace prompt. Template must instruct a JSON **markup plan** (agent_editor schema), not a replacement article, JSON CMS patches, or span indices.
 - `diff_summary_prompt_path` — unused for the review Doc (markup is the review surface). Leave empty.
 - `output_format` — `markdown` (default) or `html`. Step 07 uploads the **original** body via [../../ops/markdown_to_google_doc/SKILL.md](../../ops/markdown_to_google_doc/SKILL.md); convert HTML to Markdown first unless a workspace converter supplies `html_fragment`.
@@ -81,13 +81,13 @@ Step [06_human_gate/SKILL.md](06_human_gate/SKILL.md) is optional — use only w
 
 ## Invariants
 
-- Original Doc: step 07 uploads the fetched article as-is. Do not upload a regenerated replacement body. Do not prepend List of changes.
+- Original Doc: step 07 uploads the fetched article as-is. Upload the original body, not a regenerated replacement, with List of changes omitted.
 - Markup plan: step 05 returns agent_editor JSON only. Prefer `replaces` / `insert_after` / `insert_sections` over rewrite.
-- Preserve identity: keep the same topic, URL/slug target, and brand voice. Do not rewrite paragraphs except the dated-year rule and workspace-prompt extras that insert missing sections.
+- Preserve identity: keep the same topic, URL/slug target, and brand voice. Keep paragraphs as they are except the dated-year rule and workspace-prompt extras that insert missing sections.
 - Crosslinks: use the list from step 04; wrap existing phrases.
 - FAQ: when `include_faq` is true, append a clearly labeled FAQ when the page lacks one (or improve an existing FAQ in place via inserts).
-- Dated-year freshness: replace stale "now" year references (e.g. `in 2025`, `© 2025`) with the current calendar year from the runtime clock. Do not change historical or citation years.
-- Default end state: Google Doc URL in the workspace Drive folder, with red/blue markup still visible. No CMS write from this workflow. Do not run [accept_agent_edits](../../ops/accept_agent_edits/SKILL.md) unless the user asked to accept.
+- Dated-year freshness: replace stale "now" year references (e.g. `in 2025`, `© 2025`) with the current calendar year from the runtime clock. Keep historical and citation years.
+- Default end state: Google Doc URL in the workspace Drive folder, with red/blue markup still visible. No CMS write from this workflow. Run [accept_agent_edits](../../ops/accept_agent_edits/SKILL.md) only when the user asked to accept.
 
 ## After this workflow
 

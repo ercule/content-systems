@@ -14,7 +14,7 @@ Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) befo
 
 ## Doc upload (original article only)
 
-The Doc is a copy of the live article. Markup is the review surface. Never prepend List of changes. Never upload `enhanced_markdown` as a replacement body.
+The Doc is a copy of the live article. Markup is the review surface. Upload the original article with List of changes omitted, and keep `enhanced_markdown` out of the Doc body.
 
 1. Assemble `markdown` (or `html_fragment`) from the **fetched original** (`source_markdown` or converted `source_html`). Start with `# {source_title}` when the body does not already include that H1.
 2. Set `doc_name` to `{source_title} (update)` unless the workspace overrides it.
@@ -31,7 +31,7 @@ Inputs from upstream for metadata and logging:
 
 1. Export or `documents.get` the new Doc.
 2. For each `replaces` / `styled_replaces` `old`, each `insert_after` anchor, each `strike_only` string, and each `insert_section(s).insert_before`: confirm it appears. Normalize only trivial whitespace if needed.
-3. If any needle is missing, stop with the failing snippet. Do not paint a partial plan. Do not invent a different `old`.
+3. If any needle is missing, stop with the failing snippet. Paint the full plan or none of it, and keep each `old` as planned.
 4. Write the verified plan to `{workspace_root}/tmp/inline-markup-plan.json`.
 
 ## Paint markup (agent_editor)
@@ -45,7 +45,7 @@ python3 {content_systems_public}/scripts/google_doc/apply_inline_doc_markup.py \
   --workspace {workspace_root}
 ```
 
-Do not run [accept_agent_edits](../../../ops/accept_agent_edits/SKILL.md) in this step.
+Leave [accept_agent_edits](../../../ops/accept_agent_edits/SKILL.md) for a later run.
 
 ## Optional sheet notify
 
@@ -63,4 +63,4 @@ This workflow does not publish to the live site.
 
 ## Cleanup
 
-Delete `{workspace_root}/tmp/inline-markup-plan.json` after a successful apply unless the caller asked to keep it. Do not leave scratch Markdown or HTML dumps under `{workspace_root}/tmp/`.
+Delete `{workspace_root}/tmp/inline-markup-plan.json` after a successful apply unless the caller asked to keep it. Delete scratch Markdown or HTML dumps under `{workspace_root}/tmp/`.

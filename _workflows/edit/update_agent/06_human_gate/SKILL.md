@@ -16,10 +16,10 @@ Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) befo
 
 ## Steps
 
-1. Show the user a short inventory of `markup_plan` from step 05: replace count, insert_after count, insert_sections headings (FAQ questions, Related reading, CTA, and so on). Do not dump the full original article.
+1. Show the user a short inventory of `markup_plan` from step 05: replace count, insert_after count, insert_sections headings (FAQ questions, Related reading, CTA, and so on). Keep the inventory short, without the full original article.
 2. Ask: proceed to copy the original article into a Google Doc and paint this plan as red/blue markup?
 3. Continue only on `y` or `yes` (case-insensitive). Stop on anything else.
 
-Do not upload to Drive or write to any CMS before approval.
+Upload to Drive or write to a CMS only after approval.
 
 Next: [../07_doc_handoff/SKILL.md](../07_doc_handoff/SKILL.md)

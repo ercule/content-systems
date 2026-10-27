@@ -14,7 +14,7 @@ Read [setup/run_workflow/SKILL.md](../../../../setup/run_workflow/SKILL.md) befo
 
 ## Rule: markup plan only
 
-The model must return a single JSON object for [agent_editor](../../../ops/agent_editor/SKILL.md). Do not return:
+The model must return a single JSON object for [agent_editor](../../../ops/agent_editor/SKILL.md). Return only that JSON object, without:
 
 - A full replacement article (Markdown or HTML)
 - JSON CMS patches, span indices, or slice-level edits
@@ -48,13 +48,13 @@ Prefer:
 - replaces: wrap an existing verbatim phrase as a crosslink, or swap a stale "now" year
 - insert_after: short additive text when wrapping is not possible
 - insert_sections: FAQ (and similar missing sections) only
-Never rewrite paragraphs. Never invent a List of changes.
+Keep paragraphs as they are and omit a List of changes.
 
 `old` / insert anchors MUST be verbatim visible text from Original body.
 
 Crosslink `new` text: keep the same visible words as `old`, then a space and the absolute URL in parentheses.
 Example: ["records management", "records management (https://www.example.com/records/)"]
-Do not use Markdown [text](url) in `new` — insertText cannot create hyperlinks.
+Use plain text in `new` (no Markdown [text](url)) — insertText cannot create hyperlinks.
 
 Schema (omit empty keys or use empty arrays):
 {
@@ -77,9 +77,9 @@ Schema (omit empty keys or use empty arrays):
 }
 
 Requirements:
-- Weave internal links from CROSSLINK OPPORTUNITIES into existing phrases (typically 5–7 unless the workspace prompt says otherwise). Do not invent URLs.
-- FAQ section: {include_faq} — when yes and none exists, append via insert_sections with 3–5 Q&A pairs grounded in the page. When no, do not add FAQ.
-- Replace stale "now" year phrases with {current_year}; do not change historical or citation years.
+- Weave internal links from CROSSLINK OPPORTUNITIES into existing phrases (typically 5–7 unless the workspace prompt says otherwise). Use only URLs from the crosslink list.
+- FAQ section: {include_faq} — when yes and none exists, append via insert_sections with 3–5 Q&A pairs grounded in the page. When no, add no FAQ.
+- Replace stale "now" year phrases with {current_year}; keep historical and citation years.
 
 Original URL: {source_url}
 Title: {source_title}
@@ -99,7 +99,7 @@ Parse the response to one object: `markup_plan`. Strip markdown fences if presen
 
 Write `{workspace_root}/tmp/inline-markup-plan.json` (create `tmp/` if needed).
 
-Carry forward: `markup_plan`, `source_markdown` or `source_html` (unchanged original), `source_title`, `source_url`. Do not set `enhanced_markdown` to a replacement body. Do not build `change_summary_markdown` for the Doc.
+Carry forward: `markup_plan`, `source_markdown` or `source_html` (unchanged original), `source_title`, `source_url`. Keep `enhanced_markdown` out of the Doc body and skip `change_summary_markdown`.
 
 When this step's only output is one blob, emit the markup plan JSON only.
 
