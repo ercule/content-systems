@@ -57,6 +57,8 @@ Verb-first workflow folder names (`update_agent`, `build_crosslinks`, `stage_con
 | [wikitext_editing](ops/wikitext_editing/SKILL.md) | Wikitext helpers |
 | [browser_automation](ops/browser_automation/SKILL.md) | Browserbase fallback |
 | [rewrite_and_remove](ops/rewrite_and_remove/SKILL.md) | Catalog AI-tells in a draft, then rewrite each catalog row |
+| [editorial_catalog](ops/editorial_catalog/SKILL.md) | Detect AI-tell patterns and mechanical/house-style issues in one combined catalog, using the workspace's rule lists |
+| [editorial_replace](ops/editorial_replace/SKILL.md) | Apply the combined editorial catalog and overwrite the manuscript |
 
 ## Not shipped yet
 
