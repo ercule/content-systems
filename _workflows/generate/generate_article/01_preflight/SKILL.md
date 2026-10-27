@@ -47,13 +47,13 @@ Reuse (candidate contains `prompt-pack.md`):
 - Set `RUN_DIR` to that folder so step 02 can reuse it.
 - If `title` is omitted, read it from `RUN_DIR/run-status.md`.
 
-- `prompt-pack.md` on disk is approval. Continue. Do not wait.
+- `prompt-pack.md` on disk is approval. Continue immediately.
 
 New pack (no candidate, or the candidate has no `prompt-pack.md`):
 
 - `title` must be present. Step 02 will create `RUN_DIR`.
 
-This step never starts 05. After a pass, next is always 02.
+This step hands off to 02 only. After a pass, next is always 02.
 
 ## Probe credentials
 

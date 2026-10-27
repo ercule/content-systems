@@ -49,7 +49,7 @@ The required input is `title`. Other inputs live in [01_preflight/SKILL.md](01_p
 
 ## Run order
 
-Every run starts at 01 and walks 02, 03, 04, 05, 06, 07, 08, then 09. Do not skip a step. Do not start 05 from 01. Start each step only after the previous step has finished. Each step names the files it requires from the prior step; if those files are missing, list them and end the run.
+Every run starts at 01 and walks 02, 03, 04, 05, 06, 07, 08, then 09. Run every step in order; step 05 follows step 04. Start each step only after the previous step has finished. Each step names the files it requires from the prior step; if those files are missing, list them and end the run.
 
 - 01 [01_preflight/SKILL.md](01_preflight/SKILL.md): config, credentials, and inputs ready. Next is always 02.
 - 02 [02_context_pack/SKILL.md](02_context_pack/SKILL.md): `RUN_DIR` with verbatim copies under `context/`. Next is always 03.
@@ -60,7 +60,7 @@ Every run starts at 01 and walks 02, 03, 04, 05, 06, 07, 08, then 09. Do not ski
 - 07 [07_mechanical_rewrite/SKILL.md](07_mechanical_rewrite/SKILL.md): checklist rewrite in place. Next is always 08.
 - 08 [09_output/SKILL.md](09_output/SKILL.md): Google Doc via [markdown_to_google_doc](../../ops/markdown_to_google_doc/SKILL.md). No next step.
 
-`prompt-pack.md` on disk is approval. Do not wait and do not write `prompt-pack.approved`. Reuse the folder when `prompt-pack.md` is already there; do not wipe or rebuild it. Then continue at 05.
+`prompt-pack.md` on disk is approval. Continue immediately without writing `prompt-pack.approved`. Reuse the folder when `prompt-pack.md` is already there. Then continue at 05.
 
 ## Related
 

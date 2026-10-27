@@ -15,7 +15,7 @@ Start this step after [../01_preflight/SKILL.md](../01_preflight/SKILL.md) has p
 
 ## Reuse an existing pack folder
 
-When `RUN_DIR` already contains `context/` and `prompt-pack.md`, keep that folder. Leave the copies as they are. Do not delete `tmp/generate_article/{id-or-slug}/`. Go to [../03_research/SKILL.md](../03_research/SKILL.md).
+When `RUN_DIR` already contains `context/` and `prompt-pack.md`, keep that folder. Leave the copies as they are. Keep `tmp/generate_article/{id-or-slug}/`. Go to [../03_research/SKILL.md](../03_research/SKILL.md).
 
 ## New folder
 
@@ -27,7 +27,7 @@ Run [sync_assets](../../../../setup/sync_assets/SKILL.md) from the workspace roo
 
 ## 2. Remove leftover tmp for this slug
 
-Under `tmp/generate_article/{id-or-slug}/`, delete timestamp folders that contain no `prompt-pack.md`. Never delete a folder that contains either of those files.
+Under `tmp/generate_article/{id-or-slug}/`, delete timestamp folders that contain no `prompt-pack.md`. Keep every folder that contains either of those files.
 
 ## 3. Create a new run folder
 
