@@ -45,7 +45,7 @@ An asset is anything that ends up as a file under `_assets/` (except `asset-mani
 | `external_assets.md` line | Fetched or copied on each run |
 | File already in `_assets/` | Kept as-is; manifest records its timestamp |
 
-Do not list paths that already live inside `_assets/` in `external_assets.md`.
+List only paths outside `_assets/` in `external_assets.md`.
 
 ## `external_assets.md` format
 
@@ -105,7 +105,7 @@ Log line prefix:
         ```
 
       - Set `sync_status=ok`, `last_updated` = now.
-   4. On any other failure, log WARN with `asset`, `source`, and `reason`; do not stop
+   4. On any other failure, log WARN with `asset`, `source`, and `reason`; continue with the next asset
       the run.
 4. Inventory native files. List every file in `_assets/` except `asset-manifest.md`.
    For files not written in step 3, set `source=local`, `sync_status=ok`, and
@@ -141,11 +141,11 @@ provenance. Prefer entries with `sync_status=ok`.
 
 ## Rules
 
-- Warnings, not hard stops. A single bad source must not block the rest of the sync or
+- Warnings, not hard stops. A single bad source leaves the rest of the sync running or
   the parent workflow unless the caller explicitly requires a named asset.
-- Text only. This skill materializes text for agent consumption. Do not store binaries
+- Text only. This skill materializes text for agent consumption. Store text only, not binaries
   in `_assets/`.
-- Do not use synced web text as canon unless the workspace's own policy says otherwise.
+- Use synced web text as canon only when the workspace's own policy says so.
   Web rows in `external_assets.md` are for drift analysis and indexing; approved copy
   should come from local paths or Google Docs the workspace owns.
 - Idempotent. Re-running with unchanged sources overwrites outputs and refreshes

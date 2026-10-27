@@ -19,9 +19,9 @@ Workflow-specific rules only. Runtime paths, credentials, logging: [run_workflow
 
 | Decision | Rule |
 |----------|------|
-| Repo boundary | Shared produce/ops skills live in `@content_systems_public`; local repos hold thin orchestrators and CMS-specific publish steps. Do not fork shared skill steps. |
+| Repo boundary | Shared produce/ops skills live in `@content_systems_public`; local repos hold thin orchestrators and CMS-specific publish steps. Link to shared skill steps. |
 | Preflight | Step `01_preflight` (or `01_preflight_*`) links [run_workflow](../run_workflow/SKILL.md) first; full checklist in [Preflight step](#preflight-step-required) below. |
-| Produce vs stage | Produce pipelines end at Doc/Markdown/sheet; CMS API writes only in `stage_content` → publish sub-skills — never both in one workflow tree. |
+| Produce vs stage | Produce pipelines end at Doc/Markdown/sheet; CMS API writes only in `stage_content` → publish sub-skills — keep each in its own workflow tree. |
 | Naming | Verb-first workflow folder names (`generate_*`, `publish_*`, `stage_*`); `_` separator only. |
 | Categories | Produce in `generate/`, `edit/`, `research/`; staging/publish/evaluate in `ops/`. |
 | One folder per skill | Every skill — orchestrator, numbered step, or auxiliary helper — lives in its own folder with exactly one `SKILL.md`. One folder, one skill; one skill, one folder. |
@@ -40,14 +40,14 @@ Always run the reacts-to due check (step 5) across every main workflow skill in 
 Find the workspace root per [run_workflow/SKILL.md](../run_workflow/SKILL.md). Workflow skills live under `_workflows/`.
 
 - Orchestrator — one root `SKILL.md` per workflow (the folder that names the pipeline).
-- One folder per skill — every skill in a workflow tree gets its own folder containing exactly one `SKILL.md`. Do not put two skills in one folder, two `SKILL.md` files in one folder, or loose prompt/template files beside a skill instead of in a dedicated skill folder.
-- Numbered steps — each pipeline step is a subfolder `{NN}_{slug}/SKILL.md` under that workflow folder. Step 01 is always preflight (see below). Most workflows have two or more numbered steps after preflight. Multi-step produce and stage pipelines must use this shape — do not ship them as a single root `SKILL.md` without numbered step folders.
+- One folder per skill — every skill in a workflow tree gets its own folder containing exactly one `SKILL.md`. Put each skill, and each prompt/template, in its own dedicated folder with exactly one `SKILL.md`.
+- Numbered steps — each pipeline step is a subfolder `{NN}_{slug}/SKILL.md` under that workflow folder. Step 01 is always preflight (see below). Most workflows have two or more numbered steps after preflight. Multi-step produce and stage pipelines must use this shape — ship them with numbered step folders, not a single root `SKILL.md`.
 - Step folders use `{NN}_{slug}` with zero-padded numbers starting at `01` (`01`, `02`, …). No letter-suffix steps. No `{00}_*` folders.
 - Final produce step: `{NN}_output` (Google Doc, Markdown file, or thin wrapper over [markdown_to_google_doc](../../_workflows/ops/markdown_to_google_doc/SKILL.md)).
-- Use `_` as the only word separator in workflow and step folder names. Do not use `-`.
+- Use `_` as the only word separator in workflow and step folder names.
 - Category placement — every workflow lives under `_workflows/{category}/`:
-  - Produce pipelines (`generate_*`, `edit_*`, `update_*`, `research_*`) live in `edit/`, `generate/`, or `research/` — never in `ops/`.
-  - Staging and publish pipelines (`stage_*`, `publish_*`, `evaluate_content`, and other CMS or ops skills) live in `ops/` only — never in `edit/`, `generate/`, or `research/`. 
+  - Produce pipelines (`generate_*`, `edit_*`, `update_*`, `research_*`) live in `edit/`, `generate/`, or `research/` — outside `ops/`.
+  - Staging and publish pipelines (`stage_*`, `publish_*`, `evaluate_content`, and other CMS or ops skills) live in `ops/` only — outside `edit/`, `generate/`, and `research/`. 
 
 Per-skill frontmatter and link conventions: [maintain_skills/SKILL.md](../maintain_skills/SKILL.md). Prompt and template rules: [maintain_skills — No text replacement](../maintain_skills/SKILL.md#no-text-replacement).
 
@@ -85,16 +85,16 @@ When auditing, flag workflow folders that do not start with a recognized verb pr
 
 - The first step is step 01, not step 0. Numbered steps start at `01` and count up contiguously.
 - Step 01 is always preflight (`01_preflight` or `01_preflight_*`). It opens with a link to [run_workflow/SKILL.md](../run_workflow/SKILL.md), then verifies the run can succeed before any downstream step runs.
-- Do not use `{00}_*` step folders or prose like "step 00", "Step 0", or zero-indexed sub-step lists.
+- Number steps from `01` and use one-indexed prose ("step 01") and sub-step lists.
 - Zero-padding in folder names (`01`, `02`) is for sort order only — it is not zero-indexing of step identity.
 
 When auditing, flag and fix any workflow using step 0 / step 00 labeling, `{00}_*` folders, gaps before `01`, or a first step that is not preflight.
 
 ## Orchestrator vs step skills
 
-Orchestrator skills summarize run order and link to steps. They do not repeat step-level instructions (API shapes, column maps, cleanup file lists, etc.).
+Orchestrator skills summarize run order and link to steps. They link to step-level instructions (API shapes, column maps, cleanup file lists, etc.) instead of repeating them.
 
-Step skills do not repeat the orchestrator run order or content already in an upstream step — link to the prior step output instead.
+Step skills link to the orchestrator run order and to content already in an upstream step — link to the prior step output instead.
 
 When auditing, flag orchestrators that embed step procedures and step skills that duplicate upstream content or the orchestrator run order.
 
@@ -110,12 +110,12 @@ The preflight step must:
 4. Resolve and validate configuration — required keys in `config.json`, `workflow_specific.*` blocks, env-style variables, folder IDs, and spreadsheet IDs referenced anywhere in the workflow.
 5. Resolve and probe credentials — load workspace-root `credentials.json`, resolve `more_credentials` and `@…#…` refs, and verify each secret/API the workflow needs (auth handshake, read-only fetch, or HEAD request — not full pipeline work).
 6. Probe filesystem and network paths — confirm URLs, Drive folders, sheet tabs, `{content_systems_public_root}`, and local paths exist and are reachable.
-7. Stop with a clear error listing what is missing or broken. Do not continue to step 02 until preflight passes.
+7. Stop with a clear error listing what is missing or broken. Continue to step 02 only after preflight passes.
 
 Rules:
 
-- Do not merge preflight checks into config, fetch, transform, or output steps — keep them in step 01.
-- Preflight verifies readiness only; it must not perform the workflow's editorial or CMS work.
+- Keep preflight checks in step 01, separate from config, fetch, transform, and output steps.
+- Preflight verifies readiness only and leaves the workflow's editorial and CMS work to later steps.
 - Standalone pipelines that are still a single root `SKILL.md` must be split: add `01_preflight`, move the existing procedure to `02_*` (or more steps), and update the orchestrator run order.
 
 When auditing, flag any workflow whose step 01 is not preflight or that defers access/config checks to a later step.
@@ -126,7 +126,7 @@ The workspace should include a `stage_content` orchestrator when you publish to 
 
 1. Define the default staging destination (CMS draft, Google Doc handoff, or both).
 2. Route by source type in a routing table.
-3. Name the correct publish sub-skill for each row — never embed publish logic in the master skill itself.
+3. Name the correct publish sub-skill for each row — keep publish logic in the sub-skills, out of the master skill.
 
 Publish sub-skills are workspace-specific and named by source → destination, for example:
 
@@ -141,7 +141,7 @@ When `stage_content` is missing, add one using the examples in this doc as a tem
 
 ## Produce vs stage (hard boundary)
 
-Every workspace content workflow falls on one side of this line — never both in the same skill tree:
+Every workspace content workflow falls on one side of this line — each side gets its own skill tree:
 
 | Side | Role | Typical outputs |
 |------|------|-----------------|
@@ -150,9 +150,9 @@ Every workspace content workflow falls on one side of this line — never both i
 
 Rules:
 
-1. A single workflow must not both produce and stage. Production pipelines end at Doc/Markdown/sheet. CMS writes live only in the workspace `stage_content` dispatch targets or dedicated publish sub-skills (`publish_wordpress_from_google_doc`, `google_doc_to_webflow`, `publish_from_google_doc`, `stage-blog-from-doc`, `publish_webhook_from_google_doc`, etc.).
+1. A single workflow either produces or stages. Production pipelines end at Doc/Markdown/sheet. CMS writes live only in the workspace `stage_content` dispatch targets or dedicated publish sub-skills (`publish_wordpress_from_google_doc`, `google_doc_to_webflow`, `publish_from_google_doc`, `stage-blog-from-doc`, `publish_webhook_from_google_doc`, etc.).
 2. Staging is always the responsibility of the workspace `stage_content` orchestrator (legacy folder name: `content_staging`). The master skill routes to the correct publish sub-skill; it does not embed generation logic.
-3. Human approval is not a required workflow step. Review happens between runs: a human reviews the produce output, then separately invokes `stage_content` (or asks the agent to run the staging sub-skill). Do not add mandatory in-workflow gates unless the workspace explicitly requires one — treat review as the boundary between workflow (1) and workflow (2), not as automation inside either skill. See [README § Design principles](../../README.md#design-principles).
+3. Human approval is not a required workflow step. Review happens between runs: a human reviews the produce output, then separately invokes `stage_content` (or asks the agent to run the staging sub-skill). Add a mandatory in-workflow gate only when the workspace explicitly requires one — treat review as the boundary between workflow (1) and workflow (2), not as automation inside either skill. See [README § Design principles](../../README.md#design-principles).
 4. Each produce workflow has one primary output destination (Google Doc, Markdown file, etc.). An optional notify step may catalog that output (calendar row, Output sheet, Delivery tab) — notify is not staging and does not call CMS APIs.
 5. When auditing, flag any produce workflow whose final step calls a CMS create/update API, and any `stage_content` routing row whose sub-skill both generates net-new body copy and POSTs/PATCHes the CMS in one run.
 
@@ -165,18 +165,18 @@ Good examples of produce vs stage:
 
 ## One shared update agent
 
-Page refresh (crosslinks, optional FAQ, dated-year freshness) lives in the shared [update_agent](../../_workflows/edit/update_agent/SKILL.md) skill. Configure it via `config.json` → `workflow_specific.update_agent`. Optional thin entry skills in your workspace may link here; do not duplicate shared steps after preflight.
+Page refresh (crosslinks, optional FAQ, dated-year freshness) lives in the shared [update_agent](../../_workflows/edit/update_agent/SKILL.md) skill. Configure it via `config.json` → `workflow_specific.update_agent`. Optional thin entry skills in your workspace may link here; link to shared steps after preflight.
 
 When maintaining the shared update_agent or any workspace wrapper, step 01 must be `01_preflight`; renumber existing steps (legacy `01_config` → `02_config`, etc.) and move config resolution into preflight or step 02 as appropriate.
 
 Update agent invariants:
 
-- Full regenerate only — the model returns a complete replacement article. Do not patch CMS structures in place (no Prismic span indices, no partial HTML DOM edits, no slice-level surgery).
+- Full regenerate only — the model returns a complete replacement article. Replace the whole article rather than patching CMS structures in place (Prismic span indices, partial HTML DOM edits, slice-level surgery).
 - End state is a Google Doc for human review, not a live CMS publish.
 - Publishing runs through the workspace `stage_content` orchestrator → the appropriate publish sub-skill after the reviewer runs staging separately.
-- Do not include a mandatory human gate step — review is the process boundary between this produce workflow and a later staging run (see Produce vs stage above).
+- Leave out a mandatory human gate step — review is the process boundary between this produce workflow and a later staging run (see Produce vs stage above).
 
-Wire these shared utilities into the update_agent path; do not leave them orphaned:
+Wire these shared utilities into the update_agent path; keep each one wired in:
 
 - [build_crosslinks](../../_workflows/research/build_crosslinks/SKILL.md)
 - [markdown_to_google_doc](../../_workflows/ops/markdown_to_google_doc/SKILL.md)
@@ -205,7 +205,7 @@ Good examples (patterns — use each workspace's own URLs and IDs in workspace s
 - The FAQ Coverage tab (https://docs.google.com/spreadsheets/d/EXAMPLE_SHEET_ID/edit?gid=0) has rows with status `approved` in column F and empty output in column G
 - A new item appears on https://example.com/feed.xml that is not yet covered in https://example.com/blog/example-post
 
-Bad examples (do not use):
+Bad examples (replace with the good form):
 
 - A stakeholder shares a YouTube URL and asks for a blog draft — manual request, not an observable trigger
 - Editorial asks to clear approved FAQ rows — manual request
@@ -214,9 +214,9 @@ Bad examples (do not use):
 
 Rules:
 
-- Do not list manual-run triggers. Omit anything that depends on a person asking, sharing a link, or requesting a run. Those are normal on-demand runs, not reacts-to conditions.
+- List only automatic triggers. Omit anything that depends on a person asking, sharing a link, or requesting a run. Those are normal on-demand runs, not reacts-to conditions.
 - Time and schedule triggers are fine (daily, weekly, N days since last run, each Monday after data is ready).
-- External triggers must name the source concretely enough that the agent can detect the condition on its own: full URL, spreadsheet link, YouTube channel URL or handle, GSC property (`sc-domain:…`), analytics pane path, queue tab and column, or another fetchable endpoint. The agent must not have to guess which feed, sheet, or channel to check.
+- External triggers must name the source concretely enough that the agent can detect the condition on its own: full URL, spreadsheet link, YouTube channel URL or handle, GSC property (`sc-domain:…`), analytics pane path, queue tab and column, or another fetchable endpoint. Name the feed, sheet, or channel so the agent can check it without guessing.
 - Multiple items mean any one of them may warrant a run (OR semantics).
 
 When authoring or repairing a main workflow skill, add or fix `"reacts to"` during this pass. Remove invalid items and tighten vague external sources.

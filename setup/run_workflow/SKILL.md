@@ -22,7 +22,7 @@ Canonical execution contract for workflow skills. [README.md § Documentation ma
 2. **Break tasks into small steps.** Prefer several narrow tool calls over one large call.
 3. **Log as you go.**
    - Echo the active skill name, UID or doc ID, and fetch path.
-   - Echo credentials loaded: repository, custom type, model ID, and API host only — never secrets.
+   - Echo credentials loaded: repository, custom type, model ID, and API host only, with secrets redacted as `***`.
    - For each HTTP request: echo method, host, path (omit secret query parts), status, and content-length when present.
    - On HTTP errors: echo status and the first ~500 characters of the body.
 
@@ -30,15 +30,15 @@ Canonical execution contract for workflow skills. [README.md § Documentation ma
 
 - All lookups start at `credentials.json` (workspace root). Common keys and which skills need them: [credentials.example.json](../credentials.example.json). Storage policy: [README.md § Credentials](../../README.md#credentials).
 - Skills should name the JSON path they need (e.g. `google.oauth_token_unified`, `webflow.api_token`), not list multiple credential file paths.
-- Workspace `credentials.json` can point to external credential files via `more_credentials`, e.g. `"more_credentials": { "shared": "@./credentials.shared.json" }`. Each value is an `@`-prefixed path relative to the workspace root (a credentials file, no `#key`). `@content_systems_public` never holds credentials — that repo is skills and shared utilities only.
+- Workspace `credentials.json` can point to external credential files via `more_credentials`, e.g. `"more_credentials": { "shared": "@./credentials.shared.json" }`. Each value is an `@`-prefixed path relative to the workspace root (a credentials file, no `#key`). `@content_systems_public` holds no credentials — that repo is skills and shared utilities only.
 - Any value can also be a reference straight to a key inside a credentials file, e.g. `@shared#anthropic` (via a `more_credentials` alias) or `@credentials.json#google.oauth_token_unified` (a direct path). If the part before `#` matches a `more_credentials` key, load that file; otherwise treat it as a path. Follow nested `@` references if they chain. An inline value at the same spot always overrides a reference. Skip `more_credentials` itself when walking keys — it's a registry, not a credential.
 - To resolve: load `credentials.json` (copy from `credentials.example.json` after the user supplies values if it's missing), resolve every `more_credentials` entry to a file path, then walk the tree and replace each `@…#…` reference with its resolved secret. Treat the result as inline from then on.
 - If a required key is still missing, ask the user, add it to `./credentials.json`, and run `git check-ignore credentials.json`.
-- Delete `./credentials.json` when it would be empty. Never commit credential files or log secret values.
+- Delete `./credentials.json` when it would be empty. Keep credential files out of commits and redact secret values as `***` in logs.
 
 ## Ephemeral data
 
-Store scratch files, run folders, debug traces, and pipeline intermediates only under a directory named `tmp/` — at the workspace root, under `_workflows/{category}/{name}/`, or under a step folder. Don't use `debug/` or other names. 
+Store scratch files, run folders, debug traces, and pipeline intermediates only under a directory named `tmp/` — at the workspace root, under `_workflows/{category}/{name}/`, or under a step folder. Use `tmp/` for all of these. 
 
 Delete or wipe `tmp/` when this skill is run.
 
@@ -46,7 +46,7 @@ Delete or wipe `tmp/` when this skill is run.
 
 Only use models for which resolved credentials exist.
 
-Anthropic Messages calls use `max_tokens` from root `config.json` → `anthropic.max_tokens` (64000). Reasoning tokens count toward that cap. Do not send 8192 or 16000 for a long draft.
+Anthropic Messages calls use `max_tokens` from root `config.json` → `anthropic.max_tokens` (64000). Reasoning tokens count toward that cap. Send 64000 for a long draft.
 
 ## End of run
 
