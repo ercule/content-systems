@@ -17,7 +17,7 @@ Second pass over `FAQ Coverage` rows with `Topic | Question | Source` filled by 
 - `Response Page` — main-domain page ranking for the question
 - `Draft Response` — ~50-word recap of that page
 
-Never edits website pages or writes `Topic`, `Question`, `Source`, `LLM Response`, `Mentioned`, `Topics`, or `% Mentioned`.
+Edits no website pages and writes none of `Topic`, `Question`, `Source`, `LLM Response`, `Mentioned`, `Topics`, or `% Mentioned`.
 
 Log line prefix: `[run-debug] workflow=_workflows/generate_faq_responses | <PHASE> | <facts>`
 

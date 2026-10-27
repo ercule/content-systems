@@ -15,7 +15,7 @@ Resolve the spreadsheet and `FAQ Coverage` tab by title (exact match, fallback t
 Check optional columns independently:
 
 - If neither `Response Page` nor `Draft Response` exists, stop — nothing to fill.
-- When `Draft Response` exists without `Response Page`, still resolve pages in memory for drafting but do not write Response Page cells.
+- When `Draft Response` exists without `Response Page`, still resolve pages in memory for drafting and leave Response Page cells empty.
 
 Build target rows:
 

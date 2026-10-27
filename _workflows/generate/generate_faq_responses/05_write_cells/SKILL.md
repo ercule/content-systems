@@ -17,7 +17,7 @@ PUT https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{encod
 Authorization: Bearer {access_token}
 ```
 
-Example: `'FAQ Coverage'!F124` for Response Page, `'FAQ Coverage'!E124` for Draft Response. Skip blank values. Never write `LLM Response` or unmapped columns.
+Example: `'FAQ Coverage'!F124` for Response Page, `'FAQ Coverage'!E124` for Draft Response. Skip blank values. Write only mapped columns, leaving `LLM Response` untouched.
 
 On write failure, log and add row to `failed_response_writes`; continue.
 
