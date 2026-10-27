@@ -18,9 +18,9 @@ Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before 
 
 Log line prefix: `[run-debug] workflow=_workflows/ops/stage | <PHASE> | <facts>`
 
-This is a staging workflow. The file you keep is a CMS draft. Never publish live unless the user explicitly asks in this conversation.
+This is a staging workflow. The file you keep is a CMS draft. Create drafts only; publish live only when the user explicitly asks in this conversation.
 
-The client skill at `_workflows/ops/stage/SKILL.md` is the entry point. If that file is missing, use `_workflows/ops/stage_content/SKILL.md` when it exists. The client skill links here for the scan-and-offer protocol, then names the CMS recipe. Do not invent a CMS path.
+The client skill at `_workflows/ops/stage/SKILL.md` is the entry point. If that file is missing, use `_workflows/ops/stage_content/SKILL.md` when it exists. The client skill links here for the scan-and-offer protocol, then names the CMS recipe. Use only the CMS path the client skill names.
 
 ## Configuration
 
@@ -44,7 +44,7 @@ Read `config.json` → `calendar` at the workspace root:
 }
 ```
 
-- `enabled: false` — stop. Report that Calendar is not configured. Do not guess a sheet.
+- `enabled: false` — stop. Report that Calendar is not configured. Use only the configured sheet.
 - Missing `calendar` — try `workflow_specific.update_agent.calendar`, then `workflow_specific.publish_google_doc_to_webflow.calendar`. If still missing, stop.
 - Blank `spreadsheet_id` — stop.
 - `status_value` may be a string or a list. Match case-insensitively after trim.
@@ -55,7 +55,7 @@ Read `config.json` → `calendar` at the workspace root:
 
 ## Credentials
 
-`google.oauth_token_unified` (Sheets read). Probe: refresh once (`POST {token_uri}`). Do not log tokens.
+`google.oauth_token_unified` (Sheets read). Probe: refresh once (`POST {token_uri}`). Redact secrets as `***` in logs.
 
 CMS credentials are named in the client skill. Load them only after the user confirms a row.
 
@@ -86,13 +86,13 @@ Skip the header (`header_row`, default 1). A data row is ready when:
 2. Status matches `status_value` when `status_column` is set.
 3. `cms_url_column` is empty when `ready_when_cms_empty` is true (default).
 
-If the tab is missing, stop and say so. Do not fall back to the Strategy tab.
+If the tab is missing, stop and say so. Use only the Calendar tab.
 
 ## Offer
 
 List ready rows in chat: title or item, status, Doc URL, row number, and whether a CMS URL is already present.
 
-Ask which to stage (all, some, or none). Do not stage before that answer.
+Ask which to stage (all, some, or none). Stage after that answer.
 
 If there are no ready rows, say so and stop.
 
@@ -104,19 +104,19 @@ Run the client CMS recipe for that Doc. Default is draft:
 - WordPress: `status=draft`.
 - HubSpot: `is_draft=true` / `publish_immediately: false`.
 - Prismic: Migration draft only. Publish in the Prismic UI.
-- Storyblok: omit `publish` (default unpublished). Never send `publish: true` / `publish: 1`.
+- Storyblok: omit `publish` (default unpublished). Send only unpublished drafts (no `publish: true` / `publish: 1`).
 - GitHub: local branch + preview. No `git push` / `gh pr create` unless the user asks.
 - Sanity: prefer draft. If this workspace's Sanity publisher posts live by default, confirm before running.
 
-On success, report the CMS editor URL and preview URL. Write the editor URL back to `cms_url_column` when configured. A sheet writeback failure must not roll back the CMS draft.
+On success, report the CMS editor URL and preview URL. Write the editor URL back to `cms_url_column` when configured. A sheet writeback failure leaves the CMS draft in place.
 
 ## Safety
 
-- Never publish live unless the user explicitly asks in this conversation.
-- Do not log CMS tokens, JWTs, or Google OAuth secrets.
-- Do not stage a row with no Doc URL.
-- Do not treat Strategy-tab topics as Calendar rows.
-- Do not stage a Google Doc that still has red strikethrough or blue-addition [agent_editor](../agent_editor/SKILL.md) markup. Run [accept_agent_edits](../accept_agent_edits/SKILL.md) first (`resolve_doc_markup.py … accept --dry-run`; stop if counts are non-zero).
+- Create drafts only; publish live only when the user explicitly asks in this conversation.
+- Redact CMS tokens, JWTs, and Google OAuth secrets as `***` in logs.
+- Stage only rows that have a Doc URL.
+- Treat only Calendar-tab rows as Calendar rows.
+- Stage a Google Doc only after its red strikethrough or blue-addition [agent_editor](../agent_editor/SKILL.md) markup is resolved. Run [accept_agent_edits](../accept_agent_edits/SKILL.md) first (`resolve_doc_markup.py … accept --dry-run`; stop if counts are non-zero).
 
 ## End of run
 

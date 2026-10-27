@@ -32,4 +32,4 @@ Quick reference:
 
 ## Cleanup
 
-This skill writes nothing to disk. Deliver the rendered card in chat. Do not save scratch files.
+This skill writes nothing to disk. Deliver the rendered card in chat. Keep scratch content in chat.

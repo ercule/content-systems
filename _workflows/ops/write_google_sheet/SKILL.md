@@ -111,4 +111,4 @@ When `row_decorators` is null, append uses bare `source_url` + `doc_url` in the 
 
 ## Failure handling
 
-A 4xx from Sheets must not roll back a prior Doc or CMS write. Surface the failure with the response body; treat as soft failure when the primary deliverable (Doc, etc.) already succeeded.
+A 4xx from Sheets leaves a prior Doc or CMS write in place. Surface the failure with the response body; treat as soft failure when the primary deliverable (Doc, etc.) already succeeded.

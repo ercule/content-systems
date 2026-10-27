@@ -79,7 +79,7 @@ Drive's HTML → Google Doc import breaks when `<ul>` / `<li>` / `<p>` boundarie
 
 1. Headings: `# title` → one `<h1>`; `## title` → one `<h2>`; `###` → `<h3>`. Close any open `<ul>` or `<ol>` before emitting a heading.
 2. Horizontal rule: a line that is only `---` → `<hr />`. Close open lists first.
-3. Bullet lists: lines starting with `- ` share one `<ul>`. First `- ` after non-list context opens `<ul>`. Each `- ` → one `<li>…</li>` (inline links stay inside that same `<li>` as `<a>` — never split a bullet around `[text](url)` or `https://`). Numbered lines matching `^\d+\. ` share one `<ol>` the same way. Close the other list type before opening a new one.
+3. Bullet lists: lines starting with `- ` share one `<ul>`. First `- ` after non-list context opens `<ul>`. Each `- ` → one `<li>…</li>` (inline links stay inside that same `<li>` as `<a>` — keep a bullet whole around `[text](url)` or `https://`). Numbered lines matching `^\d+\. ` share one `<ol>` the same way. Close the other list type before opening a new one.
 4. Paragraphs: other non-empty lines → `<p>…</p>`. Close `<ul>` / `<ol>` before `<p>`, headings, or `<hr />`. Blank lines do not close a list.
 5. Sanity check: count `<ul>` and `</ul>` — must match. Same for `<ol>`. No `<li>` outside lists.
 
@@ -89,7 +89,7 @@ Strip these tags: `script`, `iframe`, `img`, `svg`, `style`, `video`, `object`, 
 
 ## Inline rules
 
-Escape first, then insert tags — never the reverse. Building `<a href="…">` then running `html.escape` on the whole segment produces literal `&lt;a href=…` in the Doc.
+Escape first, then insert tags — in that order. Building `<a href="…">` then running `html.escape` on the whole segment produces literal `&lt;a href=…` in the Doc.
 
 Procedure:
 
@@ -112,7 +112,7 @@ When the Markdown contains `## Video transcript (source)` (exact heading):
 
 - Treat everything under that heading as body copy, not `<pre>`.
 - Collapse whitespace within each paragraph; wrap in one or more `<p>` blocks.
-- Do not change words compared to the source file.
+- Keep every word identical to the source file.
 
 ## Default metadata block (update_agent preset)
 
@@ -126,7 +126,7 @@ When preset is `update_agent_default` or caller uses equivalent items:
 <hr />
 ```
 
-update_agent step 07 uploads the original article only. Do not prepend `## List of changes`. Red/blue [agent_editor](../agent_editor/SKILL.md) markup is the review surface. Do not add a "Changes made" metadata line.
+update_agent step 07 uploads the original article only. Upload the article as is, with `## List of changes` omitted. Red/blue [agent_editor](../agent_editor/SKILL.md) markup is the review surface. Leave the "Changes made" metadata line out.
 
 ## HTML shell
 
@@ -191,7 +191,7 @@ When `verify_export` is true:
 
 ## Failure handling
 
-A 4xx from Drive must not roll back upstream work (research, CMS draft, etc.). Surface the response body; the caller decides whether to retry.
+A 4xx from Drive leaves upstream work in place (research, CMS draft, etc.). Surface the response body; the caller decides whether to retry.
 
 ## Logging
 

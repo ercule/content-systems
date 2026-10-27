@@ -72,7 +72,7 @@ Stop at any heading that starts with a prefix in `stop_heading_prefixes` (exclud
 ## Validate
 
 - `title`, `slug` must be non-empty. Stop and report if missing.
-- `slug` must match `^[a-z0-9-]+$`. Warn but do not stop if it does not — report and let the user decide.
+- `slug` must match `^[a-z0-9-]+$`. Warn and continue if it does not — report and let the user decide.
 - Body must contain at least one paragraph. Stop if empty.
 
 ## Output

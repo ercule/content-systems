@@ -16,8 +16,8 @@ description: >-
 
 Always, including generate_article and standalone runs:
 
-- **Deep/atomic** depth. Do not ask Standard vs Deep.
-- **Checker only.** After findings, write the changelog. Do not rewrite the manuscript. Do not ask.
+- **Deep/atomic** depth. Choose Deep without asking.
+- **Checker only.** After findings, write the changelog. Report findings only and leave the manuscript as is. Proceed without asking.
   - generate_article: `{RUN_DIR}/{id-or-slug}-accuracy.md`
   - otherwise: `{stem}-accuracy.md` next to the manuscript
   Empty findings are valid (`Findings: none`). Next is the workspace implement step, if one exists.
@@ -38,13 +38,13 @@ Requires an environment with subagent dispatch — deep mode and batch runs depe
 
 When a workspace `generate_article` technical accuracy step calls this skill:
 
-- Run steps 1–7 (review only). Do not run step 8. Skip chunked subagent dispatch.
+- Run steps 1–7 (review only). Stop before step 8. Skip chunked subagent dispatch.
 - Prefetch the source ledger from `{id-or-slug}-relevant-articles.md` and `{id-or-slug}-crosslinks.md` in `RUN_DIR` when those files exist.
 - Write `{RUN_DIR}/{id-or-slug}-accuracy.md` with only the changelog, framing report, score/coverage line, and 5b tally.
-- Do not write sentence-level accounting, analogy logs, or dispatch transcripts into that file or the reply.
-- Do not paste the changelog into the reply. The reply is the one-line log.
+- Keep sentence-level accounting, analogy logs, and dispatch transcripts out of that file and the reply.
+- Keep the changelog in the file. The reply is the one-line log.
 
-Standalone runs follow the same Deep/atomic + findings-only defaults. Do not rewrite unless the caller also runs the workspace technical accuracy implement step.
+Standalone runs follow the same Deep/atomic + findings-only defaults. Report findings only unless the caller also runs the workspace technical accuracy implement step.
 
 ## Why this exists
 
@@ -59,7 +59,7 @@ A fourth, process-level failure caused a real review to miss issues it had alrea
 
 ### 0. Depth
 
-Always **Deep/atomic**. Do not ask Standard vs Deep.
+Always **Deep/atomic**. Choose Deep without asking.
 
 ### 1. Read the whole draft, log two maps
 
@@ -69,7 +69,7 @@ Read start to finish. While reading, log two maps.
 
 **Restatement map**: claims asserted more than once (`R1: <claim> @ sentences 3, 47, 112`). Concentrated in TL;DR, intro, section summaries and conclusion — the same places step 3 flags for smuggling claims in under cover of restating. Each cluster is verified **once**, in the chunk owning its first occurrence; every other occurrence inherits that verdict, marked `inherited from R<n>`, and is not re-searched. This is a correctness fix as much as a cost one: a claim stated three times currently gets searched three times and counted three times in the score, silently tripling its weight.
 
-### 2. Framing check (whole piece, never chunked)
+### 2. Framing check (whole piece, run unchunked)
 
 Two independent sub-checks, both required even if every claim passes step 5:
 
@@ -87,7 +87,7 @@ Two independent sub-checks, both required even if every claim passes step 5:
 
   **Volume is itself a finding.** If more than about three clear both filters, the piece is usually not a piece with omissions but a piece scoped wrong or aimed at the wrong audience. Say so and escalate to a 2a framing ISSUE — which routes it to the machinery that already exists for that, rather than leaving a long list to be read as a punch list of additions.
 
-A framing ISSUE outranks any severity tier as the headline finding, is reported separately from the score (never adjusts it), and blocks a rewrite (step 8) regardless of what was asked for. 2d omissions are reported the same way — alongside the score, never adjusting it — but do **not** block a rewrite unless their volume escalated them into a 2a ISSUE; an omission is additive, not evidence the piece is built wrong. Read `references/framing-calibration.md` for the 2a-vs-2b test and a worked audience-naming failure.
+A framing ISSUE outranks any severity tier as the headline finding, is reported separately from the score (never adjusts it), and blocks a rewrite (step 8) regardless of what was asked for. 2d omissions are reported the same way — alongside the score, never adjusting it — and block a rewrite only if their volume escalated them into a 2a ISSUE; an omission is additive, not evidence the piece is built wrong. Read `references/framing-calibration.md` for the 2a-vs-2b test and a worked audience-naming failure.
 
 ### 3. Extract every claim
 
@@ -103,11 +103,11 @@ Claim types: definitions, mechanisms, protocol/spec behavior, numbers (including
 
 ### 3b. Deep mode: atomic decomposition + chunked dispatch
 
-Only if deep mode was chosen. Number every sentence in the draft; decompose each into its smallest testable assertions (`<n>: assertions A1, A2` / `<n>: no atomic assertions`). This replaces paragraph-level claims for scoring — don't run both. Verify with `scripts/check_atomic_decomposition_coverage.py <draft> <atomic_accounting>`.
+Only if deep mode was chosen. Number every sentence in the draft; decompose each into its smallest testable assertions (`<n>: assertions A1, A2` / `<n>: no atomic assertions`). This replaces paragraph-level claims for scoring — run only the atomic decomposition. Verify with `scripts/check_atomic_decomposition_coverage.py <draft> <atomic_accounting>`.
 
 **Long piece → chunk across subagents:**
-1. Do steps 0-2 yourself first (depth, full read, dependency map, audience name, framing check) — framing never chunks.
-2. **Split on section boundaries first**, target ~40-60 sentences/chunk, numbered ranges that don't overlap. Only split *within* a section if it exceeds ~80 sentences, and never across a dependency-map edge — a chunk boundary through an argument forces both subagents to establish the same premise and manufactures a seam Pass A then has to reconcile. An uneven 30/70 split along a real boundary beats an even 50/50 through the middle of one.
+1. Do steps 0-2 yourself first (depth, full read, dependency map, audience name, framing check) — run framing unchunked.
+2. **Split on section boundaries first**, target ~40-60 sentences/chunk, numbered ranges that don't overlap. Only split *within* a section if it exceeds ~80 sentences, and only along dependency-map boundaries, not across an edge — a chunk boundary through an argument forces both subagents to establish the same premise and manufactures a seam Pass A then has to reconcile. An uneven 30/70 split along a real boundary beats an even 50/50 through the middle of one.
 3. Dispatch one subagent per chunk: atomic decomposition + analogy test + Pass B search + severity, scoped to its sentence range. Each prompt carries, instead of the whole draft:
    - its own sentence range, verbatim and numbered;
    - the **dependency map** and **restatement clusters** from step 1 — already the distilled version of what one chunk needs to know about the rest;
@@ -137,7 +137,7 @@ Rewrite after chunked review: same per-chunk dispatch, each subagent gets only i
 - **Outdated** — was true, a source shows a real before/after.
 - **Imprecise** — true but omits something that flips the takeaway.
 - **Vague** — no accuracy problem, just unclear.
-- **Unverified** — genuinely searched, couldn't resolve (never from skipping a fetch).
+- **Unverified** — genuinely searched, couldn't resolve (only after actually fetching).
 
 Read `references/severity-calibration.md` for the Outdated-vs-Incorrect and Imprecise-vs-Vague tests.
 
@@ -162,23 +162,23 @@ Report the tally with the score: "12 findings challenged, 1 overturned, 2 weaken
 
 Weights: Confirmed 1.0, Vague 0.9, Imprecise 0.75, Outdated 0.6, Incorrect 0.2, Severe 0.0. Unverified excluded from both numerator and denominator.
 
-`Score = (Σweights / resolved claims) × 10`, round to nearest whole (report X.5 as-is if exact). **Cap at 3 if any Severe.** Framing/2c/2d/credibility findings never adjust the score — report them alongside it, headline finding first if one exists. Verdicts overturned or weakened in 5b **do** move the score, because they change the tier itself; score after that pass, never before. Report coverage (resolved/total) every time; flag low coverage (<50%) explicitly. **Below 40% coverage, report no score at all** — state the coverage, the changelog, and one line on why the number is being withheld. A 9/10 drawn from four resolved claims out of sixty is not a weak signal, it is a misleading one, and the score is the part people quote. This is the expected outcome for pieces about proprietary or internal systems, where little is externally sourceable; say that plainly rather than producing a number that implies otherwise. **Any coverage script that exited 1 is named in that same line with its gap** (e.g. "coverage 41/47 (87%); 3 paragraphs unaccounted for, 1 cited URL unfetched") — one place the reader looks to see what was actually checked. A script that exited 3 is a setup failure: report it as "not run," never as a gap, and never let it read as a finding about the draft.
+`Score = (Σweights / resolved claims) × 10`, round to nearest whole (report X.5 as-is if exact). **Cap at 3 if any Severe.** Framing/2c/2d/credibility findings leave the score unchanged — report them alongside it, headline finding first if one exists. Verdicts overturned or weakened in 5b **do** move the score, because they change the tier itself; score after that pass, never before. Report coverage (resolved/total) every time; flag low coverage (<50%) explicitly. **Below 40% coverage, report no score at all** — state the coverage, the changelog, and one line on why the number is being withheld. A 9/10 drawn from four resolved claims out of sixty is not a weak signal, it is a misleading one, and the score is the part people quote. This is the expected outcome for pieces about proprietary or internal systems, where little is externally sourceable; say that plainly rather than producing a number that implies otherwise. **Any coverage script that exited 1 is named in that same line with its gap** (e.g. "coverage 41/47 (87%); 3 paragraphs unaccounted for, 1 cited URL unfetched") — one place the reader looks to see what was actually checked. A script that exited 3 is a setup failure: report it as "not run," never as a gap, and never let it read as a finding about the draft.
 
 ### 7. Review first, always — then ask about rewrite
 
 Always run 1-6. Show changelog + framing check before asking about a rewrite.
 
-**Changelog:** one row per flagged claim only — never a row for Confirmed. Columns: # | Claim | Issue | Severity | Fix | Source. Close with a tally (all tiers incl. confirmed count), the score/coverage line, and any credibility callout.
+**Changelog:** one row per flagged claim only — leave Confirmed claims out. Columns: # | Claim | Issue | Severity | Fix | Source. Close with a tally (all tiers incl. confirmed count), the score/coverage line, and any credibility callout.
 
 **Framing report:** 2a and 2b every time (state OK explicitly if clean, confirm every distinct scope question was checked individually), 2c only if triggered. **2d omissions** every time — one line ("Omissions: none material") when clean, otherwise every entry that cleared both filters with its concrete consequence. Include the 5b challenge tally next to the score.
 
-Do not ask. Do not rewrite. Write the changelog to the accuracy file. Next is the workspace implement step, if one exists.
+Report findings only and leave the text as is. Proceed without asking. Write the changelog to the accuracy file. Next is the workspace implement step, if one exists.
 
 ### 8. Rewrite (only for pieces selected)
 
-Do not run this section in the checker. It lives in the workspace technical accuracy implement step.
+Run this section only in the implement step, outside the checker. It lives in the workspace technical accuracy implement step.
 
-**If step 2 found a framing issue, still apply claim-level Fixes and report the ISSUE in the handoff. Do not skip claim rewrites** — even for independently-Severe claims. Open the note with `Rewrite skipped:` followed by the reason — that exact opening is the marker `scripts/check_rewrite_coverage.py --framing-issue` looks for. A framing problem has no line-level fix.
+**If step 2 found a framing issue, still apply claim-level Fixes and report the ISSUE in the handoff. Always apply claim rewrites** — even for independently-Severe claims. Open the note with `Rewrite skipped:` followed by the reason — that exact opening is the marker `scripts/check_rewrite_coverage.py --framing-issue` looks for. A framing problem has no line-level fix.
 
 Otherwise: fix Severe/Incorrect/dated-Outdated fully; Imprecise/Vague with the minimum edit; Unverified by softening or an inline `[UNVERIFIED: ...]` flag; credibility-flagged sentences too. Each 2d omission is either addressed or explicitly declined with a reason — silently dropping one puts the rewrite back where the original was. New facts introduced during a fix must be verified now, same sourcing bar as step 4.
 
@@ -190,14 +190,14 @@ After rewriting: one bounded, zero-fetch re-read of edited paragraphs + immediat
 
 **Wave 1 — review only, one subagent per piece**, steps 1-6 (including 5b) at the batch's chosen depth, each on a clean context. Each prompt carries the full dispatch payload from 3b — same risk, same fix. Present one summary table (Framing ISSUE rows first, then Score/Coverage/Claims-checked columns), then ask which numbers to rewrite (all/some/none).
 
-**Wave 2 — rewrite only, selected pieces**, one subagent per piece, each given only its own wave-1 changelog (not re-extraction). Update the Files column afterward; don't regenerate the summary.
+**Wave 2 — rewrite only, selected pieces**, one subagent per piece, each given only its own wave-1 changelog (not re-extraction). Update the Files column afterward and keep the existing summary.
 
 Close the batch with any **recurring pattern across pieces** (same stale benchmark, same oversimplified model) — a pattern showing up in every piece is also worth checking against your own review process, not just the drafts.
 
 ## Notes
 
-- Never invent a citation. Cite only what was actually found.
-- Style/voice passes stay separate from this one; don't let a style preference override a needed correction (credibility/tone is the one narrow exception — it's evidentiary posture, not voice).
+- Cite only what was actually found.
+- Style/voice passes stay separate from this one; let a needed correction take priority over a style preference (credibility/tone is the one narrow exception — it's evidentiary posture, not voice).
 - **Top three real-review misses, check these first if something was missed:** TL;DR/summary paragraphs waved through as restatement; should/rather-than sentences waved through as opinion; analogies logged but never tested (nothing to search).
 - **Ceiling of search-based review:** weak on operator-level detail no one would think to search for (an obscure named vendor feature, precise internal architecture). This is a different, more forgivable miss than skipping the audience-naming or omissions steps — one is a discipline failure, the other is a real limit fixable only by a human domain expert. Flag it in the framing report rather than presenting the automated pass as final.
 
@@ -205,6 +205,6 @@ Close the batch with any **recurring pattern across pieces** (same stale benchma
 
 Prose instructions get skipped under time pressure — that's why the checkable parts are scripts, not just emphasis: `scripts/check_paragraph_coverage.py` / `scripts/check_citation_coverage.py` (review completeness), `scripts/check_atomic_decomposition_coverage.py` (deep-mode sentence coverage), `scripts/check_analogy_coverage.py` (every analogy got its test), `scripts/check_rewrite_coverage.py` (the rewrite touched what the changelog flagged). In chunked runs, the paragraph and analogy checks only mean something run against the *full* draft and the reassembled tables — per-chunk only proves that chunk, not the reassembly.
 
-**Exit codes are a contract, and a failing check never halts the review.** `0` = confirmed. `1` = a real coverage gap: disclose it in the coverage line and keep going. `2` = wrong arguments. `3` = the script could not run at all (missing file, bad path) — a tooling failure that says nothing about the draft, reported as "not run" and never as a gap. Treating a `3` as evidence of a bad piece is a misread, and treating a `1` as a reason to abandon the review is worse: the gap is information for the reader, not a stop condition.
+**Exit codes are a contract, and a failing check leaves the review running.** `0` = confirmed. `1` = a real coverage gap: disclose it in the coverage line and keep going. `2` = wrong arguments. `3` = the script could not run at all (missing file, bad path) — a tooling failure that says nothing about the draft, reported as "not run" and never as a gap. Treating a `3` as evidence of a bad piece is a misread, and treating a `1` as a reason to abandon the review is worse: the gap is information for the reader, not a stop condition.
 
 What stays judgment-only, permanently, because there's no ground-truth list to diff against: whether a severity call is right, whether a source really contradicts a claim, whether a dependency-map resolution is correct, whether an analogy's test *answer* is right (not just present), whether a fix is correct (not just changed), what framing concludes. Scripts guarantee coverage; they don't guarantee correctness.

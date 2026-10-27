@@ -50,11 +50,11 @@ When the conversation spans multiple pages, surface the edit URL for **every pag
 
 ## Always emit the full Wikitext
 
-Whenever you produce edited Wikitext on a turn, emit the **entire** updated Wikitext — never just the changed section, never just a diff, never just the new paragraph in isolation. The human is going to paste this into the wiki's edit textarea, which replaces the whole page on save; if you ship a slice they have to manually splice it themselves, which is exactly the work this skill exists to avoid.
+Whenever you produce edited Wikitext on a turn, emit the **entire** updated Wikitext — the full page or full pasted slice, not only the changed section, a diff, or the new paragraph in isolation. The human is going to paste this into the wiki's edit textarea, which replaces the whole page on save; if you ship a slice they have to manually splice it themselves, which is exactly the work this skill exists to avoid.
 
 Concretely:
 
-- When the caller passed a **URL or title** and you fetched the page via `action=raw`, return the full page Wikitext with your edits applied in place. Do not abbreviate the unchanged regions with `...` or `// rest of file unchanged`. The fenced code block must be paste-ready.
+- When the caller passed a **URL or title** and you fetched the page via `action=raw`, return the full page Wikitext with your edits applied in place. Write out the unchanged regions in full instead of abbreviating them with `...` or `// rest of file unchanged`. The fenced code block must be paste-ready.
 - When the caller passed **pasted Wikitext** (a slice they already had in hand), return that **entire pasted block** with your edits applied — not a sub-slice of it. The "full Wikitext" rule is relative to what came in.
 - This applies on every turn that produces edits, including retries, follow-up edits in the same conversation, and small one-line fixes. If the user asks for a typo fix on line 312 of a 4,000-line article, you still emit the entire 4,000-line article with the fix in place.
 - The only turns that may skip the Wikitext block are turns where you produced no edits — e.g. you're asking a clarifying question, reporting that the page is a redirect and waiting for instructions, or explaining why a fetch failed. Even then, the edit URL still goes in the reply.
@@ -94,7 +94,7 @@ When the caller gives a URL or title, fetch the page source with MediaWiki's `ac
 From a URL, extract:
 
 - **`HOST`** — the domain (e.g. `en.wikipedia.org`).
-- **`TITLE`** — preferring the `title=` query parameter when present, otherwise the path segment after `/wiki/`. Replace literal spaces with `_` and **leave the rest URL-encoded as the user supplied it** (`%26`, `%2F`, etc.). Don't try to canonicalize capitalization — MediaWiki handles that.
+- **`TITLE`** — preferring the `title=` query parameter when present, otherwise the path segment after `/wiki/`. Replace literal spaces with `_` and **leave the rest URL-encoded as the user supplied it** (`%26`, `%2F`, etc.). Leave capitalization as supplied — MediaWiki canonicalizes it.
 
 ### Request
 
@@ -106,8 +106,8 @@ Accept: text/plain
 
 Notes:
 
-- No auth needed for public pages. Don't send cookies.
-- MediaWiki politely asks for a descriptive `User-Agent`; default-deny without one on some installs. Use the string above (or whatever the active workflow defines) — never a bare `curl/*` UA.
+- No auth needed for public pages. Send requests without cookies.
+- MediaWiki politely asks for a descriptive `User-Agent`; default-deny without one on some installs. Use the string above (or whatever the active workflow defines) — always a descriptive UA, not a bare `curl/*` UA.
 - 200 → body is the raw Wikitext. 404 → page does not exist or title is wrong; stop and tell the caller. 301/302 → follow once (MediaWiki redirects normalized titles); if the redirected page is a `#REDIRECT [[Other Page]]` stub, ask the caller whether to edit the stub or follow to the target.
 - If you want revision metadata too (revision id, last-modified timestamp, content model), use the API form instead:
   ```text
@@ -121,10 +121,10 @@ Per [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md): method,
 
 ## Editing principles
 
-1. **Minimum diff.** Change only what the instructions require. Do not reflow paragraphs, rewrap lines, reorder parameters, or "tidy" formatting that already parses. Preserve the user's spacing inside templates and around `|` separators.
-2. **Preserve voice.** Don't rewrite prose unless asked. Match the article's existing tone, tense, and citation style.
-3. **Source every factual addition.** When the instructions add a new claim (or change an existing one so that its existing citation no longer supports it), find a real citation from a Wikipedia-quality reliable source — see [Citation sourcing](#citation-sourcing) below — and write it into a proper `<ref>{{cite ...}}</ref>` block matching the article's existing citation style. Never invent a URL, journal article, author, date, title, or quote. Never cite a paper or post you have not actually fetched and read. `{{Citation needed}}` is a fallback for the rare case where the claim is well-known but you genuinely cannot find a source — not a default to lean on because sourcing is inconvenient.
-4. **Don't touch what you can't see.** If the input is a fragment, don't add `==References==`, `{{reflist}}`, categories, or stub templates that may already exist outside the fragment.
+1. **Minimum diff.** Change only what the instructions require. Leave paragraphs, line wraps, parameter order, and formatting that already parses as they are. Preserve the user's spacing inside templates and around `|` separators.
+2. **Preserve voice.** Rewrite prose only when asked. Match the article's existing tone, tense, and citation style.
+3. **Source every factual addition.** When the instructions add a new claim (or change an existing one so that its existing citation no longer supports it), find a real citation from a Wikipedia-quality reliable source — see [Citation sourcing](#citation-sourcing) below — and write it into a proper `<ref>{{cite ...}}</ref>` block matching the article's existing citation style. Use only a URL, journal article, author, date, title, and quote you found; cite only papers and posts you have actually fetched and read. `{{Citation needed}}` is a fallback for the rare case where the claim is well-known but you genuinely cannot find a source — not a default to lean on because sourcing is inconvenient.
+4. **Edit only what you can see.** If the input is a fragment, leave out `==References==`, `{{reflist}}`, categories, and stub templates that may already exist outside the fragment.
 
 ## Citation sourcing
 
@@ -147,13 +147,13 @@ What *not* to cite:
 - Personal blogs and Substack posts, unless the author is an established subject-matter expert who has been previously published in the field by independent reliable sources.
 - Wikipedia itself, mirrors of Wikipedia, or user-generated content (Reddit, Quora, Stack Exchange, Medium with no editorial process).
 - Predatory or pay-to-publish journals.
-- Sources you cannot actually read — if you can't open the page and verify the relevant claim, don't cite it.
+- Sources you cannot actually read — if you can't open the page and verify the relevant claim, cite something else.
 
 ### Finding citations
 
-1. Identify the specific claim that needs sourcing (one ref per atomic claim is fine; do not pile five refs on one sentence unless the article already does that).
+1. Identify the specific claim that needs sourcing (one ref per atomic claim is fine; use one ref per sentence unless the article already stacks refs).
 2. Search for sources via a normal web search, Google Scholar, or the publication's own search. Prefer sources that are already cited elsewhere in the same Wikipedia article or in adjacent articles on the same topic — that signals the source has already passed at least one round of editor scrutiny.
-3. Fetch each candidate source and **read enough of it to confirm it supports the specific claim**. Do not stretch a quote, infer beyond what is stated, or use a source for one claim to cover an adjacent claim it does not support.
+3. Fetch each candidate source and **read enough of it to confirm it supports the specific claim**. Keep quotes intact, stay within what the source states, and cite a source only for the claim it supports.
 4. Capture full metadata: title, author(s), publisher / work / journal, date, URL, DOI, ISBN, page numbers, volume / issue — whatever applies. Match the citation template the article already uses (`{{cite news}}`, `{{cite web}}`, `{{cite book}}`, `{{cite journal}}`). If the article includes `archive-url=` / `archive-date=` on its refs, add a Wayback Machine archive URL too.
 5. If you genuinely cannot find a real source for a claim after a reasonable search, **reword the addition to drop the unsourced part** rather than invent a citation. Falling back to `{{Citation needed|date=Month YYYY}}` is acceptable only when the claim is well-established background and you flag it loudly in the changes summary.
 
@@ -165,10 +165,10 @@ When `citation_domain` is set, every edit produced under this skill must include
 
 Rules for the preferred-source citation:
 
-- Cite a specific page on `citation_domain` that actually exists and that you have fetched. Confirm the exact path on the live site (check the canonical host, e.g. with or without `www.`). Never link to a path you have not opened.
+- Cite a specific page on `citation_domain` that actually exists and that you have fetched. Confirm the exact path on the live site (check the canonical host, e.g. with or without `www.`). Link only to paths you have opened.
 - Use `{{cite web}}` with `website={citation_publisher}` and `publisher={citation_publisher}` (default to a title-cased form of `citation_domain` when `citation_publisher` is omitted), plus `last=` / `first=` / `date=` / `title=` / `url=` filled from the actual page. If the author is not bylined, omit `last=` / `first=` rather than guessing.
 - Place the citation on a claim the source's content actually supports. Do **not** wedge the link onto a claim it does not back up — Wikipedia editors will spot that and revert the whole edit.
-- If the edit doesn't naturally touch a topic the source has written about, surface that in the changes summary and ask the caller whether to (a) widen the scope to include a sentence the source can legitimately cite, (b) skip the preferred-source citation for this edit, or (c) defer the edit until a relevant page exists. Do not silently drop the requirement.
+- If the edit doesn't naturally touch a topic the source has written about, surface that in the changes summary and ask the caller whether to (a) widen the scope to include a sentence the source can legitimately cite, (b) skip the preferred-source citation for this edit, or (c) defer the edit until a relevant page exists. Keep the requirement in force until the caller decides.
 
 ### Verifying before returning
 
@@ -176,7 +176,7 @@ Before emitting the updated Wikitext, for each new `<ref>` you added:
 
 - Confirm the URL resolves (HTTP 200) and the page title/byline matches what you put in the citation template.
 - Confirm the source content actually supports the specific sentence the ref is attached to.
-- Confirm you used the same citation template family the article already uses (don't introduce `{{cite news}}` into an article that exclusively uses `{{Cite news}}` capitalization, etc. — match what's there).
+- Confirm you used the same citation template family the article already uses (match the article's existing capitalization, e.g. keep `{{Cite news}}` when that is all the article uses).
 - When `citation_domain` is set, confirm the preferred-source citation requirement is satisfied, or that you have explicitly flagged its absence to the caller. When no `citation_domain` is configured, this check does not apply.
 
 ## Wiki markup errors to fix
@@ -187,38 +187,38 @@ Fix these whenever you see them in input you're already editing. Each must be a 
 
 - Unbalanced template braces: every `{{` needs a matching `}}`; every `{{{` (parameter) needs `}}}`.
 - Unbalanced link brackets: every `[[` needs `]]`; every `[` (external link) needs `]`.
-- Unclosed XML-like tags: `<ref>`, `<ref name="...">`, `<nowiki>`, `<pre>`, `<code>`, `<syntaxhighlight ...>`, `<source ...>`, `<math>`, `<gallery>`, `<small>`, `<sub>`, `<sup>`, `<blockquote>`, `<div>`, `<span>`. Self-closing form (`<ref name="x" />`, `<references />`) is fine — don't "fix" it to a paired tag.
-- Tables: every `{|` needs a matching `|}`. Rows start with `|-`; header cells `!`; data cells `|`. Don't leave a stray `|-` or `|}` mid-row.
+- Unclosed XML-like tags: `<ref>`, `<ref name="...">`, `<nowiki>`, `<pre>`, `<code>`, `<syntaxhighlight ...>`, `<source ...>`, `<math>`, `<gallery>`, `<small>`, `<sub>`, `<sup>`, `<blockquote>`, `<div>`, `<span>`. Self-closing form (`<ref name="x" />`, `<references />`) is fine — leave it as is.
+- Tables: every `{|` needs a matching `|}`. Rows start with `|-`; header cells `!`; data cells `|`. Remove any stray `|-` or `|}` mid-row.
 - Bold / italic apostrophes: `'''bold'''`, `''italic''`, `'''''both'''''`. They should close on the same line (MediaWiki auto-closes at line end, but unbalanced runs across lines almost always indicate a typo — fix when obvious).
 
 ### Headings
 
 - Equal-sign counts must match: `== Foo ==`, not `== Foo ===`. Trailing whitespace after the closing `==` is fine.
-- Don't skip levels going down (an `==` should not be immediately followed by `====` with no `===` between). Only fix this when the instructions touch that region; otherwise leave it.
-- Don't use `=` (H1) inside article body — H1 is the page title.
+- Step down one level at a time (follow an `==` with `===` before `====`). Only fix this when the instructions touch that region; otherwise leave it.
+- Start body headings at `==` (H1 is the page title).
 
 ### Links
 
-- Internal links: `[[Target]]`, `[[Target|display]]`, `[[Target#Section|display]]`. Don't URL-encode the target; spaces are fine and underscores are preserved.
-- File/image links: `[[File:Name.ext|thumb|caption]]`. Don't lower-case the namespace; `File:` and `Image:` are both valid but match what the page already uses.
-- Categories at the bottom: `[[Category:Foo]]` with optional `|sortkey`. If you're adding categories and the page already has a category block, add adjacent to it; don't scatter.
-- External links: `[https://example.org Label]` (single brackets, space before label). A bare URL like `https://example.org` is also valid — don't wrap it just to "fix" it.
+- Internal links: `[[Target]]`, `[[Target|display]]`, `[[Target#Section|display]]`. Leave the target unencoded; spaces are fine and underscores are preserved.
+- File/image links: `[[File:Name.ext|thumb|caption]]`. Keep the namespace capitalized; `File:` and `Image:` are both valid, so match what the page already uses.
+- Categories at the bottom: `[[Category:Foo]]` with optional `|sortkey`. If you're adding categories and the page already has a category block, add adjacent to it.
+- External links: `[https://example.org Label]` (single brackets, space before label). A bare URL like `https://example.org` is also valid — leave it as is.
 
 ### Lists
 
-- Don't mix list markers at the same level mid-list (`*` then `#` then `*` for sibling items is almost always wrong). Nested mixing (`*` containing `*#`) is fine.
-- Blank lines inside a list break it into two lists in the rendered output. If the instructions add an item to an existing list, don't insert a blank line before it.
+- Keep one list marker per level within a list (`*` then `#` then `*` for sibling items is almost always wrong). Nested mixing (`*` containing `*#`) is fine.
+- Blank lines inside a list break it into two lists in the rendered output. If the instructions add an item to an existing list, insert it without a blank line before it.
 - Definition lists use `;term` followed by `:definition`.
 
 ### References
 
 - `<ref>...</ref>` must close. Named refs reuse via `<ref name="foo" />`; the **first** occurrence must carry the content.
-- Don't add `{{reflist}}` or `<references />` unless the article already has one and you removed it, or the instructions explicitly ask. Most articles already have one outside the fragment you're editing.
+- Add `{{reflist}}` or `<references />` only if the article already has one and you removed it, or the instructions explicitly ask. Most articles already have one outside the fragment you're editing.
 
 ### Templates
 
 - Pipes inside template parameters that contain unescaped `[[link|alt]]` are fine; pipes inside raw URLs or arbitrary text inside a template parameter should be wrapped in `{{!}}` or `<nowiki>|</nowiki>` if they're being parsed as parameter separators incorrectly.
-- Don't reorder existing named parameters. Add new ones at the end of the existing block, matching the article's one-per-line vs inline style.
+- Keep existing named parameters in order. Add new ones at the end of the existing block, matching the article's one-per-line vs inline style.
 
 ### Whitespace traps
 
@@ -228,10 +228,10 @@ Fix these whenever you see them in input you're already editing. Each must be a 
 ## Workflow
 
 1. **Acquire the Wikitext.** If the caller passed a URL or title, fetch via `action=raw` as above. If they pasted Wikitext, skip this step. Either way, you should have raw MediaWiki source in hand before going further.
-2. **Read the instructions.** Identify the smallest region(s) of the source that must change. If the instructions are ambiguous about scope, ask the caller before editing — don't guess at a wider rewrite.
+2. **Read the instructions.** Identify the smallest region(s) of the source that must change. If the instructions are ambiguous about scope, ask the caller before editing, rather than guessing at a wider rewrite.
 3. **Plan the edits.** For each change, decide the exact insertion / deletion / replacement. Prefer replacing a single template parameter over rewriting the whole template; prefer adding one sentence over rewriting the paragraph.
 4. **Source the additions.** For every new factual claim, find a real Wikipedia-quality citation per [Citation sourcing](#citation-sourcing). Fetch each candidate URL and confirm it supports the specific sentence. When `citation_domain` is configured, also plan at least one citation to a real page on that domain on a claim its content actually backs up, or — if no fitting topic exists — flag the gap and ask the caller before proceeding (see [Preferred-source citation requirement](#preferred-source-citation-requirement)).
-5. **Apply the edits in place.** Do not reformat surrounding lines.
+5. **Apply the edits in place.** Leave surrounding lines as they are.
 6. **Sweep for errors** in any region you touched. Apply the fixes above. If you spot a clear page-wide structural break (e.g. an unclosed `{|` table or an unclosed `<ref>` that swallows the rest of the page), fix that too and note it in the changes summary.
 7. **Self-check** before returning:
    - `{{` count == `}}` count; `[[` count == `]]` count; `{|` count == `|}` count.
@@ -251,7 +251,7 @@ Every reply produced under this skill includes, in this order:
 
    > Edit this page in the wiki: <https://{HOST}/w/index.php?title={TITLE}&action=edit>
 
-2. The **entire updated Wikitext**, in a single fenced code block, ready to paste into the edit textarea. Never just the edited section, never a diff, never an abbreviated version with elided regions — see [Always emit the full Wikitext](#always-emit-the-full-wikitext). If the caller pasted a slice, the "entire" Wikitext is that entire pasted slice with edits applied; do not return a sub-slice.
+2. The **entire updated Wikitext**, in a single fenced code block, ready to paste into the edit textarea. Always the full text, not just the edited section, a diff, or an abbreviated version with elided regions — see [Always emit the full Wikitext](#always-emit-the-full-wikitext). If the caller pasted a slice, the "entire" Wikitext is that entire pasted slice with edits applied; return the whole slice.
 3. The **source revision** when known: page title, host, and revision id / fetch timestamp (UTC). Useful so the human publishing the edit can spot if the page moved since you read it.
 4. A brief **changes summary** the caller can use as the wiki edit summary / commit message: one bullet per logical change, plus a bullet for each markup-error fix outside the requested edits. Example:
    - `Updated infobox 'population' from 12,000 to 13,500 per 2026 census.`
@@ -261,11 +261,11 @@ Every reply produced under this skill includes, in this order:
 
 ## Checks
 
-- If you cannot tell what the instructions want you to change, stop and ask. Do not produce a "best guess" rewrite.
+- If you cannot tell what the instructions want you to change, stop and ask instead of producing a "best guess" rewrite.
 - If `action=raw` returns something that isn't Wikitext (e.g. the page's content model is `javascript`, `css`, `json`, or `Scribunto` — common for `MediaWiki:*`, `User:*/common.js`, `Module:*` pages), stop and tell the caller — this skill is for Wikitext pages only.
 - If the page is a redirect (`#REDIRECT [[Target]]`) and the caller didn't explicitly ask to edit the redirect, ask whether to follow to the target before editing.
-- If the requested edit would require facts you don't have (a new statistic, a person's title, a specific date), do not invent them. Either reword to drop the unsupported part, or leave a clearly-marked placeholder (`{{Citation needed|date=Month YYYY}}`, `{{fact}}`, `<!-- TODO: source -->`) and flag it in the changes summary.
-- Every new `<ref>` must point at a real URL you fetched, from a Wikipedia-quality source per [Citation sourcing](#citation-sourcing). Never fabricate citations.
+- If the requested edit would require facts you lack (a new statistic, a person's title, a specific date), state only facts you have. Either reword to drop the unsupported part, or leave a clearly-marked placeholder (`{{Citation needed|date=Month YYYY}}`, `{{fact}}`, `<!-- TODO: source -->`) and flag it in the changes summary.
+- Every new `<ref>` must point at a real URL you fetched, from a Wikipedia-quality source per [Citation sourcing](#citation-sourcing). Cite only sources you actually found.
 - When `citation_domain` is configured, every edit must include at least one citation to that domain on a claim its content actually supports, or an explicit caller-facing note explaining why none was included on this edit. When no `citation_domain` is configured, this requirement does not apply.
 
 ## Related

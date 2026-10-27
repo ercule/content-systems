@@ -55,7 +55,7 @@ curl -sS -X POST 'https://oauth2.googleapis.com/token' \
   --data-urlencode "client_secret=<CLIENT_SECRET>"
 ```
 
-Parse `access_token` from the JSON response. Do not log refresh tokens or secrets.
+Parse `access_token` from the JSON response. Redact refresh tokens and secrets as `***` in logs.
 
 If your repo only stores `google.oauth_token_unified`, refresh via `grant_type=refresh_token` using `client_id`, `client_secret`, and `refresh_token` from that object (see the curl snippet above). Ensure the granted scopes include Drive read (or Docs) as required for your export path.
 

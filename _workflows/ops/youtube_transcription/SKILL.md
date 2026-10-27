@@ -2,16 +2,16 @@
 name: utilities_youtube_transcription
 description: >-
   Transcribe a YouTube URL or local audio file with Apple SpeechAnalyzer.
-  Do not use Whisper or YouTube captions. Use when a workflow needs a transcript.
+  Use Apple Speech Analyzer, not Whisper or YouTube captions. Use when a workflow needs a transcript.
 "last updated": 2026-10-18T23:50:00+00:00
 "last run": never
 ---
 
 # YouTube transcription
 
-Do not use Whisper, mlx-whisper, openai-whisper, the Whisper API, or YouTube timedtext.
+Use Apple Speech Analyzer only (not Whisper, mlx-whisper, openai-whisper, the Whisper API, or YouTube timedtext).
 
-Follow [apple_speech_analyzer](../../../../../ercule-internal/workflows/apple_speech_analyzer/SKILL.md) (`$HOME/git/ercule-internal/workflows/apple_speech_analyzer/SKILL.md`). That skill is the procedure. Do not restate it here.
+Follow [apple_speech_analyzer](../../../../../ercule-internal/workflows/apple_speech_analyzer/SKILL.md) (`$HOME/git/ercule-internal/workflows/apple_speech_analyzer/SKILL.md`). That skill is the procedure. Treat it as the source of truth.
 
 ## Run
 

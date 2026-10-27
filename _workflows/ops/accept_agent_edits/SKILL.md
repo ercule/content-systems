@@ -84,9 +84,9 @@ Resolve from `{workspace_root}/credentials.json` per [setup/run_workflow/SKILL.m
 
 ## Staging gate
 
-Do not stage or publish a Doc that still has red strikethrough or blue-addition markup. Run `resolve_doc_markup.py … accept --dry-run` first. If counts are non-zero, stop and tell the user to run this skill (accept or reject) before `{workspace_root}/_workflows/stage_content`.
+Stage or publish a Doc only after its red strikethrough and blue-addition markup is resolved. Run `resolve_doc_markup.py … accept --dry-run` first. If counts are non-zero, stop and tell the user to run this skill (accept or reject) before `{workspace_root}/_workflows/stage_content`.
 
 ## Related
 
 - [agent_editor](../agent_editor/SKILL.md) — paint approved plan as inline markup
-- [update_agent](../../edit/update_agent/SKILL.md) — produce path that paints markup and must not auto-accept
+- [update_agent](../../edit/update_agent/SKILL.md) — produce path that paints markup and leaves acceptance to the user

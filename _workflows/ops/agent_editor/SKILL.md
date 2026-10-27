@@ -68,7 +68,7 @@ Pass order: color markup → insert section → paragraph styles → trim empty 
 
 ### Paragraph styles (required second pass)
 
-`insertText` at a heading boundary inherits that heading's style. After color markup, run a separate `updateParagraphStyle` pass per paragraph. Use single `\n` between paragraphs — never `\n\n`.
+`insertText` at a heading boundary inherits that heading's style. After color markup, run a separate `updateParagraphStyle` pass per paragraph. Use single `\n` between paragraphs — not `\n\n`.
 
 ## Run
 
@@ -94,13 +94,13 @@ Resolve from `{workspace_root}/credentials.json` per [setup/run_workflow/SKILL.m
 |-------|-----|
 | `https://www.googleapis.com/auth/documents` | `documents.get`, `batchUpdate` |
 
-Token refresh: [google_doc_to_markdown](../../ops/google_doc_to_markdown/SKILL.md). Do not log tokens.
+Token refresh: [google_doc_to_markdown](../../ops/google_doc_to_markdown/SKILL.md). Redact secrets as `***` in logs.
 
 ## Checks
 
 - Missing `DOC_ID` or plan file → stop.
 - Empty plan → stop.
-- Any `old text` substring not found → stop with the failing snippet (do not partial-apply).
+- Any `old text` substring not found → stop with the failing snippet (apply all or nothing).
 
 ## Output
 

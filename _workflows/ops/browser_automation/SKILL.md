@@ -6,7 +6,7 @@ description: >-
   enabled and credentialed; fall back to Chrome DevTools MCP otherwise. Link from
   any skill that marks Browser (wp-admin) or Browser Fallback in its routing table.
   REQUIRED: post Browserbase live view URL to the user immediately after session
-  create (see Live session link section); never only in run-debug logs.
+  create (see Live session link section); run-debug logs alone are insufficient.
 "last updated": 2026-07-13T20:00:00+00:00
 "last run": 2026-10-18
 ---
@@ -21,14 +21,14 @@ Log prefix: `[run-debug] browser=… | …`
 
 Any skill that routes an operation to **Browser (wp-admin)**, **Fallback**, or **Browser fallback** links here for how to drive the browser. The caller skill owns what to do in wp-admin; this skill owns which browser path to use and how to connect.
 
-Prefer REST or HTTP APIs when they work. Switch to a browser path as soon as an API path is blocked — do not report the run complete with missing CMS fields.
+Prefer REST or HTTP APIs when they work. Switch to a browser path as soon as an API path is blocked — report the run complete only when no CMS fields are missing.
 
 ## Path preference
 
 1. **Browserbase + Playwright** — preferred when available (see availability check below)
 2. **Chrome DevTools MCP** (or an equivalent browser MCP your agent exposes) — when Browserbase is not configured or session creation fails
 
-Do not ask the user which path to use. Pick automatically from the check below.
+Pick automatically from the check below.
 
 ## Availability check (required before Browserbase)
 
@@ -45,7 +45,7 @@ Optional but recommended: `config.browserbase.project_id` (non-secret; Browserba
 [run-debug] browser=browserbase | available=true|false | enabled=… | api_key=set|missing | project_id=…
 ```
 
-If `available=false`, skip Browserbase and use Chrome DevTools MCP immediately. Do not stop the run or ask the user unless both paths fail login.
+If `available=false`, skip Browserbase and use Chrome DevTools MCP immediately. Continue the run and ask the user only when both paths fail login.
 
 ## Browserbase session
 
@@ -86,7 +86,7 @@ Repeat the live session URL block in terminal output every ~15s during waits (no
 [run-debug] browser=browserbase | session_id={id} | live={debugger_fullscreen_url} | replay=https://browserbase.com/sessions/{id}
 ```
 
-Do not wait until the end of the run to surface the live link — the session may close first. Fetch `debug` right after `create`, before long automation steps.
+Surface the live link right away, not at the end of the run — the session may close first. Fetch `debug` right after `create`, before long automation steps.
 
 If the user may need to intervene (login, MFA, cookie banner, upload), pause automation, **repeat the live URL block**, then tell them what to do. Resume Playwright/CDP control after they finish.
 
@@ -109,7 +109,7 @@ session = bb.sessions.create(
 )
 ```
 
-- **`persist: false`** — read-only; use when auth is already saved and you must not overwrite cookies.
+- **`persist: false`** — read-only; use when auth is already saved and cookies must stay as saved.
 - **`persist: true`** — write changes back to the context when the session is released (`sessions.update(id, status="REQUEST_RELEASE")`). Use after a fresh login handoff to save new auth.
 
 First-time login handoff: create session without a context (or with `persist: true` on a new context), give the user the live link, wait for login, then release the session and store the context id in `config.json`.
@@ -154,7 +154,7 @@ Credentials:
 | `browserbase.enabled` | `config.json` | Must be `true` to attempt Browserbase. |
 | `browserbase.project_id` | `config.json` | Non-secret project UUID. |
 
-Do not log the API key. Echo session id, live URL, and replay URL only.
+Redact the API key as `***` in logs. Echo session id, live URL, and replay URL only.
 
 On session or CDP connect failure after one retry, log the error and fall back to Chrome DevTools MCP for the same operation.
 
@@ -166,7 +166,7 @@ Learned on wp-admin ACF repeater fills; apply to any long `page.evaluate()` agai
 |---------|-----|
 | **`TargetClosedError` mid-fill** | BB session or tab closed (save reload, timeout, user). Use `keep_alive=True`; save **outside** evaluate; resume with `sessions.retrieve(id)` + CDP reconnect, or start a new session. |
 | **`page.evaluate(..., timeout=N)`** | Sync Playwright API does **not** accept `timeout` on `evaluate`. Use `page.set_default_timeout(ms)` before long scripts. |
-| **Infinite repeater loops** | ACF `add-row` is async. Never `while (rows < n) click()` — use delayed `ensureRows($rep, n, done)` instead. |
+| **Infinite repeater loops** | ACF `add-row` is async. Use delayed `ensureRows($rep, n, done)` instead of `while (rows < n) click()`. |
 | **Save during evaluate** | `#save-post` inside JS can navigate and kill the evaluation context. Fill in JS; `page.click('#save-post')` from Python after evaluate returns. |
 | **Relative admin URLs** | Duplicate-plugin links like `admin.php?action=dt_duplicate_post_as_draft&post=…` need `urljoin(f"{base}/wp-admin/", href)` before `page.goto`. |
 | **wp-login vs REST creds** | Application passwords work for REST/GraphQL only. Browser login on `wp-login.php` uses `credentials.json` → `wordpress` (human password field), not `workflow_specific.update_agent.wordpress.app_password`. |
@@ -210,6 +210,6 @@ Log: `[run-debug] browser=chrome-devtools-mcp | reason=browserbase_unavailable|s
 
 Typical WordPress login: navigate to `{base_url}/wp-login.php`, sign in with workspace WordPress credentials (`credentials.json` → `wordpress`, not REST app password unless confirmed working on login form), confirm with `take_snapshot` before editing.
 
-## Do not stop early
+## Keep going until done
 
-Complete the browser step unless login is impossible on both paths. Do not ask the user to finish by hand when either automation path can still run.
+Complete the browser step unless login is impossible on both paths. Ask the user to finish by hand only when neither automation path can run.
