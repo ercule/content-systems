@@ -5,7 +5,6 @@ description: >-
   markup plan (crosslinks, optional FAQ, dated-year freshness). Not a
   replacement article.
 "last updated": 2026-09-20
-P26-09-20
 ---
 
 # Update agent — 05 Markup plan

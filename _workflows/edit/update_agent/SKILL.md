@@ -7,7 +7,6 @@ description: >-
   Configure via workflow_specific.update_agent in config.json. Publishing
   is always a separate stage_content sub-skill after accept_agent_edits.
 "last updated": 2026-09-20
-P26-09-20
 ---
 
 # Update agent (shared)

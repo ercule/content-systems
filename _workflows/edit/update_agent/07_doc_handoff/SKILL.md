@@ -5,7 +5,6 @@ description: >-
   paint the step-05 markup plan via agent_editor, optionally write the Doc
   URL to a Google Sheet. No List of changes.
 "last updated": 2026-09-20
-P26-09-20
 ---
 
 # Update agent — 07 Doc handoff

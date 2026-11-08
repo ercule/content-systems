@@ -4,7 +4,6 @@ description: >-
   Shared update agent step 4: delegate to build_crosslinks for target keyword
   and crosslink list used when planning markup.
 "last updated": 2026-09-20
-P26-09-20
 ---
 
 # Update agent — 04 Build crosslinks

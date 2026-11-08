@@ -4,7 +4,6 @@ description: >-
   Shared update agent step 2: resolve workspace_root, source URL, FAQ flag, fetch
   steps, prompt paths, and Drive folder from workspace config and credentials.
 "last updated": 2026-06-28T23:30:00+00:00
-P26-09-20
 ---
 
 # Update agent — 02 Config
