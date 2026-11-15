@@ -5,7 +5,7 @@ description: >-
   Google Doc after agent_editor. Trigger on "accept agent edits", "accept changes",
   "reject changes", "keep blue text", "remove red markup", or finalize editorial markup.
 "last updated": 2026-09-20T20:00:00+00:00
-"last run": 2026-10-12
+"last run": 2026-11-11
 ---
 
 # Accept agent edits (inline markup)

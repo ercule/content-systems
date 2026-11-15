@@ -5,7 +5,7 @@ description: >-
   issues) to a manuscript. Overwrites the manuscript in place. Use from
   generate_article after editorial_catalog.
 "last updated": 2026-11-08
-"last run": 2026-11-01
+"last run": 2026-11-11
 ---
 
 Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.

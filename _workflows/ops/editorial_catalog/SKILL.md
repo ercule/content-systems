@@ -6,7 +6,7 @@ description: >-
   Report findings only; does not rewrite. Use from generate_article before
   editorial_replace.
 "last updated": 2026-10-26
-"last run": 2026-11-01
+"last run": 2026-11-11
 ---
 
 Read [setup/run_workflow/SKILL.md](../../../setup/run_workflow/SKILL.md) before running this step.
