@@ -7,7 +7,7 @@ description: >-
   hydrofranz/technical-accuracy-check. Use for "fact-check this," "review before
   we publish," or generate_article.
 "last updated": 2026-09-20
-"last run": 2026-10-13
+"last run": 2026-11-15
 ---
 
 # Technical Accuracy Check
